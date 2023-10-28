@@ -1,12 +1,12 @@
 import Image from 'next/image'
 import { prisma } from '@/db'
+import Link from 'next/link'
 
-export default async function Home() {
-
-  const users = prisma.user.findMany();
+export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Hello Mom</h1>
+    <main className="flex min-h-screen flex-col items-center p-24">
+      <h1>Start planning your great projects and teams with Project planner</h1>
+      <Link href="/autorize">Start for free</Link>
     </main>
   )
 }
