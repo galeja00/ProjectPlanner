@@ -11,10 +11,13 @@
   "dependencies": {
     "@prisma/client": "^5.3.1",
     "next": "^13.5.4",
+    "next-auth": "^4.24.4",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-loading-skeleton": "^3.3.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.1",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",

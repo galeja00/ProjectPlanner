@@ -15,7 +15,7 @@ export default function Menu() {
                     <LinkTo href="" text="Nodes"></LinkTo>
                 </ul>
             </nav>
-            <Link href="/authorize" className='mr-4 link'>Log in</Link>
+            <Link href="/auth/signin" className='mr-4 link'>Sign in</Link>
         </header>
     )
 }
