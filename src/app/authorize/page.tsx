@@ -2,19 +2,17 @@ import Link from 'next/link'
 
 export default function Registr() {
     return (
-        <main className="flex min-h-screen flex-col items-center p-24">
-            <h1 className=''>Sign up</h1>
+        <main className="flex flex-col items-center mx-auto mt-20 bg-neutral-950 w-fit h-fit my-auto p-8 rounded">
+            <h1 className='font-bold text-2xl'>Sign up</h1>
             <RegistrForm/>
-            <Link href="">All ready have a account</Link>
-            
-            
+            <Link href="" className='mt-8 link'>All ready have a account</Link>
         </main>
     )
 }
 
 function RegistrForm() {
     return (
-        <form className='flex flex-col gap-4 mt-9 mb-9'>
+        <form className='flex flex-col gap-4 mt-8 pb-8 border-b '>
             <FormItem item="Email" type="email"/>
             <div className='flex flex-row gap-4'>
                 <FormItem item="Name" type="text"/>
@@ -31,7 +29,7 @@ function FormItem({ item, type }: { item : string, type: string }) {
     return (
         <div className='flex flex-col'>
             <label>{item}</label>
-            <input type={type} className='text-slate-950'></input>
+            <input type={type} className='input-primary'></input>
         </div>
     )
 }
@@ -39,7 +37,7 @@ function FormItem({ item, type }: { item : string, type: string }) {
 function SendButton() {
     return (
         <div className='w-fit m-auto'>
-            <button className='px-4 py-2 border'>Continue</button>
+            <button className='btn-primary'>Create Account</button>
         </div>
     )
 }

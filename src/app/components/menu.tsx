@@ -3,9 +3,9 @@ import Link from 'next/link'
 
 export default function Menu() {
     return (
-        <header className='flex flex-row items-center sticky gap-4 h-12 flex-1'>
+        <header className='flex flex-row items-center sticky gap-4 h-12 bg-neutral-950'>
             <div className='pl-4 pr-4 border-r-2'>
-                    <Link href="" >Projec Planner</Link>
+                    <Link href="/" >Projec Planner</Link>
             </div>
             <nav className='flex flex-row flex-1'>
                 <ul className='flex flex-row flex-1 gap-4'>
@@ -15,7 +15,7 @@ export default function Menu() {
                     <LinkTo href="" text="Nodes"></LinkTo>
                 </ul>
             </nav>
-            <Link href="/authorize" className='mr-4'>Log in</Link>
+            <Link href="/authorize" className='mr-4 link'>Log in</Link>
         </header>
     )
 }
@@ -23,6 +23,6 @@ export default function Menu() {
 
 function LinkTo({ href, text } : { href : string, text : string }) : JSX.Element {
     return (
-        <Link href={href} >{text}</Link>
+        <Link href={href} className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>{text}</Link>
     )
 }
