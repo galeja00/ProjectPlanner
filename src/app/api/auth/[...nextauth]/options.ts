@@ -2,8 +2,22 @@ import type { NextAuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from '@/db'
+import { compare } from 'bcrypt';
+
+type User = {
+    id: number;
+    createdAt: Date;
+    email: string;
+    name: string;
+    surname: string;
+    password: string;
+  };
+  
 
 export const options: NextAuthOptions = {
+    session: {
+        strategy: 'jwt'
+    },
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -12,31 +26,22 @@ export const options: NextAuthOptions = {
                 password: {}
             },
             async authorize(credentials) {
-                // You need to provide your own logic here that takes the credentials
-                // submitted and returns either a object representing a user or value
-                // that is false/null if the credentials are invalid.
-                // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-                // You can also use the `req` object to obtain additional parameters
-                // (i.e., the request IP address)
-                /*const res = await fetch("/your/endpoint", {
-                  method: 'POST',
-                  body: JSON.stringify(credentials),
-                  headers: { "Content-Type": "application/json" }
-                })
-                const user = await res.json()
-          
-                if (res.ok && user) {
-                  return user
-                }*/
-                //const user = {id: 420, name: "hello@world.cz", password: "123"}
-                
-                
+                const users = await prisma.user.findMany({ where: { email: credentials?.email }});
+                const user = users[0];
+                console.log(user);
+                var  correctPsw = null;
+                if (user) {
+                    correctPsw = await compare(credentials?.password || "", user.password);
+                    if (correctPsw) {
+                       return user as User;
+                    }
+                }
+
                 return null;
               }
         })
     ],
-    /*pages: {
+    pages: {
         signIn: '/auth/signin',
-        signOut: '/auth/signout',
-    }*/
+    }
 }

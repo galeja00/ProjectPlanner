@@ -6,9 +6,12 @@ import { prisma } from '@/db'
 export async function POST(request : Request) {
     try {
         const { email, name, surname, password } = await request.json();
-        //const x = request.json()
-        // validate
-        console.log({ email, name, surname, password });
+
+        // TODO: validace vstupu od uzivatele (csrfToken, callbackUrl)
+        const CountSameEmails = await prisma.user.count({ where: { email: email}});
+        if (CountSameEmails > 0) {
+            return NextResponse.json({ massage: "fail"});
+        }
 
         const hashedPassword = await hash(password, 10);
 
