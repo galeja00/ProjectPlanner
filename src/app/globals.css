@@ -15,9 +15,12 @@
 }
 
 :root {
-  --foreground-rgb: #171717;
+  /*--foreground-rgb: #171717;
   --background-start-rgb: #fafafa;
-  --background-end-rgb: #fafafa;
+  --background-end-rgb: #fafafa;*/
+  --foreground-rgb: #fafafa;
+  --background-start-rgb: #2e1065;
+  --background-end-rgb: #2e1065/*#171717*/;
 }
 
 .main-color {
@@ -29,10 +32,6 @@
     --foreground-rgb: #fafafa;
     --background-start-rgb: #2e1065;
     --background-end-rgb: #2e1065/*#171717*/;
-  }
-
-  .main-color {
-
   }
 }
 
