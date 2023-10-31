@@ -1,8 +1,10 @@
 import type { NextAuthOptions } from "next-auth"
-import GithubProvider from "next-auth/providers/github"
+//import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from '@/db'
 import { compare } from 'bcrypt';
+import { PrismaAdapter } from "@auth/prisma-adapter";
+
 
 type User = {
     id: number;
@@ -18,30 +20,36 @@ export const options: NextAuthOptions = {
     session: {
         strategy: 'jwt'
     },
+    pages: {
+        signIn: '/auth/signin',
+    },
+    adapter: PrismaAdapter(prisma),
     providers: [
         CredentialsProvider({
-            name: "Credentials",
+            name: 'Credentials',
             credentials: {
                 email: {},
                 password: {}
             },
-            async authorize(credentials) {
-                const users = await prisma.user.findMany({ where: { email: credentials?.email }});
-                const user = users[0];
-                console.log(user);
-                var  correctPsw = null;
-                if (user) {
-                    correctPsw = await compare(credentials?.password || "", user.password);
+            async authorize(credentials, req)  {
+                const res = await prisma.user.findFirst({ where: { email: credentials?.email } });
+                //const user = { id: 10, name: "asd", password: "dasasd", email: "adsd@asd.cc"}
+                console.log(res);
+                if (res) {
+                    const correctPsw = await compare(credentials?.password || "", res.password);
                     if (correctPsw) {
-                       return user as User;
+                        return { id: res.id, name: res.name, email: res.email };
                     }
                 }
 
                 return null;
-              }
+            }
+              
         })
     ],
-    pages: {
-        signIn: '/auth/signin',
-    }
+    
 }
+
+
+  
+

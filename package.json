@@ -9,9 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^5.3.1",
+    "@auth/prisma-adapter": "^1.0.5",
+    "@prisma/client": "^5.5.2",
     "bcrypt": "^5.1.1",
-    "next": "^13.5.4",
+    "next": "^14.0.2-canary.1",
     "next-auth": "^4.24.4",
     "react": "latest",
     "react-dom": "latest",

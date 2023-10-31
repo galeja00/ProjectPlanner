@@ -9,6 +9,9 @@
   .input-primary {
     @apply text-neutral-950 rounded px-4 py-2 focus:outline focus:outline-2 focus:outline-violet-500
   }
+  .input-faild {
+    @apply text-neutral-950 rounded px-4 py-2 outline outline-2 outline-red-500
+  }
   .link {
     @apply text-violet-500 border-violet-500 hover:border-b focus:border-b 
   }

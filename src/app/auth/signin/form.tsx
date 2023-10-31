@@ -7,11 +7,12 @@ export default async function LoginForm() {
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget); 
-        signIn('credentials', {
+        const response = await signIn('credentials', {
             email: formData.get("email"),
-            password: formData.get("password"),
-            redirect: false,
+            password: formData.get("password")
         });
+
+        console.log({ response });
     }
     return (
         <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8'>
