@@ -12,14 +12,14 @@ export default function RegisterForm() {
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        const email = formData.get("email") ?? null;
-        const name = formData.get("name") ?? null;
-        const surname = formData.get("surname") ?? null;
-        const password = formData.get("password") ?? null;
-        const repeatpassword = formData.get("repeatpassword") ?? null;
+        const email = formData.get("email");
+        const name = formData.get("name");
+        const surname = formData.get("surname");
+        const password = formData.get("password");
+        const repeatpassword = formData.get("repeatpassword");
 
-        if (!(email && name && surname && password && repeatpassword)) {
-            setFaildMsg("You nee fill all inputs");
+        if (!(email && name && surname && password && repeatpassword )) {
+            setFaildMsg("You need to fill all inputs");
             setCorrectPsw(false);
             setCorrectEmail(false);
             setCorrectName(false);
@@ -27,23 +27,26 @@ export default function RegisterForm() {
             return;
         }
         if (password == repeatpassword) {
-            var response = await fetch('/api/auth/signup', {
-                method: "POST",
-                body: JSON.stringify({
-                    email: email,
-                    name: name,
-                    surname: surname,
-                    password: password,
-                    repeatpassword: repeatpassword
-                })
-            }) 
-            if  (!response.ok) {
-
-            
-            } else {
+            try {
+                var response = await fetch('/api/auth/signup', {
+                    method: "POST",
+                    body: JSON.stringify({
+                        email: email,
+                        name: name,
+                        surname: surname,
+                        password: password,
+                        repeatpassword: repeatpassword
+                    })
+                }) 
+                if  (!response.ok) {
+                    //TODO: Zachitit errory ktere vraci api
+                    setFaildMsg("Error in communication with server, try again");
+                } else {
+                    console.log("succes registration")
+                }
+            } catch (error) {
                 setFaildMsg("Error in communication with server, try again");
             }
-
         } else {
             setCorrectPsw(false);
             setFaildMsg("Your passwords arent same");

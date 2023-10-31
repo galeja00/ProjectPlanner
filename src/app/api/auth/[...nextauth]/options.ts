@@ -32,9 +32,9 @@ export const options: NextAuthOptions = {
                 password: {}
             },
             async authorize(credentials, req)  {
+                
                 const res = await prisma.user.findFirst({ where: { email: credentials?.email } });
                 //const user = { id: 10, name: "asd", password: "dasasd", email: "adsd@asd.cc"}
-                console.log(res);
                 if (res) {
                     const correctPsw = await compare(credentials?.password || "", res.password);
                     if (correctPsw) {
