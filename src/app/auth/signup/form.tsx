@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
+import EmailValidator from 'email-validator';
 
 export default function RegisterForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
@@ -18,12 +19,18 @@ export default function RegisterForm() {
         const password = formData.get("password");
         const repeatpassword = formData.get("repeatpassword");
 
+        // TODO: validaci emailu a potvrzení emailove adresy... (nodemailer...)
         if (!(email && name && surname && password && repeatpassword )) {
             setFaildMsg("You need to fill all inputs");
             setCorrectPsw(false);
             setCorrectEmail(false);
             setCorrectName(false);
             setCorrectSurName(false);
+            return;
+        }
+        if (!EmailValidator.validate(email.toString())) {
+            setCorrectEmail(false);
+            setFaildMsg("You need to insert valid email");
             return;
         }
         if (password == repeatpassword) {

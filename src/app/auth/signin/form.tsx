@@ -2,16 +2,31 @@
 
 import { signIn } from 'next-auth/react';
 import { FormEvent, useState } from 'react'
+import EmailValidator from 'email-validator';
 
 export default function LoginForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
     const [correctEmail, setCorrectEmail] = useState<boolean | null>(null); 
     const [faildMsg, setFaildMsg] = useState<string>("");
-
+    // TODO: pridat přesměrování pokud user už je přihlášen
+    
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        // TODO: pridat validaci na klientovi
         const formData = new FormData(e.currentTarget); 
+        const email = formData.get("email");
+        const password = formData.get("password");
+        if (!(email && password)) {
+            setCorrectPsw(false);
+            setCorrectEmail(false);
+            setFaildMsg("You need to fill all inputs");
+            return;
+        }
+    
+        if (!EmailValidator.validate(email.toString())) {
+            setCorrectEmail(false);
+            setFaildMsg("You need to insert valid email");
+            return;
+        }
         const response = await signIn('credentials', {
             email: formData.get("email"),
             password: formData.get("password")
@@ -49,3 +64,4 @@ function SendButton() {
         </div>
     )
 }
+
