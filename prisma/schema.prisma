@@ -10,12 +10,74 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+
 model User {
-  id        String     @id @default(cuid())
-  createdAt DateTime @default(now())
-  email     String   @unique
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  email     String      @unique
+  emailVerified DateTime?
   name      String
   surname   String
   password  String
   image     String?
+  projects  ProjectMember[]
+  teams     TeamMember[]
+}
+
+enum ProjectType {
+  Kanban
+  Scrum
+}
+
+model Project {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  name      String
+  icon      String?
+  type      ProjectType
+  members   ProjectMember[]
+  teams     Team[]
+
+  kanban    Kanban?
+  scrum     Scrum?
+}
+
+model Kanban {
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String    @id
+}
+
+model Scrum {
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String    @id
+}
+
+model ProjectMember {
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  //position  String?
+  creator   Boolean @default(false)
+  teamId    String?
+}
+
+
+model TeamMember {
+  userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId  String  @unique
+  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  creator   Boolean @default(false)
+  //position  String?
+}
+
+model Team {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  name      String
+  icon      String?
+  members   TeamMember[]
+  project   Project[]
 }

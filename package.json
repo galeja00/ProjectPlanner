@@ -21,7 +21,6 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.1",
-    "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "autoprefixer": "latest",
@@ -29,7 +28,6 @@
     "eslint-config-next": "latest",
     "postcss": "latest",
     "prisma": "^5.3.1",
-    "tailwindcss": "latest",
-    "typescript": "latest"
+    "tailwindcss": "latest"
   }
 }

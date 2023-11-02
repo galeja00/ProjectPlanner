@@ -4,8 +4,10 @@ import Link from 'next/link'
 import UserMenu from './user-menu'
 
 
+
 export default async function Menu() {
     const session = await getServerSession(options);
+    // TODO: insted nodes maybe use issues
     return (
         <header className='flex flex-row items-center sticky gap-4 h-12 bg-neutral-950'>
             <div className='pl-4 pr-4 border-r-2'>
