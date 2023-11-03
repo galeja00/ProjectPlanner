@@ -1,6 +1,5 @@
 import { getServerSession } from 'next-auth/next'
 import { options } from './api/auth/[...nextauth]/options'
-import { prisma } from '@/db'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 

@@ -35,6 +35,7 @@ model Project {
   createdAt DateTime    @default(now())
   name      String
   icon      String?
+  done      Boolean     @default(false)
   type      ProjectType
   members   ProjectMember[]
   teams     Team[]
