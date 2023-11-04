@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Project } from '@prisma/client'
 import ListProjects from './projects'
+import { SessionProvider } from 'next-auth/react'
 
 
 

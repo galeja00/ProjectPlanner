@@ -4,8 +4,12 @@ import { prisma } from '@/db'
 
 
 export async function POST(request : Request) {
+    // TODO: validaci emailu a potvrzení emailove adresy... (nodemailer...)
     try {
-        const { email, name, surname, password, repeatpassword } = await request.json();
+        const { email , name , surname, password, repeatpassword } = await request.json();
+        if (!(email && name && surname && password && repeatpassword)) {
+            return NextResponse.json({ massage: "You need to fill all inputs"} , { status: 400 })
+        }
 
         if (password !== repeatpassword) {
             return NextResponse.json({ massage: "Your passwords arent same"}, { status: 400 });

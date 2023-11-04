@@ -30,11 +30,14 @@ enum ProjectType {
   Scrum
 }
 
+
+
 model Project {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
   name      String
   icon      String?
+  color     String
   done      Boolean     @default(false)
   type      ProjectType
   members   ProjectMember[]
@@ -55,23 +58,27 @@ model Scrum {
 }
 
 model ProjectMember {
-  userId    String  @unique
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId String  @unique
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String  
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   //position  String?
-  creator   Boolean @default(false)
+  creator   Boolean   @default(false)
   teamId    String?
+
+   @@unique([userId, projectId], name: "Unique_User_Project")
 }
 
 
 model TeamMember {
-  userId  String  @unique
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId  String  @unique
-  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  creator   Boolean @default(false)
+  userId  String  
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId  String  
+  team    Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  creator   Boolean   @default(false)
   //position  String?
+
+  @@unique([userId, teamId], name: "Unique_User_Team")
 }
 
 model Team {

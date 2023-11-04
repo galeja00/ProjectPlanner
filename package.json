@@ -24,10 +24,11 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "autoprefixer": "latest",
+    "babel-plugin-root-import": "^6.6.0",
     "eslint": "latest",
     "eslint-config-next": "latest",
     "postcss": "latest",
     "prisma": "^5.3.1",
     "tailwindcss": "latest"
-  }
+  } 
 }

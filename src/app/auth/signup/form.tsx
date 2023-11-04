@@ -1,7 +1,8 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState } from 'react';
 import EmailValidator from 'email-validator';
+import { FormItem, SubmitButton } from '../../components/form';
 
 export default function RegisterForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
@@ -70,13 +71,13 @@ export default function RegisterForm() {
             </div>
             <FormItem item="Password" name="password" type="password" correct={correctPsw}/>
             <FormItem item="Repeat Password" name="repeatpassword" type="password" correct={correctPsw}/>
-            <SendButton/>
+            <SubmitButton/>
             {faildMsg === "" ? <p>  </p> : <p className='text-red-500 w-fit m-auto'>{faildMsg}</p>}
         </form>
     )
 }
 
-function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
+/*function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
     var inputClass = "input-primary";
     if (correct == false) {
         inputClass = "input-faild";
@@ -95,19 +96,19 @@ function SendButton() {
             <button className='btn-primary' type="submit">Create Account</button>
         </div>
     )
-}
+}*/
 
 /*
 function ValidEmail(email : string) : boolean {
     const splited = email.split("@")
 
-    if (splited.length < 2) {
+    if (splited.length !== 2) {
         return false; 
     }
 
     const domain = splited[1].split(".");
 
-    if (domain.length < 2) {
+    if (domain.length !== 2) {
         return false;
     }
 
