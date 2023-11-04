@@ -16,9 +16,11 @@ export default async function Projects() {
     }
     var email = session.user?.email ?? "";
     return (
-        <main className="flex min-h-screen flex-col items-center p-24 ">
-            <h1>Projects</h1>
-            <Link href="/projects/add" className='btn-primary'>Add Project</Link>
+        <main className="flex min-h-screen max-w-screan flex-col p-24">
+            <div className='flex justify-between'>
+                <h1 className='text-4xl mb-4 font-bold'>Projects</h1>
+                <Link href="/projects/add" className='btn-primary w-fit mb-4'>Add Project</Link>
+            </div>
             <ListProjects/>
         </main>
     )
