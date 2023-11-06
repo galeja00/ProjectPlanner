@@ -9,7 +9,7 @@ export default async function Menu() {
     const session = await getServerSession(options);
     // TODO: insted nodes maybe use issues
     return (
-        <header className='flex flex-row items-center sticky gap-4 h-12 bg-neutral-950'>
+        <header className='flex flex-row items-center sticky gap-4 h-12 bg-neutral-950 border-b border-neutral-600'>
             <div className='pl-4 pr-4 border-r-2'>
                     <Link href="/" >Project Planner</Link>
             </div>
@@ -34,7 +34,7 @@ export default async function Menu() {
 
 function LinkTo({ href, text } : { href : string, text : string }) : JSX.Element {
     return (
-        <Link href={href} className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>{text}</Link>
+        <li><Link href={href} className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>{text}</Link></li>
     )
 }
 

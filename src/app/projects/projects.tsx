@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Image from 'next/image' 
 
-export default function ListProjects() {
+export default function Projects() {
     const [inWorkP, setInWorkP] = useState<Project[]>([]);
     const [doneP, setDoneP] = useState<Project[]>([]);
     
@@ -37,43 +37,62 @@ export default function ListProjects() {
     
     return (
         <>
-            <section>
-                <div>
-                    <h2 className='text-2xl mb-4 font-bold'>In Work</h2>
-                    {inWorkP.length > 5 ?
-                            <div>
-                                <button></button><button></button>
-                            </div>
-                        :
-                            <></>
-                    }
-                </div>
-                
-                <ul className='flex gap-4 mb-4 width-full overflow-hidden'>
-                    {inWorkP.map((p) => (
-                        <ProjectItem key={p.id} proj={p}/>
-                    ))}
-                </ul>
-            </section>
-            <section>
-                <h2 className='text-2xl mb-4 font-bold'>Done</h2>
-                <ul className='flex gap-4 mb-4 width-full overflow-hidden'>
-                    {doneP.map((p) => (
-                        <ProjectItem key={p.id} proj={p}/>
-                    ))}
-                </ul>
-            </section>
+            <ProjectList name="In Work" list={inWorkP}/>
+            <ProjectList name="Done" list={doneP}/>
         </>
     )
 }
 
+//TODO: viewport-width number (custon indexis for diferent viewports width)
+function ProjectList({ name, list } : { name : string, list : Project[] }) {
+    const [[bottom, top], setIndexes] = useState<number[]>([0, 4]);
 
-function ProjectItem({ proj } : { proj : Project }) {
-    const linkTo = "/projects/" + proj.id;
+    function changeIndex(n : number) {
+        if (n < 0) {
+            if (bottom == 0) {
+                return;
+            }
+        } else {
+            if (top == list.length - 1) {
+                return;
+            } 
+        }
+        setIndexes([bottom + n, top + n]);
+    }
+    
     return (
-        <li key={proj.id} className=' relative overflow-hidden bg-neutral-950 rounded w-96 h-50 h-auto'>
+        <section>
+            <div className='flex justify-between items-center mb-4'>
+                <h2 className='text-2xl  font-bold'>{name}</h2>
+                {list.length > 5 ?
+                        <div className='flex gap-4'>
+                            <button onClick={() => changeIndex(-1)}><Image src="/arrow-small-left.svg" alt="to left" width={40} height={40} className='hover:stroke-violet-500'></Image></button>
+                            <button onClick={() => changeIndex(1)}><Image src="/arrow-small-right.svg" alt="to right" width={40} height={40} className='hover:stroke-violet-500'></Image></button>
+                        </div>
+                    :
+                        <></>
+                }
+            </div>
+            <ul className='flex gap-4 mb-4 width-full overflow-hidden'>
+                {list.map((p, i) => (
+                    <ProjectItem key={p.id} proj={p} index={i} vis={[bottom, top]}/>
+                ))}
+            </ul>
+        </section>
+    )
+}
+
+// TODO: přidat animaci posunu
+function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vis : number[] }) {
+    const linkTo = "/projects/" + proj.type + "/" + proj.id;
+    var visible = "relative";
+    if (index < vis[0] || index > vis[1]) {
+        visible = "hidden";
+    } 
+    return (
+        <li key={proj.id} className={`overflow-hidden bg-neutral-950 rounded w-96 h-50 h-auto ${visible}`}>
             <div className='absolute w-96 h-10' style={{backgroundColor: proj.color}}></div>
-            <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-12 h-12 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer absolute z-10 left-6 top-4'></Image>
+            <Image src="/project.svg" alt="avater" width={20} height={20} className='w-12 h-12 rounded-full bg-neutral-50 mr-5 text-color cursor-pointer absolute z-10 left-6 top-4'></Image>
             <div className='p-4 mt-16'>
                 <h3 className='relative z-10 text-xl mb-2 font-bold'>{proj.name}</h3>
                 <dl>
@@ -89,4 +108,3 @@ function ProjectItem({ proj } : { proj : Project }) {
         </li>
     )
 }
-
