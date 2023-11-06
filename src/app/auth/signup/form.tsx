@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import EmailValidator from 'email-validator';
-import { FormItem, SubmitButton } from '../../components/form';
+//import { FormItem, SubmitButton } from '@/app/components/form';
 
 export default function RegisterForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
@@ -77,7 +77,7 @@ export default function RegisterForm() {
     )
 }
 
-/*function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
+function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
     var inputClass = "input-primary";
     if (correct == false) {
         inputClass = "input-faild";
@@ -90,15 +90,15 @@ export default function RegisterForm() {
     )
 }
 
-function SendButton() {
+function SubmitButton() {
     return (
         <div className='w-fit m-auto'>
             <button className='btn-primary' type="submit">Create Account</button>
         </div>
     )
-}*/
+}
 
-/*
+
 function ValidEmail(email : string) : boolean {
     const splited = email.split("@")
 
@@ -117,4 +117,4 @@ function ValidEmail(email : string) : boolean {
     }
 
     return true;
-}*/
+}
