@@ -98,23 +98,3 @@ function SubmitButton() {
     )
 }
 
-
-function ValidEmail(email : string) : boolean {
-    const splited = email.split("@")
-
-    if (splited.length !== 2) {
-        return false; 
-    }
-
-    const domain = splited[1].split(".");
-
-    if (domain.length !== 2) {
-        return false;
-    }
-
-    if (domain[1].length > 200 || domain[1].length < 2) {
-        return false;
-    }
-
-    return true;
-}
