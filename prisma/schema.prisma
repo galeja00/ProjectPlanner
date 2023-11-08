@@ -23,6 +23,7 @@ model User {
   image     String?
   projects  ProjectMember[]
   teams     TeamMember[]
+
 }
 
 enum ProjectType {
@@ -36,13 +37,14 @@ model Project {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
   name      String
+  category  String
   icon      String?
   color     String
   done      Boolean     @default(false)
   type      ProjectType
   members   ProjectMember[]
   teams     Team[]
-
+  
   kanban    Kanban?
   scrum     Scrum?
 }
