@@ -27,7 +27,7 @@ export default async function ProjectLayout({
     }
     return (
       <div className='flex'>
-        <Menu id={params.id} type={params.type}></Menu>
+        <Menu id={params.id}></Menu>
         {children}
       </div>   
     )

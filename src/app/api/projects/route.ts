@@ -15,7 +15,7 @@ export async function GET(req : Request) {
 
         const email = session.user.email;
         if (!email) {
-            return NextResponse.json({ massage: "fail"}, { status: 400 })
+            return NextResponse.json({ massage: "fail"}, { status: 401 })
         }
 
         const user = await prisma.user.findFirst({
@@ -49,9 +49,9 @@ export async function GET(req : Request) {
             }
         }
        
-        return NextResponse.json({ massage: "succes", projects: projects}, { status: 200 })
+        return NextResponse.json({ error: "succes", projects: projects}, { status: 200 })
     } catch {
-        return NextResponse.json({ massage: "error"}, { status: 400 })
+        return NextResponse.json({ error: "error"}, { status: 400 })
     }
     
     
@@ -110,7 +110,7 @@ export async function POST(req : Request) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
 
-        return NextResponse.json({ message: "Projectt succesfully created"}, { status: 200 });
+        return NextResponse.json({ message: "Project succesfully created"}, { status: 200 });
 
     } catch (error) {
         return NextResponse.json({ error: "Comunication on server faild try again later"}, { status: 400 })

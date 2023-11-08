@@ -8,8 +8,8 @@ export default function LoginForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
     const [correctEmail, setCorrectEmail] = useState<boolean | null>(null); 
     const [faildMsg, setFaildMsg] = useState<string>("");
-    // TODO: pridat přesměrování pokud user už je přihlášen
     
+
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget); 

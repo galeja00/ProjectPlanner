@@ -1,6 +1,6 @@
 
 
-function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
+export function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
     var inputClass = "input-primary";
     if (correct == false) {
         inputClass = "input-faild";
@@ -13,7 +13,7 @@ function FormItem({ item, type, name, correct }: { item : string, type: string, 
     )
 }
 
-function SubmitButton() {
+export function SubmitButton() {
     return (
         <div className='w-fit m-auto'>
             <button className='btn-primary' type="submit">Create Account</button>
