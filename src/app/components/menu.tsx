@@ -10,8 +10,8 @@ export default async function Menu() {
     // TODO: insted nodes maybe use issues
     return (
         <header className='flex flex-row items-center sticky gap-4 h-12 bg-neutral-950 border-b border-neutral-600'>
-            <div className='pl-4 pr-4 border-r-2'>
-                    <Link href="/" >Project Planner</Link>
+            <div className='w-48 border-r border-neutral-600 h-full flex items-center justify-center'>
+                    <Link href="/" className='w-fit h-fit'>Project Planner</Link>
             </div>
             <nav className='flex flex-row flex-1'>
                 <ul className='flex flex-row flex-1 gap-4'>

@@ -3,12 +3,12 @@
 import { signIn } from 'next-auth/react';
 import { FormEvent, useState } from 'react'
 import EmailValidator from 'email-validator';
+import { redirect } from 'next/navigation';
 
 export default function LoginForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
     const [correctEmail, setCorrectEmail] = useState<boolean | null>(null); 
     const [faildMsg, setFaildMsg] = useState<string>("");
-    
 
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -33,6 +33,7 @@ export default function LoginForm() {
         });
 
         console.log({ response });
+        redirect("/projects");
     }
     return (
         <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8'>

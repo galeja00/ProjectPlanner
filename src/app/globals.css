@@ -18,6 +18,9 @@
   .link-secundary {
     @apply hover:border-b focus:border-b hover:text-violet-500 border-violet-500 
   }
+  .link-active {
+    @apply text-violet-500 border-violet-500 border-b
+  }
   .main-head {
     @apply text-4xl font-bold
   }
@@ -32,9 +35,7 @@
   --background-end-rgb: #171717;
 }
 
-.main-color {
-  color: 
-}
+
 
 @media (prefers-color-scheme: dark) {
   :root {

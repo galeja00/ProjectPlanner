@@ -37,7 +37,7 @@ model Project {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
   name      String
-  category  String
+  category  String?
   icon      String?
   color     String
   done      Boolean     @default(false)

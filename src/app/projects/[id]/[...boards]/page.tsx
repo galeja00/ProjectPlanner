@@ -1,6 +1,11 @@
+import Board from "./board";
 
-export default function Boards() {
+export default function Boards({ params } :  { params: { id : string, boards : string[]}}) {
     return (
-        <h1>board</h1>
+        <main className="p-24">
+            <h1 className='text-4xl font-bold mb-8'>{params.boards[1]}</h1>
+            <Board/>
+        </main>
+        
     )
 }

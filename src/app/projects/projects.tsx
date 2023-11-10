@@ -13,25 +13,28 @@ export default function Projects() {
         getProjects();
     }, [])
 
-        async function getProjects() {
-        try {
-            const response = await fetch('/api/projects');
-            
-            if (!response.ok) {
-                throw new Error('Error: fatch failed to load data'); 
-            }
-            
-            const data = await response.json();
-            const projects : Project[] = data.projects;
-    
-            const inWorkProjects = projects.filter((p) => !p.done);
-            const doneProjects = projects.filter((p) => p.done);
-    
-            setInWorkP(inWorkProjects);
-            setDoneP(doneProjects);
-        } catch (error) {
-            console.error(error);
+    // TODO: lepsi zachyceni chyby
+    async function getProjects() {
+    try {
+        const response = await fetch('/api/projects', {
+            method: "GET"
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error: fatch failed to load data'); 
         }
+        
+        const data = await response.json();
+        const projects : Project[] = data.projects;
+
+        const inWorkProjects = projects.filter((p) => !p.done);
+        const doneProjects = projects.filter((p) => p.done);
+
+        setInWorkP(inWorkProjects);
+        setDoneP(doneProjects);
+    } catch (error) {
+        console.error(error);
+    }
         
     }  
     
@@ -84,7 +87,7 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
 
 // TODO: přidat animaci posunu
 function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vis : number[] }) {
-    const linkTo = "/projects/" + proj.type + "/" + proj.id;
+    const linkTo = "/projects/" + proj.id;
     var visible = "relative";
     if (index < vis[0] || index > vis[1]) {
         visible = "hidden";
@@ -95,10 +98,14 @@ function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vi
             <Image src="/project.svg" alt="avater" width={20} height={20} className='w-12 h-12 rounded-full bg-neutral-50 mr-5 text-color cursor-pointer absolute z-10 left-6 top-4'></Image>
             <div className='p-4 mt-16'>
                 <h3 className='relative z-10 text-xl mb-2 font-bold'>{proj.name}</h3>
-                <dl>
+                <dl className='mb-4'>
                     <div className='flex gap-4'> 
-                        <dt>Type :</dt>
+                        <dt>Type:</dt>
                         <dd>{proj.type}</dd>
+                    </div>
+                    <div className='flex gap-4'>
+                        <dt>Category: </dt>
+                        <dd>{proj.category ? proj.category : "undefined"}</dd>
                     </div>
                 </dl>
                 <div className='flex justify-end items-end'>

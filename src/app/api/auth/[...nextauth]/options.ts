@@ -29,6 +29,7 @@ export const options: NextAuthOptions = {
         CredentialsProvider({
             name: 'Credentials',
             credentials: {
+                id: {},
                 email: {},
                 password: {}
             },
