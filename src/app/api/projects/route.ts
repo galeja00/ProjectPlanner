@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { options } from '../auth/[...nextauth]/options'
 import { prisma } from '@/db'
-import { Project } from "@prisma/client";
+import { Board, Project, TaskColumn, User } from "@prisma/client";
 import { getServerSession } from "next-auth/next"
+import { ChildProcessWithoutNullStreams } from "child_process";
+import { Session } from "inspector";
 
 // GET: for user will get him all projects he worked on 
 export async function GET(req : Request) {
@@ -70,8 +72,28 @@ function selectColor() : string{
     return arrColors[Math.floor(Math.random() * arrColors.length)]
 }
 
+async function createStartingBoardTasksColumns(boardId : string) : Promise<void> {
+    const colums = await prisma.taskColumn.createMany({
+        data: [{
+            boardId: boardId,
+            name: "To Do",
+            numOfTasks: 0,
+        },
+        {
+            boardId: boardId,
+            name: "In Work",
+            numOfTasks: 0,
+        },
+        {
+            boardId: boardId,
+            name: "Done",
+            numOfTasks: 0,
+        }]
+    })
+}
+
 // POST: Create new project
-// TODO: uprovit mistro returnu trow error a pokusit se opravit chybu
+// TODO: uprovit misto returnu throw error a pokusit se opravit chybu a zaroven opravir error hlasky
 export async function POST(req : Request) {
     try {
         const session = await getServerSession(options);
@@ -83,29 +105,50 @@ export async function POST(req : Request) {
         const { name, type } = await req.json();
 
         const email = session.user.email ?? "";
-        const user = await prisma.user.findFirst({ where: { email: email }});    
+        const user : User | null = await prisma.user.findFirst({ where: { email: email }});    
 
         if (!user) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
 
-        const proj = await prisma.project.create({ data: {
+        const proj : Project = await prisma.project.create({ data: {
             name: name,
             type: type,
             color: selectColor()     
-        }})
+        }});
+
 
         if (!proj) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
+
+        const kanban = await prisma.kanban.create( {
+            data: {
+                projectId: proj.id,  
+            }
+        })
         
+        const board = await prisma.board.create( {
+            data: {
+                projectId: proj.id,
+            }
+        })
+        if (!board) {
+            return NextResponse.json({ error: "error"}, { status: 400 });
+        }
+
+        
+
+        createStartingBoardTasksColumns(board.id);
+    
         const projMem = await prisma.projectMember.create({ data: {
             userId: user.id,
             projectId: proj.id,
             creator: true,
             teamId: null
-        }})
+        }});
 
+    
         if (!projMem) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }

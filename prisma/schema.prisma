@@ -31,8 +31,6 @@ enum ProjectType {
   Scrum
 }
 
-
-
 model Project {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
@@ -50,38 +48,107 @@ model Project {
 }
 
 model Kanban {
-  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String    @id
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  boardId   String?
+  board     Board?
+  timetableId String?
+  timetable TimeTable?
+  backlogId   String?
+  backlog   Backlog?
 }
 
+model Board {
+  id          String   @id @default(cuid())   
+  projectId   String   @unique
+  Kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  name        String?
+  taskColumns TaskColumn[] 
+}
+
+model TaskColumn {
+  id        String  @id @default(cuid())  
+  board     Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId   String  
+  name      String  @unique
+  tasks     Task[]
+  numOfTasks  Int   @default(0)
+}
+
+model Task {
+  id            String  @id @default(cuid()) 
+  taskColumn    TaskColumn @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
+  taskColumnId  String
+  createAt      DateTime @default(now())
+  name          String
+  type          String
+  Tags          Tag[]
+  projectMember  ProjectMember @relation(fields: [projectMemberId], references: [id])
+  projectMemberId String
+}
+
+model Tag {
+  id      String  @id @default(cuid()) 
+  taskId  String  @unique
+  task    Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  name    String
+  type    String?
+  color   String?
+}
+
+// TODO ////////////////////////////////
 model Scrum {
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String    @id
 }
+model TimeTable {
+  id          String   @id @default(cuid()) 
+  projectId   String   @unique
+  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+}
+
+model Backlog {
+  id  String @id @default(cuid()) 
+  projectId   String   @unique
+  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+}
+/////////////////////////////////////////
+
 
 model ProjectMember {
-  userId    String  
+  id        String    @id @default(cuid()) 
+  userId    String   
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId String  
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  //position  String?
+  position  String?
   creator   Boolean   @default(false)
   teamId    String?
+  tasks     Task[]
 
    @@unique([userId, projectId], name: "Unique_User_Project")
 }
 
 
 model TeamMember {
+  id      String    @id @default(cuid()) 
   userId  String  
   user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   teamId  String  
   team    Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
   creator   Boolean   @default(false)
-  //position  String?
+  position  String?
 
   @@unique([userId, teamId], name: "Unique_User_Team")
 }
+
+// TODO //////////////////
+model ProjectPosition {
+  id    String    @id @default(cuid()) 
+  name  String
+}
+
+//////////////////////////
 
 model Team {
   id        String      @id @default(cuid())

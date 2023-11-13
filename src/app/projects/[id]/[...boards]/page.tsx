@@ -4,7 +4,7 @@ export default function Boards({ params } :  { params: { id : string, boards : s
     return (
         <main className="p-24">
             <h1 className='text-4xl font-bold mb-8'>{params.boards[1]}</h1>
-            <Board/>
+            <Board id={params.id}/>
         </main>
         
     )

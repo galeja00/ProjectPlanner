@@ -48,7 +48,7 @@ function CreateProject({ type, resetType } : { type : ProjectType, resetType : (
     const [errorMsg, setErrorMsg] = useState<String>("");
 
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
-        e.preventDefault;
+        e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const name = formData.get("name");
 
@@ -66,11 +66,16 @@ function CreateProject({ type, resetType } : { type : ProjectType, resetType : (
                 })   
             })
 
-            if (!response.ok) {
-                redirect("/projects"); 
+            if (!response) {
+                setCorrectName(true);
+                redirect("/projects");
+                return;
+                  
             }
+            
             const data = await response.json();
             setErrorMsg(data.error); 
+           
         } catch (error) {
             setErrorMsg("Something went wrong");
         }

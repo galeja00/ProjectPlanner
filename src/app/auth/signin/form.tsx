@@ -31,9 +31,6 @@ export default function LoginForm() {
             email: formData.get("email"),
             password: formData.get("password")
         });
-
-        console.log({ response });
-        redirect("/projects");
     }
     return (
         <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8'>

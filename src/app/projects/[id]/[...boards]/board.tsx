@@ -1,19 +1,73 @@
 'use client'
+import { Tag, Task } from '@prisma/client'
+import { ExecFileSyncOptionsWithBufferEncoding } from 'child_process'
 import Image from 'next/image' 
-import { useReducer, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 
-export default function Board() {
+/*
+textovaci constanty
+<TaskColumn name="Todo"></TaskColumn>
+<TaskColumn name="InWork"></TaskColumn>
+<TaskColumn name="Done"></TaskColumn>
+*/
+
+type BoardTasksColumn = {
+    id : string,
+    boardId: string,
+    name : string,
+    num : number,
+    tasks : Task[]
+}
+
+export default function Board({ id } : { id : string }) {
+    const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]);
+
+    useEffect(() => {
+        getColumns(id);
+    }, [])
+
+
+    async function getColumns(id : string) : Promise<void> {
+        try {
+            console.log(id);
+            const response = await fetch(`/api/projects/${id}/board`, {
+                method: "GET"
+            })
+            if (!response.ok) {
+                const data = await response.json();
+                console.log(data.error);
+            }
+
+            const json = await response.json();
+
+            console.log(json);
+
+            if (!json.data) {
+                console.log(json)
+            }
+
+            setTaskColumns(json.data);
+        }
+        catch (Error) {
+            console.log(Error);
+        }
+    }
+
     return (
         <section className="flex gap-2 w-full">
-            <TaskColumn name="Todo"></TaskColumn>
-            <TaskColumn name="InWork"></TaskColumn>
-            <TaskColumn name="Done"></TaskColumn>
+            {
+                tasksColumns.map((col) => (
+                    <TaskColumn key={col.id} name={col.name}></TaskColumn>
+                ))
+            }
             <AddTaskColumn></AddTaskColumn>
         </section>
     )
 }
 
-function TaskColumn({ name } : { name : string}) {
+function TaskColumn({ name } : { name : string }) {
+    const [tasks, setTasks] = useState<Task[]>([]); 
+
     return (
         <section className="bg-neutral-950 rounded w-80 h-fit">
             <div className="p-2 border-b border-neutral-400">
@@ -21,20 +75,21 @@ function TaskColumn({ name } : { name : string}) {
             </div>
             <div className="p-2">
                 <ul className="flex flex-col gap-2 mb-2">
-                    <TaskItem name="node1"/>
-                    <TaskItem name="node2"/>
+                    { tasks.map( (task) => (
+                        <TaskItem key={task.id} task={task}></TaskItem>
+                    ))}
                 </ul>
-                <AddTaskButton/>
+                <AddTask/>
             </div>
         </section>
     )
 }
 
-function TaskItem({ name } : { name : string}) {
+function TaskItem({ task } : { task : Task }) {
     return (
         <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2">
             <div className='flex w-full items-center justify-between'>
-                <Name name={name}/>
+                <Name name={task.name}/>
                 <More/>
             </div>
             <TagList/>
@@ -45,9 +100,11 @@ function TaskItem({ name } : { name : string}) {
     )
 }
 
+
+
 function TagList() {
     // TODO: Tags and ags type
-    const [tags, setTags] = useState();
+    const [tags, setTags] = useState<Tag[]>();
     const [adding, toggle] = useReducer(adding => !adding, false);
 
     function addTag() {
@@ -55,8 +112,14 @@ function TagList() {
     }
 
     return (
-        <div className='flex'>
+        <div>
+            <div className='flex'>
             <ul>
+                {
+                    tags?.map((tag) => (
+                        <li className='p-1'>{tag.name}</li>
+                    ))
+                }
             </ul>
             { adding ?
                 <form>
@@ -66,31 +129,29 @@ function TagList() {
                 :
                 <button onClick={addTag}><Image src="/plus.svg" width={20} height={20} alt="add"></Image></button>
             }
-               
+            </div>   
         </div>
     )
 }
 
-function Tag({ name, type } : { name : string , type : string}) {
-    return (
-        <li>{name}</li>
-    )
-}
 
 
-function AddTaskButton() {
+
+function AddTask() {
     return (
-        <button className='flex items-center gap-2'>
-            <Image src="/plus.svg" alt="avatar" width={2} height={2} className='w-7 h-7 rounded bg-neutral-900 cursor-pointer'></Image>
+        <div className='flex items-center gap-2'>
+            <button >
+                <Image src="/plus.svg" alt="add task" width={2} height={2} className='w-7 h-7 rounded bg-neutral-900 cursor-pointer hover:bg-violet-800'></Image>
+            </button>
             <p className='text-neutral-400 text-sm'>Create new task</p>
-        </button>
+        </div>
     )
 }
 
 function Solvers() {
     return (
         <div>
-            <Image src="/avatar.svg" alt="avatar" width={2} height={2} className='w-7 h-7 rounded-full bg-neutral-300 cursor-pointer'></Image>
+            <Image src="/avatar.svg" alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-300 cursor-pointer'></Image>
         </div>    
     )
 }
@@ -98,7 +159,7 @@ function Solvers() {
 function AddTaskColumn() {
     return (
         <button>
-            <Image src="/plus.svg" alt="avatar" width={2} height={2} className='w-7 h-full rounded bg-neutral-950 cursor-pointer'></Image>
+            <Image src="/plus.svg" alt="avatar" width={2} height={2} className='w-6 h-full rounded bg-neutral-950 cursor-pointer'></Image>
         </button>
     )
 }
