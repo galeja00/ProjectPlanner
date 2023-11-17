@@ -1,8 +1,7 @@
 'use client'
 import { Tag, Task } from '@prisma/client'
-import { ExecFileSyncOptionsWithBufferEncoding } from 'child_process'
 import Image from 'next/image' 
-import { useEffect, useReducer, useState } from 'react'
+import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent } from 'react'
 
 /*
 textovaci constanty
@@ -19,6 +18,16 @@ type BoardTasksColumn = {
     tasks : Task[]
 }
 
+type ProviderColumns = {
+    tasksColumns: BoardTasksColumn[];
+    setTaskColumns: Dispatch<SetStateAction<BoardTasksColumn[]>>;
+}
+// TODO: vyresit problem pokud dany Context se dostane do dalsich komponenet
+const TasksColumnsContext = createContext<ProviderColumns>(({
+    tasksColumns: [],
+    setTaskColumns: () => {},
+  }));
+
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]);
 
@@ -26,10 +35,8 @@ export default function Board({ id } : { id : string }) {
         getColumns(id);
     }, [])
 
-
     async function getColumns(id : string) : Promise<void> {
         try {
-            console.log(id);
             const response = await fetch(`/api/projects/${id}/board`, {
                 method: "GET"
             })
@@ -39,8 +46,6 @@ export default function Board({ id } : { id : string }) {
             }
 
             const json = await response.json();
-
-            console.log(json);
 
             if (!json.data) {
                 console.log(json)
@@ -53,39 +58,102 @@ export default function Board({ id } : { id : string }) {
         }
     }
 
+
     return (
-        <section className="flex gap-2 w-full">
-            {
-                tasksColumns.map((col) => (
-                    <TaskColumn key={col.id} name={col.name}></TaskColumn>
-                ))
-            }
-            <AddTaskColumn></AddTaskColumn>
-        </section>
+        <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
+            <section>
+                <SeacrhBoard/>
+                <FilterBoard/>
+            </section>
+            <section className="flex gap-2 w-full">
+                {
+                    tasksColumns.map((col, index) => (
+                        <TasksColumn key={col.id} index={index} projectId={id}/>
+                        
+                    ))
+                }
+                <AddTaskColumn/>
+            </section>
+        </TasksColumnsContext.Provider>
     )
 }
 
-function TaskColumn({ name } : { name : string }) {
-    const [tasks, setTasks] = useState<Task[]>([]); 
+function SeacrhBoard() {
+    return <></>
+}
+
+function FilterBoard() {
+    return <></>
+}
+
+
+// TODO: refactor name of functions, and add json type safty
+function TasksColumn({ index, projectId } : { index : number, projectId : string }) {
+    const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false);
+    const { tasksColumns: tasksColumns, setTaskColumns: setTaskColumns } = useContext(TasksColumnsContext);
+    const [ tasksCol , setTasksCol ] = useState<BoardTasksColumn>(tasksColumns[index]);
+    
+    function handleCreateTaskForm() {
+        toggle();
+        console.log(creating);
+    }
+
+    async function createTask(name : string) {
+        try {
+            const colId = tasksCol.id;
+            const response = await fetch(`/api/projects/${projectId}/board/add-task`, {
+                method: "POST",
+                body: JSON.stringify({
+                    name: {name},
+                    colId: {colId}
+                })
+            });
+            
+            const json = await response.json();
+            console.log(json);
+            if (!response.ok) {
+                throw new Error(json.error);
+            }
+            
+            
+            const newTask : Task = json.task;
+            const newTasks : Task[] = tasksCol.tasks;
+            newTasks.push(newTask);
+            toggle();
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: newTasks});
+            
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+        
 
     return (
         <section className="bg-neutral-950 rounded w-80 h-fit">
             <div className="p-2 border-b border-neutral-400">
-                <h2 className="">{name}</h2>
+                <h2 className="">{tasksCol.name}</h2>
             </div>
             <div className="p-2">
                 <ul className="flex flex-col gap-2 mb-2">
-                    { tasks.map( (task) => (
-                        <TaskItem key={task.id} task={task}></TaskItem>
+                    {   
+                        creating ? 
+                        <CreatorOfTask createTask={createTask}/>
+                        :
+                        <></>
+                    }
+                    { 
+                        tasksCol.tasks.map((task) => (
+                            <Task key={task.id} task={task} />
                     ))}
                 </ul>
-                <AddTask/>
+                <CreateTaskButton createTask={() => handleCreateTaskForm()}/>
             </div>
         </section>
     )
 }
 
-function TaskItem({ task } : { task : Task }) {
+function Task({ task } : { task : Task }) {
     return (
         <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2">
             <div className='flex w-full items-center justify-between'>
@@ -100,11 +168,9 @@ function TaskItem({ task } : { task : Task }) {
     )
 }
 
-
-
 function TagList() {
     // TODO: Tags and ags type
-    const [tags, setTags] = useState<Tag[]>();
+    const [tags, setTags] = useState<Tag[]>([]);
     const [adding, toggle] = useReducer(adding => !adding, false);
 
     function addTag() {
@@ -116,7 +182,7 @@ function TagList() {
             <div className='flex'>
             <ul>
                 {
-                    tags?.map((tag) => (
+                    tags.map((tag) => (
                         <li className='p-1'>{tag.name}</li>
                     ))
                 }
@@ -134,13 +200,28 @@ function TagList() {
     )
 }
 
+function CreatorOfTask({ createTask } : { createTask: (text : string) => void }) {
+    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
+        const inputValue = event.currentTarget.value;
+        if (event.key === 'Enter') {
+            if (inputValue.length > 0) {
+                createTask(inputValue);
+            }
+        }
+    }
+
+    return (
+        <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2">
+            <input type="text" className="bg-neutral-900" id="name" onKeyDown={handleKeyDown}></input>
+        </li>
+    )
+}
 
 
-
-function AddTask() {
+function CreateTaskButton({ createTask } : { createTask : () => void }) {
     return (
         <div className='flex items-center gap-2'>
-            <button >
+            <button onClick={createTask}>
                 <Image src="/plus.svg" alt="add task" width={2} height={2} className='w-7 h-7 rounded bg-neutral-900 cursor-pointer hover:bg-violet-800'></Image>
             </button>
             <p className='text-neutral-400 text-sm'>Create new task</p>

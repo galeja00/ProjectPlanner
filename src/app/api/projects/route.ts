@@ -72,7 +72,7 @@ function selectColor() : string{
     return arrColors[Math.floor(Math.random() * arrColors.length)]
 }
 
-async function createStartingBoardTasksColumns(boardId : string) : Promise<void> {
+async function createStartingBoard(boardId : string) : Promise<void> {
     const colums = await prisma.taskColumn.createMany({
         data: [{
             boardId: boardId,
@@ -111,42 +111,54 @@ export async function POST(req : Request) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
 
-        const proj : Project = await prisma.project.create({ data: {
+        const project : Project = await prisma.project.create({ data: {
             name: name,
             type: type,
             color: selectColor()     
         }});
 
+        console.log("project done:", project);
 
-        if (!proj) {
+        if (!project) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
 
         const kanban = await prisma.kanban.create( {
             data: {
-                projectId: proj.id,  
+                projectId: project.id,  
             }
         })
-        
+
+        console.log("kanban done:", kanban);
+
         const board = await prisma.board.create( {
             data: {
-                projectId: proj.id,
+                projectId: project.id,
             }
         })
-        if (!board) {
-            return NextResponse.json({ error: "error"}, { status: 400 });
-        }
+
+        console.log("board done:", board);
 
         
-
-        createStartingBoardTasksColumns(board.id);
+        await prisma.kanban.update( {
+            where: {
+                projectId: project.id
+            },
+            data: {
+                boardId: board.id
+            }
+        })
+        
+        
+        createStartingBoard(board.id);
     
-        const projMem = await prisma.projectMember.create({ data: {
-            userId: user.id,
-            projectId: proj.id,
-            creator: true,
-            teamId: null
-        }});
+        const projMem = await prisma.projectMember.create({ 
+            data: {
+                userId: user.id,
+                projectId: project.id,
+                creator: true,
+                teamId: null}
+            });
 
     
         if (!projMem) {

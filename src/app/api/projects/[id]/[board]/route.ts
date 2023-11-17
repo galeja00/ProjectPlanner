@@ -79,7 +79,6 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         return Response.json({ data: boardTasksColumns }, { status: 200 });
             
         
-        return Response.json({ error : "Error on server try again"}, { status: 400});
     } 
     catch (error) {
         console.log(error);
