@@ -17,13 +17,11 @@ type BoardTasksColumn = {
 export async function GET(req : Request, { params } : { params: { id: string, board: string } }) {
     try {
         const session : Session | null = await getServerSession(options);
-        
         if (!(session && session.user)) {
             return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
         }
 
         const email = session.user.email;
-        
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
@@ -33,7 +31,6 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 email: email
             },
         })
-
         if (!user) {
             return Response.json({ error: "Can not find this user in DB"}, { status: 404 });
         }
@@ -44,7 +41,6 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 projectId: params.id
             }
         })
-
         if (!pm) {
             return Response.json({ error: "You are not Project member of this project"}, { status: 400 });
         }
@@ -55,7 +51,6 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 projectId: params.id
             }
         })
-
         if (!board) {
             return Response.json({ error: "You are not Project member of this project"}, { status: 400 });
         }
@@ -70,12 +65,11 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         for (const col of taskColumns) {
             var tasks : Task[] = await prisma.task.findMany( {
                 where: {
-                    id: col.id
+                    taskColumnId: col.id
                 }
             })
             boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, num: col.numOfTasks, tasks: tasks });
         }
-
         return Response.json({ data: boardTasksColumns }, { status: 200 });
             
         
@@ -85,3 +79,4 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         return Response.json({ error : "Error on server try again"}, { status: 400});
     }
 }
+

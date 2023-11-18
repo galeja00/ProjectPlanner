@@ -5,6 +5,7 @@ import { prisma } from '@/db'
 import { compare } from 'bcrypt';
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import EmailValidator from 'email-validator';
+import NextAuth from "next-auth/next";
 
 
 type User = {
@@ -29,13 +30,12 @@ export const options: NextAuthOptions = {
         CredentialsProvider({
             name: 'Credentials',
             credentials: {
-                id: {},
                 email: {},
                 password: {}
             },
             async authorize(credentials, req)  {
 
-                if (!(credentials?.email && credentials?.password)) {
+                if (!(credentials?.email || credentials?.password)) {
                     return null;
                 }
 
@@ -45,7 +45,7 @@ export const options: NextAuthOptions = {
                 
                 const res = await prisma.user.findFirst({ where: { email: credentials.email } });
                 if (res) {
-                    const correctPsw = await compare(credentials?.password || "", res.password);
+                    const correctPsw = await compare(credentials.password || "", res.password);
                     if (correctPsw) {
                         return { id: res.id, name: res.name, email: res.email };
                     }

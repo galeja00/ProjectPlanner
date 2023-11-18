@@ -48,10 +48,12 @@ export default function Board({ id } : { id : string }) {
             const json = await response.json();
 
             if (!json.data) {
-                console.log(json)
+                console.log(json);
+                throw new Error("");
             }
-
+            console.log(json.data);
             setTaskColumns(json.data);
+            
         }
         catch (Error) {
             console.log(Error);
@@ -104,8 +106,8 @@ function TasksColumn({ index, projectId } : { index : number, projectId : string
             const response = await fetch(`/api/projects/${projectId}/board/add-task`, {
                 method: "POST",
                 body: JSON.stringify({
-                    name: {name},
-                    colId: {colId}
+                    name: name,
+                    colId: colId
                 })
             });
             
@@ -240,7 +242,7 @@ function Solvers() {
 function AddTaskColumn() {
     return (
         <button>
-            <Image src="/plus.svg" alt="avatar" width={2} height={2} className='w-6 h-full rounded bg-neutral-950 cursor-pointer'></Image>
+            <Image src="/plus.svg" alt="avatar" width={2} height={2} className='w-6 h-6 rounded bg-neutral-950 cursor-pointer'></Image>
         </button>
     )
 }
