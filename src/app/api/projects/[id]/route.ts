@@ -35,9 +35,11 @@ export async function GET(req : Request, { params } : { params: { id: string } }
             }
         })
 
+
         if (!project) {
             return Response.json({ error: "This project is no existing"}, { status: 404 });
         }
+       
 
         const projectMember = await prisma.projectMember.findFirst({
             where: {
@@ -45,6 +47,7 @@ export async function GET(req : Request, { params } : { params: { id: string } }
                 projectId: project.id
             }
         })
+
 
         if (!projectMember) {
             return Response.json({ error: "You are not project member of this project"}, { status: 403 });

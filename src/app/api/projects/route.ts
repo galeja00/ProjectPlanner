@@ -78,16 +78,19 @@ async function createStartingBoard(boardId : string) : Promise<void> {
             boardId: boardId,
             name: "To Do",
             numOfTasks: 0,
+            position: 1,
         },
         {
             boardId: boardId,
             name: "In Work",
             numOfTasks: 0,
+            position: 2,
         },
         {
             boardId: boardId,
             name: "Done",
             numOfTasks: 0,
+            position: 3
         }]
     })
 }
@@ -117,27 +120,23 @@ export async function POST(req : Request) {
             color: selectColor()     
         }});
 
-        console.log("project done:", project);
 
         if (!project) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
 
-        const kanban = await prisma.kanban.create( {
+        await prisma.kanban.create( {
             data: {
                 projectId: project.id,  
             }
         })
 
-        console.log("kanban done:", kanban);
 
         const board = await prisma.board.create( {
             data: {
                 projectId: project.id,
             }
         })
-
-        console.log("board done:", board);
 
         
         await prisma.kanban.update( {
@@ -157,8 +156,8 @@ export async function POST(req : Request) {
                 userId: user.id,
                 projectId: project.id,
                 creator: true,
-                teamId: null}
-            });
+                teamId: null
+            }});
 
     
         if (!projMem) {

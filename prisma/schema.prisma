@@ -23,7 +23,11 @@ model User {
   image     String?
   projects  ProjectMember[]
   teams     TeamMember[]
+}
 
+model Profile {
+  id    String   @id @default(cuid())
+  userId  String  @unique
 }
 
 enum ProjectType {
@@ -73,6 +77,7 @@ model TaskColumn {
   name      String  @unique
   tasks     Task[]
   numOfTasks  Int   @default(0)
+  position  Int        
 }
 
 model Task {

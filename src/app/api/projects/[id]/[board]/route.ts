@@ -58,6 +58,9 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         const taskColumns : TaskColumn[] = await prisma.taskColumn.findMany( {
             where: {
                 boardId: board.id
+            },
+            orderBy: {
+                position: 'asc'
             }
         })
 

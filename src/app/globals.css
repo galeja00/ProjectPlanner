@@ -4,7 +4,7 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 border rounded border-violet-500 text-violet-500 hover:bg-violet-500 hover:text-neutral-50 focus:bg-violet-500 focus:text-neutral-50 ease-in-out;
+    @apply px-4 py-1 border rounded border-violet-500 text-violet-500 hover:bg-violet-500 hover:text-neutral-50 focus:bg-violet-500 focus:text-neutral-50 ease-in-out;
   }
   .input-primary {
     @apply text-neutral-950 rounded px-4 py-2 focus:outline focus:outline-2 focus:outline-violet-500

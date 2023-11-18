@@ -19,7 +19,7 @@ export default function ProjectMenu({ id } : { id : string }) {
             </section>
             <section>
                 <ul>
-                    <li><Link href={`/projects/${id}/settings`} className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Settings</Link></li>
+                    <SettingsLink id={id}/>
                 </ul>
             </section>  
         </div>
@@ -28,8 +28,21 @@ export default function ProjectMenu({ id } : { id : string }) {
 
 
 function BoardLink( { name, id, text} : { name : string, id : string, text : string} ) {
+    const src : string = "/" + name.toLocaleLowerCase()  + ".svg"
     return (
-        <li><Link href={`/projects/${id}/boards/${name}`} className='link-secundary'>{text}</Link></li>
+        <li className="flex gap-2 items-center h-7">
+            <Image src={src} alt="" height={5} width={5} className="h-5 w-5"/>
+            <Link href={`/projects/${id}/boards/${name}`} className='link-secundary'>{text}</Link>
+        </li>
+    )
+}
+
+function SettingsLink( { id } : { id : string } ) {
+    return (
+        <li className="flex gap-2 items-center h-7">
+            <Image src="/settings.svg" alt="" height={5} width={5} className="h-5 w-5"/>
+            <Link href={`/projects/${id}/settings`} className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Settings</Link>
+        </li>
     )
 }
 /*
