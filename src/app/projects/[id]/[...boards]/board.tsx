@@ -1,5 +1,5 @@
 'use client'
-import { Tag, Task } from '@prisma/client'
+import { ProjectMember, Tag, Task, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { start } from 'repl'
@@ -18,6 +18,7 @@ type ProviderColumns = {
     setTaskColumns: Dispatch<SetStateAction<BoardTasksColumn[]>>;
 }
 // TODO: vyresit problem pokud dany Context se dostane do dalsich komponenet
+// TODO: bug with tasks when new is added
 const TasksColumnsContext = createContext<ProviderColumns>(({
     tasksColumns: [],
     setTaskColumns: () => {},
@@ -330,6 +331,9 @@ function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task :
                 <TagList/>
                 <div className='flex flex-row-reverse'>
                     <Solver handleSolversMenu={displaySolversMenu}/>
+                    {
+                        isSolversMenu ? <></> : <></>
+                    }
                 </div>
             </li>
         </>
@@ -407,8 +411,30 @@ function Solver({ handleSolversMenu } : { handleSolversMenu : () => void }) {
     )
 }
 
-function ChooseSolverMenu() {
+function SolversMenu({ projectId } : { projectId : string }) {
+    const [ users, getUsers ] = useState<User[]>([]);
 
+    useEffect(() => {}, []);
+
+    function getProjectUsers() {
+
+    }
+
+    return (
+        <div>
+            <input></input>
+            <ul>
+                {
+                    users.map((user) => (
+                        <li key={user.id}> 
+                            <Image src="/avatar.svg" alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
+                            <h5>{user.name} {user.surname}</h5>
+                        </li>
+                    ))
+                }
+            </ul>
+        </div>
+    )
 }
 
 function AddTaskColumn() {
