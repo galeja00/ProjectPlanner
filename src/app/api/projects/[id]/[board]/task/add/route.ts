@@ -2,8 +2,9 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { Task, TaskColumn } from "@prisma/client";
 import { Session, User, getServerSession } from "next-auth";
+import { getMember } from "../../../static";
 
-export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
+export async function POST(req : Request, { params } : { params: { id: string, board: string , type: string} } ) {
     try {
         // TODO: Do abstraction
         const session : Session | null = await getServerSession(options);
@@ -18,29 +19,12 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
 
-        const user : User | null = await prisma.user.findFirst({
-            where: {
-                email: email
-            },
-        })
-
-        if (!user) {
-            return Response.json({ error: "Can not find this user in DB"}, { status: 404 });
-        }
-
-        const projectMember = await prisma.projectMember.findFirst({
-            where: {
-                userId: user.id,
-                projectId: params.id
-            }
-        })
-
+        const projectMember = await getMember(email, params.id);
         if (!projectMember) {
-            return Response.json({ error: "This user is not project member"}, { status: 400 });
+            return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
         const { name, colId } = await req.json();
-        console.log("name:", name, "colId:", colId);
         const type = "test"; // TODO: typ of task, "test" = only placeholder
 
         if (!(name || colId)) {
@@ -52,7 +36,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                 id: colId
             }
         });
-
         if (!tasksCol) {
             return Response.json({ error: "Bad reqest: this column dosnt exist"}, { status: 400 });
         }

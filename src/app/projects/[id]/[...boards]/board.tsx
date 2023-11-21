@@ -1,7 +1,8 @@
 'use client'
 import { Tag, Task } from '@prisma/client'
 import Image from 'next/image' 
-import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent } from 'react'
+import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
+import { start } from 'repl'
 
 
 type BoardTasksColumn = {
@@ -34,24 +35,77 @@ export default function Board({ id } : { id : string }) {
             const response = await fetch(`/api/projects/${id}/board`, {
                 method: "GET"
             })
+            const data = await response.json();
             if (!response.ok) {
-                const data = await response.json();
+                
                 console.log(data.error);
             }
 
-            const json = await response.json();
-
-            if (!json.data) {
+            if (!data.data) {
                 throw new Error("");
             }
-            setTaskColumns(json.data);
+            setTaskColumns(data.data);
             
         }
         catch (Error) {
             console.log(Error);
         }
     }
+    // TODO : test tthis function for move a task
+    async function handleMoveOfTask(fromColId : string, toColId : string, taskId : string) {
+        try {
+            const response = await fetch(`/api/projects/${id}/board/task/move`, {
+                method: "POST",
+                body: JSON.stringify({
+                    taskId: taskId,
+                    fromColId: fromColId,
+                    toColId: toColId
+                })
+            })
+    
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.erro);
+            }
+            
+            const movedTask : Task = data.task;
+            const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
+            const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
+            if (toCol && fromCol) {
+                toCol.tasks.push(movedTask);
+                const newFromTasks : Task[] = [];
+                for (const task of fromCol.tasks) {
+                    if (task.id != movedTask.id) {
+                        newFromTasks.push(task);
+                    }
+                }
+                fromCol.tasks = newFromTasks;
+                const newBoardColumns : BoardTasksColumn[] = [];
+                for (const col of tasksColumns) {
+                    switch (col.id) {
+                        case toCol.id: 
+                            newBoardColumns.push(toCol); 
+                            break;
+                        case fromCol.id: 
+                            newBoardColumns.push(fromCol);
+                            break;
+                        default: 
+                            newBoardColumns.push(col);
+                    
+                    }
+                }
+                console.log(newBoardColumns);
+                setTaskColumns(newBoardColumns);
+            }
+            else {
+                await getColumns(id);
+            }
 
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
 
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
@@ -62,7 +116,12 @@ export default function Board({ id } : { id : string }) {
             <section className="flex gap-2 w-full">
                 {
                     tasksColumns.map((col, index) => (
-                        <TasksColumn key={col.id} index={index} projectId={id}/>
+                        <TasksColumn 
+                            key={col.id} 
+                            index={index} 
+                            projectId={id}
+                            handleMoveOfTask={handleMoveOfTask}
+                        />
                         
                     ))
                 }
@@ -89,11 +148,16 @@ function FilterBoard() {
     )
 }
 
+async function moveTask( taskId : string, fromColId : string, toColId : string, projectId : String) {
+    
+}
 
-function TasksColumn({ index, projectId } : { index : number, projectId : string }) {
+
+function TasksColumn({ index, projectId, handleMoveOfTask } : { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string) => void }) {
     const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false);
     const { tasksColumns: tasksColumns } = useContext(TasksColumnsContext);
     const [ tasksCol , setTasksCol ] = useState<BoardTasksColumn>(tasksColumns[index]);
+    const [ isDragetOver, setIsDragetOver ] = useState<boolean>(false);
     
     function handleCreateTaskForm() {
         toggle();
@@ -133,10 +197,9 @@ function TasksColumn({ index, projectId } : { index : number, projectId : string
             const response = await fetch(`/api/projects/${projectId}/board/task/delete`, {
                 method: "POST",
                 body: JSON.stringify({
-                    id: id
+                    taskId: id
                 })
             });
-
             if (!response.ok) {
                 throw new Error();
             }
@@ -157,18 +220,57 @@ function TasksColumn({ index, projectId } : { index : number, projectId : string
 
         }
     }
+
+    async function handleOnDrop(e : React.DragEvent) {
+        const [ fromColId, taskId ] : string[] = e.dataTransfer.getData("colId/taskId").split("/"); 
+
+        const colId = tasksColumns[index].id    
+        if (colId == fromColId) {
+            console.log("sameCol");
+            setIsDragetOver(false);
+            return;
+        }
         
+        handleMoveOfTask(fromColId, colId, taskId);
+        setIsDragetOver(false);
+    }
+        
+    function handleOnDrag(e : React.DragEvent, task : Task) {
+        e.dataTransfer.setData("colId/taskId", tasksCol.id + "/" + task.id);
+    }
+
+    function handleDragOver(e : React.DragEvent) {
+        e.preventDefault();
+        setIsDragetOver(true);
+    }
+
+    function handleOnLeave(e : React.DragEvent) {
+        setIsDragetOver(false);
+    }
+
 
     return (
-        <section className="bg-neutral-950 rounded w-80 h-fit">
+        <section 
+            className={`bg-neutral-950 rounded w-80 h-fit ${isDragetOver ? "bg-neutral-700" : ""}`} 
+            onDrop={handleOnDrop} 
+            onDragOver={handleDragOver} 
+            onDragExit={handleOnLeave} 
+            onDragLeave={handleOnLeave}
+        >
             <div className="p-2 border-b border-neutral-400">
                 <h2 className="">{tasksCol.name}</h2>
             </div>
             <div className="p-2">
-                <ul className="flex flex-col gap-2 mb-2">
+                <ul className={`flex flex-col gap-2 mb-2`}>
                     { 
                         tasksCol.tasks.map((task) => (
-                            <Task key={task.id} task={task} deleteTask={() => deleteTask(task.id)} removeTask={() => removeTask(task.id)} />
+                            <TaskComponent 
+                                key={task.id} 
+                                task={task} 
+                                deleteTask={() => deleteTask(task.id)} 
+                                removeTask={() => removeTask(task.id)} 
+                                handleOnDrag={(e) => handleOnDrag(e, task)}
+                            />
                     ))
                     }
                     {   
@@ -189,8 +291,9 @@ type MoreMenuItem = {
     handler: () => void
 }
 
-function Task({ task, removeTask, deleteTask } : { task : Task, removeTask : () => void, deleteTask : () => void }) {
+function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void }) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
+
     function displayMoreMenu() {
         toggleMenu();
     }
@@ -203,32 +306,36 @@ function Task({ task, removeTask, deleteTask } : { task : Task, removeTask : () 
 
     }
 
-    
     const MoreMenuItems : MoreMenuItem[] = [
         { name: "Move To", handler: moveTask },
         { name: "Info", handler: displayInfo },
         { name: "Remove", handler: removeTask },
         { name: "Delete", handler: deleteTask },
-    ]
+    ];
     return (
-        <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative">
-            <div className='flex w-full items-center justify-between '>
-                <Name name={task.name}/>
-                <MoreButton handleClick={() => displayMoreMenu()}/>
-                {
-                    isMenu ? <MoreMenu items={MoreMenuItems}/> : <></>
-                }
-            </div>
-            <TagList/>
-            <div className='flex flex-row-reverse'>
-                <Solvers/>
-            </div>
-        </li>
+        <>
+            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} >
+                <div className='flex w-full items-center justify-between'>
+                    <Name name={task.name}/>
+                    <MoreButton handleClick={() => displayMoreMenu()}/>
+                    {
+                        isMenu ? <MoreMenu items={MoreMenuItems}/> : <></>
+                    }
+                </div>
+                <TagList/>
+                <div className='flex flex-row-reverse'>
+                    <Solver/>
+                </div>
+            </li>
+        </>
     )
 }
 
 function TaskInfo({ task } : { task : Task }) {
-
+    return (
+        <>
+        </>
+    )
 }
 
 function TagList() {
@@ -292,12 +399,16 @@ function CreateTaskButton({ createTask } : { createTask : () => void }) {
     )
 }
 
-function Solvers() {
+function Solver() {
     return (
         <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1'>
             <Image src="/avatar.svg" alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-300 cursor-pointer'></Image>
         </button>    
     )
+}
+
+function ChooseSolverMenu() {
+
 }
 
 function AddTaskColumn() {
@@ -333,17 +444,17 @@ function MoreMenu({ items } : { items : MoreMenuItem[] }) {
         <ul className='absolute w-28 bg-neutral-950 rounded p-2 border border-neutral-400 right-0 top-10 z-50'>
             {
                 items.map((item) => (
-                    <MoreMenuIteam key={item.name} name={item.name} handleClick={item.handler}/>
+                    <MoreMenuItems key={item.name} name={item.name} handleClick={item.handler}/>
                 ))
             }
         </ul>
     )
 }
 
-function MoreMenuIteam({ name, handleClick } : { name : string, handleClick : () => void }) {
+function MoreMenuItems({ name, handleClick } : { name : string, handleClick : () => void }) {
     return (
         <li>
-            <button className='link-secundary h-6'>{name}</button>
+            <button className='link-secundary h-6' onClick={handleClick}>{name}</button>
         </li>
     )
 }

@@ -1,8 +1,8 @@
 import { options } from "@/app/api/auth/[...nextauth]/options";
-import { prisma } from "@/db";
-import { Session, User, getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { Session, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
+import { prisma } from "@/db";
+
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
@@ -23,30 +23,21 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
-        const { taskId } : { taskId : string } = await req.json();
-        console.log(taskId);
+        const { taskId, fromColId, toColId } : { taskId : string, fromColId : string, toColId : string } = await req.json(); 
 
-        const res = await prisma.task.delete({
+        const task = await prisma.task.update({
             where: {
-               id: taskId 
-            }
-        });
-
-        if (!res) {
-            return Response.json({ error: "This task is not existing"}, { status: 400 });
-        } 
-
-        const tasks = await prisma.task.findMany({
-            where: {
-                taskColumnId: res.taskColumnId
+                id: taskId,
+                taskColumnId: fromColId
+            },
+            data: {
+                taskColumnId: toColId
             }
         })
 
-
-        return Response.json({ tasks: tasks }, { status: 200 });
-    } 
+        return Response.json({ task: task }, { status: 200 });
+    }
     catch (error) {
-        console.log(error);
-        return Response.json({ error: "Somthing went worng" }, { status: 400 });
+       return Response.json({ error: "Somthing went wrong on server" }, { status: 400 });  
     }
 }
