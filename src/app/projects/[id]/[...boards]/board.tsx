@@ -65,9 +65,9 @@ export default function Board({ id } : { id : string }) {
     
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.erro);
+                throw new Error(data.error);
             }
-            
+
             const movedTask : Task = data.task;
             const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
             const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
@@ -91,10 +91,8 @@ export default function Board({ id } : { id : string }) {
                             break;
                         default: 
                             newBoardColumns.push(col);
-                    
                     }
                 }
-                console.log(newBoardColumns);
                 setTaskColumns(newBoardColumns);
             }
             else {
@@ -163,6 +161,10 @@ function TasksColumn({ index, projectId, handleMoveOfTask } : { index : number, 
         toggle();
     }
 
+    useEffect(() => {
+        setTasksCol(tasksColumns[index])
+    }, [tasksColumns[index]]);
+
     async function createTask(name : string) {
         try {
             const colId = tasksCol.id;
@@ -226,7 +228,6 @@ function TasksColumn({ index, projectId, handleMoveOfTask } : { index : number, 
 
         const colId = tasksColumns[index].id    
         if (colId == fromColId) {
-            console.log("sameCol");
             setIsDragetOver(false);
             return;
         }
@@ -248,10 +249,9 @@ function TasksColumn({ index, projectId, handleMoveOfTask } : { index : number, 
         setIsDragetOver(false);
     }
 
-
     return (
         <section 
-            className={`bg-neutral-950 rounded w-80 h-fit ${isDragetOver ? "bg-neutral-700" : ""}`} 
+            className={`rounded w-80 h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-950"}`} 
             onDrop={handleOnDrop} 
             onDragOver={handleDragOver} 
             onDragExit={handleOnLeave} 
@@ -293,6 +293,7 @@ type MoreMenuItem = {
 
 function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void }) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
+    const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
 
     function displayMoreMenu() {
         toggleMenu();
@@ -304,6 +305,10 @@ function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task :
 
     function moveTask() {
 
+    }
+
+    function displaySolversMenu() {
+        toggleSolversMenu();
     }
 
     const MoreMenuItems : MoreMenuItem[] = [
@@ -324,19 +329,14 @@ function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task :
                 </div>
                 <TagList/>
                 <div className='flex flex-row-reverse'>
-                    <Solver/>
+                    <Solver handleSolversMenu={displaySolversMenu}/>
                 </div>
             </li>
         </>
     )
 }
 
-function TaskInfo({ task } : { task : Task }) {
-    return (
-        <>
-        </>
-    )
-}
+
 
 function TagList() {
     // TODO: Tags and ags type
@@ -399,9 +399,9 @@ function CreateTaskButton({ createTask } : { createTask : () => void }) {
     )
 }
 
-function Solver() {
+function Solver({ handleSolversMenu } : { handleSolversMenu : () => void }) {
     return (
-        <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1'>
+        <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1' onClick={handleSolversMenu}>
             <Image src="/avatar.svg" alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-300 cursor-pointer'></Image>
         </button>    
     )

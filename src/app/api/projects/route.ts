@@ -164,7 +164,7 @@ export async function POST(req : Request) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
 
-        return NextResponse.json({ message: "Project succesfully created"}, { status: 200 });
+        return NextResponse.json({ message: "Project succesfully created" }, { status: 200 });
 
     } catch (error) {
         return NextResponse.json({ error: "Comunication on server faild try again later"}, { status: 400 })
