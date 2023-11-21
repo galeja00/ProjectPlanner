@@ -152,7 +152,10 @@ async function moveTask( taskId : string, fromColId : string, toColId : string, 
 }
 
 
-function TasksColumn({ index, projectId, handleMoveOfTask } : { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string) => void }) {
+function TasksColumn(
+        { index, projectId, handleMoveOfTask } : 
+        { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string) => void }
+    ) {
     const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false);
     const { tasksColumns: tasksColumns } = useContext(TasksColumnsContext);
     const [ tasksCol , setTasksCol ] = useState<BoardTasksColumn>(tasksColumns[index]);
@@ -164,7 +167,7 @@ function TasksColumn({ index, projectId, handleMoveOfTask } : { index : number, 
 
     useEffect(() => {
         setTasksCol(tasksColumns[index])
-    }, [tasksColumns[index]]);
+    }, [tasksColumns]);
 
     async function createTask(name : string) {
         try {
