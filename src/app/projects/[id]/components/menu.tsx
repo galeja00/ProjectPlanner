@@ -22,7 +22,7 @@ export default function ProjectMenu({ id } : { id : string }) {
                 <ul>
                     <SideMenuLink id={id} name="Members" to="members" img="/members.svg"/>
                     <SideMenuLink id={id} name="Code" to="code" img="/code.svg"/>
-                    <SideMenuLink id={id} name="Settings" to="setting" img="/settings.svg"/>
+                    <SideMenuLink id={id} name="Settings" to="settings" img="/settings.svg"/>
                 </ul>
             </section>  
         </div>
