@@ -20,6 +20,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
 
         const projectMember = await getMember(email, params.id);
+        console.log(projectMember);
         if (!projectMember) {
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }

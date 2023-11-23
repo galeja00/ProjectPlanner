@@ -3,6 +3,8 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { Board, ProjectMember, Task, TaskColumn, User } from "@prisma/client";
 import { Session } from "next-auth";
+import { authorize } from "@/app/api/static";
+import { getMember } from "../static";
 
 // TODO: defent boards need to be implement, implmenet type safe api
 
@@ -16,33 +18,13 @@ type BoardTasksColumn = {
 
 export async function GET(req : Request, { params } : { params: { id: string, board: string } }) {
     try {
-        const session : Session | null = await getServerSession(options);
-        if (!(session && session.user)) {
-            return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
-        }
-
-        const email = session.user.email;
+        const email = await authorize(req);
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
-
-        const user : User | null = await prisma.user.findFirst({
-            where: {
-                email: email
-            },
-        })
-        if (!user) {
-            return Response.json({ error: "Can not find this user in DB"}, { status: 404 });
-        }
-
-        const pm : ProjectMember | null = await prisma.projectMember.findFirst({
-            where: {
-                userId: user.id,
-                projectId: params.id
-            }
-        })
-        if (!pm) {
-            return Response.json({ error: "You are not Project member of this project"}, { status: 400 });
+        const member = await getMember(email, params.id);
+        if (!member) {
+            return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
        
         

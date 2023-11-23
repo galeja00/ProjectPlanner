@@ -3,22 +3,18 @@
 import { getServerSession } from "next-auth/next";
 import { options } from "../../auth/[...nextauth]/options";
 import { prisma } from "@/db";
+import { authorize } from "../../static";
+import { getMember } from "./static";
 
 export async function GET(req : Request, { params } : { params: { id: string } }) {
     try {
-        const session = await getServerSession(options);
         
-        if (!(session && session.user)) {
-            return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
-        }
-
-        const email = session.user.email;
         
+        const email = await authorize(req);
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
         
-
         const user = await prisma.user.findFirst({
             where: {
                 email: email
@@ -36,20 +32,13 @@ export async function GET(req : Request, { params } : { params: { id: string } }
         })
 
 
-        if (!project) {
-            return Response.json({ error: "This project is no existing"}, { status: 404 });
+        const member = await getMember(email, params.id);
+        if (!member) {
+            return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
-       
-
-        const projectMember = await prisma.projectMember.findFirst({
-            where: {
-                userId: user.id,
-                projectId: project.id
-            }
-        })
 
 
-        if (!projectMember) {
+        if (!member) {
             return Response.json({ error: "You are not project member of this project"}, { status: 403 });
         }
 

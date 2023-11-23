@@ -17,8 +17,8 @@ type ProviderColumns = {
     tasksColumns: BoardTasksColumn[];
     setTaskColumns: Dispatch<SetStateAction<BoardTasksColumn[]>>;
 }
-// TODO: vyresit problem pokud dany Context se dostane do dalsich komponenet
-// TODO: bug with tasks when new is added
+
+
 const TasksColumnsContext = createContext<ProviderColumns>(({
     tasksColumns: [],
     setTaskColumns: () => {},
@@ -28,10 +28,10 @@ export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]);
     
     useEffect(() => {
-        getColumns(id);
+        fetchColumns(id);
     }, [])
 
-    async function getColumns(id : string) : Promise<void> {
+    async function fetchColumns(id : string) : Promise<void> {
         try {
             const response = await fetch(`/api/projects/${id}/board`, {
                 method: "GET"
@@ -97,7 +97,7 @@ export default function Board({ id } : { id : string }) {
                 setTaskColumns(newBoardColumns);
             }
             else {
-                await getColumns(id);
+                await fetchColumns(id);
             }
 
         } catch (error) {
@@ -147,10 +147,6 @@ function FilterBoard() {
     )
 }
 
-async function moveTask( taskId : string, fromColId : string, toColId : string, projectId : String) {
-    
-}
-
 
 function TasksColumn(
         { index, projectId, handleMoveOfTask } : 
@@ -168,6 +164,7 @@ function TasksColumn(
     useEffect(() => {
         setTasksCol(tasksColumns[index])
     }, [tasksColumns]);
+
 
     async function createTask(name : string) {
         try {
@@ -190,7 +187,6 @@ function TasksColumn(
             newTasks.push(newTask);
             toggle();
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: newTasks });
-            
         }
         catch (error) {
             console.log(error);
@@ -270,6 +266,7 @@ function TasksColumn(
                         tasksCol.tasks.map((task) => (
                             <TaskComponent 
                                 key={task.id} 
+                                projectId={projectId}
                                 task={task} 
                                 deleteTask={() => deleteTask(task.id)} 
                                 removeTask={() => removeTask(task.id)} 
@@ -295,7 +292,10 @@ type MoreMenuItem = {
     handler: () => void
 }
 
-function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void }) {
+// TODO: to much argumentsa ned to be better solved
+function TaskComponent(
+        { task, projectId, removeTask, deleteTask, handleOnDrag } : 
+        { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void }) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
 
@@ -323,7 +323,7 @@ function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task :
     ];
     return (
         <>
-            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} >
+            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-4 relative" draggable onDragStart={handleOnDrag} >
                 <div className='flex w-full items-center justify-between'>
                     <Name name={task.name}/>
                     <MoreButton handleClick={() => displayMoreMenu()}/>
@@ -331,51 +331,19 @@ function TaskComponent({ task, removeTask, deleteTask, handleOnDrag } : { task :
                         isMenu ? <MoreMenu items={MoreMenuItems}/> : <></>
                     }
                 </div>
-                <TagList/>
                 <div className='flex flex-row-reverse'>
-                    <Solver handleSolversMenu={displaySolversMenu}/>
-                    {
-                        isSolversMenu ? <></> : <></>
-                    }
+                    <div className='relative'>
+                        <Solver handleSolversMenu={displaySolversMenu}/>
+                        {
+                            isSolversMenu ? <SolversMenu projectId={projectId}/>: <></>
+                        }
+                    </div>
                 </div>
             </li>
         </>
     )
 }
 
-
-
-function TagList() {
-    // TODO: Tags and ags type
-    const [tags, setTags] = useState<Tag[]>([]);
-    const [adding, toggle] = useReducer(adding => !adding, false);
-
-    function addTag() {
-        toggle();
-    }
-
-    return (
-        <div>
-            <div className='flex'>
-            <ul>
-                {
-                    tags.map((tag) => (
-                        <li className='p-1'>{tag.name}</li>
-                    ))
-                }
-            </ul>
-            { adding ?
-                <form>
-                    <input></input>
-                    <button></button>
-                </form>
-                :
-                <button onClick={addTag}><Image src="/plus.svg" width={20} height={20} alt="add"></Image></button>
-            }
-            </div>   
-        </div>
-    )
-}
 
 function CreatorOfTask({ createTask } : { createTask: (text : string) => void }) {
     function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
@@ -415,21 +383,48 @@ function Solver({ handleSolversMenu } : { handleSolversMenu : () => void }) {
 }
 
 function SolversMenu({ projectId } : { projectId : string }) {
-    const [ users, getUsers ] = useState<User[]>([]);
+    const [ users, setUsers ] = useState<User[]>([]);
 
-    useEffect(() => {}, []);
+    useEffect(() => {
+        fetchProjectUsers(projectId);
+    }, []);
 
-    function getProjectUsers() {
+    async function fetchProjectUsers(projectId : string) {
+        try {
+            console.log(projectId);
+            const response = await fetch(`/api/projects/${projectId}/members`, {
+                method: "GET"
+            });
 
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error);
+            }
+
+            setUsers(data.users);
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function changeSolver(solverId : string) {
+        try {
+
+        }
+        catch (error) {
+
+        }
     }
 
     return (
-        <div>
-            <input></input>
+        <div className='w-fit bg-neutral-950  absolute right-0 z-50 p-0 rounded'>
+            <input className='w-fit bg-neutral-900 rounded m-1 outline-none border-none py-1 px-2'></input>
             <ul>
                 {
                     users.map((user) => (
-                        <li key={user.id}> 
+                        <li key={user.id} className='flex gap-2 m-1 p-1 hover:bg-neutral-800 cursor-pointer rounded '> 
                             <Image src="/avatar.svg" alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
                             <h5>{user.name} {user.surname}</h5>
                         </li>
@@ -439,6 +434,8 @@ function SolversMenu({ projectId } : { projectId : string }) {
         </div>
     )
 }
+
+
 
 function AddTaskColumn() {
     return (
@@ -470,7 +467,7 @@ function MoreButton({ handleClick } : { handleClick : () => void}) {
 
 function MoreMenu({ items } : { items : MoreMenuItem[] }) {
     return (
-        <ul className='absolute w-28 bg-neutral-950 rounded p-2 border border-neutral-400 right-0 top-10 z-50'>
+        <ul className='absolute w-28 bg-neutral-950 rounded p-2 border right-0 top-10 z-50'>
             {
                 items.map((item) => (
                     <MoreMenuItems key={item.name} name={item.name} handleClick={item.handler}/>
@@ -488,3 +485,35 @@ function MoreMenuItems({ name, handleClick } : { name : string, handleClick : ()
     )
 }
 
+// Not implemented
+function TagList() {
+    // TODO: Tags and ags type
+    const [tags, setTags] = useState<Tag[]>([]);
+    const [adding, toggle] = useReducer(adding => !adding, false);
+
+    function addTag() {
+        toggle();
+    }
+
+    return (
+        <div>
+            <div className='flex'>
+            <ul>
+                {
+                    tags.map((tag) => (
+                        <li className='p-1'>{tag.name}</li>
+                    ))
+                }
+            </ul>
+            { adding ?
+                <form>
+                    <input></input>
+                    <button></button>
+                </form>
+                :
+                <button onClick={addTag}><Image src="/plus.svg" width={20} height={20} alt="add"></Image></button>
+            }
+            </div>   
+        </div>
+    )
+}

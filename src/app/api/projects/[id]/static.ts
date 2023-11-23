@@ -1,19 +1,19 @@
 import { prisma } from "@/db";
-import { Project, ProjectMember } from "@prisma/client";
+import { Project, ProjectMember, User } from "@prisma/client";
+import { Session, getServerSession } from "next-auth";
+import { options } from "../../auth/[...nextauth]/options";
 
 export async function getMember(email : string, projectId : string) : Promise<ProjectMember | null>  {
     try {
-        const user = await prisma.user.findFirst({
+        const user : User | null = await prisma.user.findFirst({
             where: {
                 email: email
             },
         });
-
         if (!user) {
-            throw new Error();
+            return null;
         }
-       
-
+        
         const projectMember : ProjectMember | null = await prisma.projectMember.findFirst({
             where: {
                 userId: user.id,
@@ -27,3 +27,4 @@ export async function getMember(email : string, projectId : string) : Promise<Pr
         return null;
     }
 }
+

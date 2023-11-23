@@ -18,8 +18,11 @@ export default function ProjectMenu({ id } : { id : string }) {
                 </ul>
             </section>
             <section>
+                <h3 className="text-sm text-neutral-400 mb-2">More</h3>
                 <ul>
-                    <SettingsLink id={id}/>
+                    <SideMenuLink id={id} name="Members" to="members" img="/members.svg"/>
+                    <SideMenuLink id={id} name="Code" to="code" img="/code.svg"/>
+                    <SideMenuLink id={id} name="Settings" to="setting" img="/settings.svg"/>
                 </ul>
             </section>  
         </div>
@@ -27,7 +30,7 @@ export default function ProjectMenu({ id } : { id : string }) {
 }
 
 
-function BoardLink( { name, id, text} : { name : string, id : string, text : string} ) {
+function BoardLink( { name, id, text } : { name : string, id : string, text : string } ) {
     const src : string = "/" + name.toLocaleLowerCase()  + ".svg"
     return (
         <li className="flex gap-2 items-center h-7">
@@ -37,24 +40,12 @@ function BoardLink( { name, id, text} : { name : string, id : string, text : str
     )
 }
 
-function SettingsLink( { id } : { id : string } ) {
+function SideMenuLink( { id, name, to, img } : { id : string, name: string, to : string, img : string } ) {
     return (
         <li className="flex gap-2 items-center h-7">
-            <Image src="/settings.svg" alt="" height={5} width={5} className="h-5 w-5"/>
-            <Link href={`/projects/${id}/settings`} className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Settings</Link>
+            <Image src={img} alt="" height={5} width={5} className="h-5 w-5"/>
+            <Link href={`/projects/${id}/${to}`} className='link-secundary'>{name}</Link>
         </li>
     )
 }
-/*
-function ProjectInfo( { id } : { id : string }) {
-    return (
-        <div className="flex gap-2">
-            <Image src="/project.svg" alt="Project Icon" width={40} height={40} className="bg-neutral-50 rounded"></Image>
-            <div>
-                <h2>{id}</h2>
-                <p></p>
-            </div>
-        </div>
-    )
-}
-*/
+
