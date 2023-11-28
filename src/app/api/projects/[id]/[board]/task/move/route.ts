@@ -2,22 +2,15 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { Session, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
+import { authorize } from "@/app/api/static";
 
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
-        const session : Session | null = await getServerSession(options);
-        
-        if (!(session && session.user)) {
-            return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
-        }
-
-        const email = session.user.email;
-        
+        const email = await authorize(req);
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
-
         const member = await getMember(email, params.id);
         if (!member) {
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
@@ -35,6 +28,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             }
         })
 
+        // TODO: select column update nuber of tasks
         return Response.json({ task: task }, { status: 200 });
     }
     catch (error) {

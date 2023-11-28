@@ -3,6 +3,7 @@ import { ProjectMember, Tag, Task, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { start } from 'repl'
+import { FilterButton, SearchInput } from '../components/filter-tables'
 
 
 type BoardTasksColumn = {
@@ -109,8 +110,8 @@ export default function Board({ id } : { id : string }) {
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                <SeacrhBoard/>
-                <FilterBoard/>
+                <SearchInput/>
+                <FilterButton/>
             </section>
             <section className="flex gap-2 w-full">
                 {
@@ -130,22 +131,6 @@ export default function Board({ id } : { id : string }) {
     )
 }
 
-function SeacrhBoard() {
-    return (
-        <div className='flex flex-col gap-2'>
-            <label>Search</label>
-            <input name="search" className='border rounded text-neutral-950 focus:outline focus:outline-2 focus:outline-violet-500'></input>
-        </div>
-    )
-}
-
-function FilterBoard() {
-    return (
-        <div className='w-fit'>
-            <button className='btn-primary'>Filter</button>
-        </div>
-    )
-}
 
 
 function TasksColumn(
@@ -409,6 +394,7 @@ function SolversMenu({ projectId } : { projectId : string }) {
         }
     }
 
+    // TODO: solvers to project
     async function changeSolver(solverId : string) {
         try {
 

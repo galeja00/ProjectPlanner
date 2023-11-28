@@ -66,11 +66,9 @@ function CreateProject({ type, resetType } : { type : ProjectType, resetType : (
                 })   
             })
 
-            if (!response) {
+            if (!response.ok) {
                 setCorrectName(true);
                 redirect("/projects");
-                return;
-                  
             }
             
             const data = await response.json();

@@ -18,7 +18,7 @@ export default async function ProjectLayout({
     params
   } : {
     children: React.ReactNode,
-    params : { type : string, id : string }
+    params : { id : string }
   }) {
     const session = await getServerSession(options);
 

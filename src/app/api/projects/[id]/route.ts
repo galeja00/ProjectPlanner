@@ -8,8 +8,6 @@ import { getMember } from "./static";
 
 export async function GET(req : Request, { params } : { params: { id: string } }) {
     try {
-        
-        
         const email = await authorize(req);
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
@@ -20,7 +18,6 @@ export async function GET(req : Request, { params } : { params: { id: string } }
                 email: email
             },
         })
-
         if (!user) {
             return Response.json({ error: "Can not find this user in DB"}, { status: 404 });
         }

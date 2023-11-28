@@ -3,29 +3,21 @@ import { prisma } from "@/db";
 import { Session, User, getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { getMember } from "../../../static";
+import { authorize } from "@/app/api/static";
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
-        const session : Session | null = await getServerSession(options);
-        
-        if (!(session && session.user)) {
-            return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
-        }
-
-        const email = session.user.email;
-        
+        const email = await authorize(req);
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
-
         const member = await getMember(email, params.id);
         if (!member) {
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
         const { taskId } : { taskId : string } = await req.json();
-        console.log(taskId);
-
+        
         const res = await prisma.task.delete({
             where: {
                id: taskId 

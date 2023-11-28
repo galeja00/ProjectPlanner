@@ -34,7 +34,7 @@ export async function POST(req : Request, { params } : { params : { id : string 
             }
         })
 
-        return Response.json({status: 200}); 
+        return Response.json({ task: custTask }, {status: 200 }); 
     }
     catch (error) {
 

@@ -1,9 +1,17 @@
+import { Head } from "../components/other";
 import Board from "./board";
 
 export default function Boards({ params } :  { params: { id : string, boards : string[]}}) {
+    var board : string;
+    if (params.boards[0] === "") {
+        board = "dashboard";
+    } else {
+        board = params.boards[0];
+    }
+    
     return (
         <main className="px-14 py-14">
-            <h1 className='text-2xl font-bold mb-4'>{params.boards[1]}</h1>
+            <Head text={params.boards[1]}/>
             <Board id={params.id}/>
         </main>
         

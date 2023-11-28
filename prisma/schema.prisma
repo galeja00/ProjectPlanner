@@ -21,6 +21,7 @@ model User {
   surname   String
   password  String
   image     String?
+  skills    String[]
   projects  ProjectMember[]
   teams     TeamMember[]
 }
@@ -81,13 +82,21 @@ model TaskColumn {
   position  Int        
 }
 
+enum Complexity {
+  Low
+  Middium
+  Heigh
+}
+
 model Task {
   id            String  @id @default(cuid()) 
-  taskColumn    TaskColumn @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
-  taskColumnId  String
+  taskColumn    TaskColumn? @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
+  taskColumnId  String?
   createAt      DateTime @default(now())
   name          String
   type          String
+  estimatedHours Int?
+  complexity    Complexity?
   description   String?
   issues        Issue[]
   tags          Tag[]
@@ -139,8 +148,10 @@ model ProjectMember {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId String  
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  seniority String?
   position  String?
   creator   Boolean   @default(false)
+  isAdmin   Boolean   @default(false)
   teamId    String?
   tasks     Task[]
 

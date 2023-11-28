@@ -3,25 +3,17 @@ import { prisma } from "@/db";
 import { Task, TaskColumn } from "@prisma/client";
 import { Session, User, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
+import { authorize } from "@/app/api/static";
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string , type: string} } ) {
     try {
-        // TODO: Do abstraction
-        const session : Session | null = await getServerSession(options);
         
-        if (!(session && session.user)) {
-            return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
-        }
-
-        const email = session.user.email;
-        
+        const email = await authorize(req);
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
-
-        const projectMember = await getMember(email, params.id);
-        console.log(projectMember);
-        if (!projectMember) {
+        const member = await getMember(email, params.id);
+        if (!member) {
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
@@ -56,7 +48,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                 name: name,
                 type: type, 
                 taskColumnId: colId,
-                projectMemberId: projectMember.id
+                projectMemberId: member.id
             }
         })
 
