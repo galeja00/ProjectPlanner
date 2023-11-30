@@ -1,8 +1,9 @@
 "use client"
 import Image from 'next/image'
-import { useEffect, useReducer, useState } from "react"
+import { useEffect, useReducer, useRef, useState } from "react"
 import { FilterButton, SearchInput } from '../components/filter-tables'
 import { Head } from '../components/other'
+import { User } from '@prisma/client'
 
 
 enum Load {
@@ -24,7 +25,7 @@ type MemberInfo = {
 
 export default function Members({ params } : { params : { id : string }}) {
     const [ members, setMembers] = useState<MemberInfo[]>([]);
-    const [ isAddDialog, toggleDialog ] = useReducer((isAddDialog) => !isAddDialog, false);
+    const [ isAddDialog, toggleDialog ] = useState<boolean>(false)
 
     useEffect(() => {
         fetchMembers();
@@ -52,11 +53,11 @@ export default function Members({ params } : { params : { id : string }}) {
     }
 
     function handleAddButton() {
-
+        toggleDialog(!isAddDialog);
     }
 
     return (
-        <main className="py-14 px-14 w-3/4 mx-auto  ">
+        <main className="py-14 px-14 w-3/4 mx-auto  relative">
             <Head text="Members"/>
             <div className='flex gap-4 mb-4 w-full h-fit items-end'>
                 <SearchInput/>
@@ -66,7 +67,7 @@ export default function Members({ params } : { params : { id : string }}) {
             <TableMembers members={members}/>
             {
                 isAddDialog ?
-                    <AddDialog/>
+                    <AddDialog onClose={handleAddButton}/>
                     :
                     <></>
             }
@@ -195,12 +196,47 @@ type UserInfo = {
     surname : string
 }
 
-function AddDialog() {
+function AddDialog({onClose} : { onClose : () => void }) {
     const [ results, setResults ] = useState<UserInfo[]>([]);
     const [ type, setType ] = useState<TypeOfSearh>(TypeOfSearh.Id);
+    const typesOfSearh = [ TypeOfSearh.Id, TypeOfSearh.Name ]
+
     return (
-        <dialog className='absolute z-50'>
-            <input></input>
+        <dialog className='absolute z-50 block bg-neutral-950 left-0 top-24 w-2/6 h-2/4 rounded text-neutral-100'>
+            <search className='p-4 relative h-full'>
+                <AddForm actualType={type} types={typesOfSearh}/>
+                <ListUsers users={results}/>
+                <button className='btn-primary h-fit w-fit absolute right-4 bottom-4' onClick={onClose}>Close</button>
+            </search>
         </dialog>
     )
+}
+
+function AddForm({ actualType, types } : { actualType : TypeOfSearh, types : TypeOfSearh[] }) {
+    return (
+        <div>
+            <div className='flex'>
+                {
+                    types.map((t) => (
+                        <label className="rounded-t px-4 py-1 flex content-center" style={{ backgroundColor: t == actualType ? "#171717" : "#0a0a0a"}}>{t}</label>
+                    ))
+                }
+            </div>
+            <div className='py-2 px-4 bg-neutral-900 rounded-tr rounded-br rounded-bl w-full'>
+                <input className=" bg-neutral-900 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-950 w-full" type="text"></input>
+            </div>
+        </div>
+    )
+}
+
+function ListUsers({ users } : { users : UserInfo[] }) {
+    return (
+        <ul>
+            {
+                users.map((user) => (
+                    <li key={user.id}>{user.name}</li>
+                ))
+            }
+        </ul>
+)
 }

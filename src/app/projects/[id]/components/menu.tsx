@@ -19,7 +19,7 @@ export default function ProjectMenu({ id } : { id : string }) {
             </section>
             <section>
                 <h3 className="text-sm text-neutral-400 mb-2">More</h3>
-                <ul>
+                <ul className="flex flex-col gap-2">
                     <SideMenuLink id={id} name="Members" to="members" img="/members.svg"/>
                     <SideMenuLink id={id} name="Code" to="code" img="/code.svg"/>
                     <SideMenuLink id={id} name="Settings" to="settings" img="/settings.svg"/>
