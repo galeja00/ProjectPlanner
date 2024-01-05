@@ -47,10 +47,11 @@
 
 body {
   color: var(--foreground-rgb);
-  background: linear-gradient(
+  background: var(--background-end-rgb);
+  /*background: linear-gradient(
       to bottom,
       transparent,
       var(--background-end-rgb)
     )
-    var(--background-start-rgb);
+    var(--background-start-rgb)*/
 }

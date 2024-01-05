@@ -2,7 +2,6 @@
 import { ProjectMember, Tag, Task, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
-import { start } from 'repl'
 import { FilterButton, SearchInput } from '../components/filter-tables'
 
 
@@ -200,6 +199,10 @@ function TasksColumn(
         }
     }
 
+    async function updateTask(task : Task) {
+
+    }
+
     async function removeTask( id : string ) {
         try {
 
@@ -277,12 +280,22 @@ type MoreMenuItem = {
     handler: () => void
 }
 
-// TODO: to much argumentsa ned to be better solved
+// TODO: to much argumentsa need to be better solved
 function TaskComponent(
         { task, projectId, removeTask, deleteTask, handleOnDrag } : 
         { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void }) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
-    const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
+    const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false)
+
+    function changeName(name : string) {
+        try {
+
+        }
+        catch (error) {
+
+        }
+        console.log("submited");
+    }
 
     function displayMoreMenu() {
         toggleMenu();
@@ -291,7 +304,6 @@ function TaskComponent(
     function displayInfo() {
 
     }
-
     function moveTask() {
 
     }
@@ -310,7 +322,7 @@ function TaskComponent(
         <>
             <li className="rounded bg-neutral-900 p-2 flex flex-col gap-4 relative" draggable onDragStart={handleOnDrag} >
                 <div className='flex w-full items-center justify-between'>
-                    <Name name={task.name}/>
+                    <Name name={task.name} submitName={changeName}/>
                     <MoreButton handleClick={() => displayMoreMenu()}/>
                     {
                         isMenu ? <MoreMenu items={MoreMenuItems}/> : <></>
@@ -387,7 +399,7 @@ function SolversMenu({ projectId } : { projectId : string }) {
                 throw new Error(data.error);
             }
 
-            setUsers(data.users);
+            setUsers(data.data);
         }
         catch (error) {
             console.log(error);
@@ -397,7 +409,7 @@ function SolversMenu({ projectId } : { projectId : string }) {
     // TODO: solvers to project
     async function changeSolver(solverId : string) {
         try {
-
+           
         }
         catch (error) {
 
@@ -410,7 +422,7 @@ function SolversMenu({ projectId } : { projectId : string }) {
             <ul>
                 {
                     users.map((user) => (
-                        <li key={user.id} className='flex gap-2 m-1 p-1 hover:bg-neutral-800 cursor-pointer rounded '> 
+                        <li key={user.id} className='flex gap-2 m-1 p-1 hover:bg-neutral-800 cursor-pointer rounded relative' onClick={() => changeSolver(user.id)}> 
                             <Image src="/avatar.svg" alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
                             <h5>{user.name} {user.surname}</h5>
                         </li>
@@ -431,11 +443,32 @@ function AddTaskColumn() {
     )
 }
 
-function Name({ name } : { name : string}) {
+function Name({ name, submitName } : { name : string, submitName : (name : string) => void }) {
+    const [ edit, toggleEdit ] = useReducer(edit => !edit, false);
+
+    function editInput() {
+        toggleEdit();
+    }
+
+    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
+        const inputValue = event.currentTarget.value;
+        if (event.key === 'Enter') {
+            if (inputValue.length > 0) {
+                submitName(inputValue);
+            }
+        }
+    }
+
+
     return (
         <div className='flex gap-2'>
-            <h3>{name}</h3>
-            <button className='w-fit h-fit rounded hover:bg-neutral-950 p-1' title="edit name">
+            {
+                edit ? 
+                    <input defaultValue={name} type="text" className='w-fit bg-neutral-900 border-b outline-none' onKeyDown={handleKeyDown}></input>
+                    :
+                    <h3>{name}</h3>
+            }
+            <button onClick={editInput} className='w-fit h-fit rounded hover:bg-neutral-950 p-1' title="edit name" style={ {backgroundColor: edit ? "#0a0a0a" : ""}}>
                 <Image src="/pencil.svg" alt="more" width={2} height={2} className='w-5 h-5 rounded-full cursor-pointer'></Image>
             </button>
         </div>
@@ -453,7 +486,7 @@ function MoreButton({ handleClick } : { handleClick : () => void}) {
 
 function MoreMenu({ items } : { items : MoreMenuItem[] }) {
     return (
-        <ul className='absolute w-28 bg-neutral-950 rounded p-2 border right-0 top-10 z-50'>
+        <ul className='absolute w-28 bg-neutral-950 rounded p-2 right-0 top-10 z-50'>
             {
                 items.map((item) => (
                     <MoreMenuItems key={item.name} name={item.name} handleClick={item.handler}/>
@@ -468,6 +501,13 @@ function MoreMenuItems({ name, handleClick } : { name : string, handleClick : ()
         <li>
             <button className='link-secundary h-6' onClick={handleClick}>{name}</button>
         </li>
+    )
+}
+
+function TaskInfo() {
+    return (
+        <div>
+        </div>
     )
 }
 
