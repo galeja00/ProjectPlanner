@@ -38,7 +38,6 @@ export default function Board({ id } : { id : string }) {
             })
             const data = await response.json();
             if (!response.ok) {
-                
                 console.log(data.error);
             }
 
@@ -52,7 +51,7 @@ export default function Board({ id } : { id : string }) {
             console.log(Error);
         }
     }
-    // TODO : test tthis function for move a task
+
     async function handleMoveOfTask(fromColId : string, toColId : string, taskId : string) {
         try {
             const response = await fetch(`/api/projects/${id}/board/task/move`, {
@@ -72,7 +71,9 @@ export default function Board({ id } : { id : string }) {
             const movedTask : Task = data.task;
             const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
             const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
-            if (toCol && fromCol) {
+            await fetchColumns(id);
+            //FIX: bug in this optimalisation pls fix
+            /*if (toCol && fromCol) {
                 toCol.tasks.push(movedTask);
                 const newFromTasks : Task[] = [];
                 for (const task of fromCol.tasks) {
@@ -95,16 +96,17 @@ export default function Board({ id } : { id : string }) {
                     }
                 }
                 setTaskColumns(newBoardColumns);
+                
             }
             else {
                 await fetchColumns(id);
-            }
+            }*/
 
         } catch (error) {
             console.log(error)
         }
     }
-    
+    console.log()
 
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
@@ -186,24 +188,44 @@ function TasksColumn(
                     taskId: id
                 })
             });
+            const json = await response.json();
             if (!response.ok) {
-                throw new Error();
+                throw new Error(json.error);
             }
 
-            const data = await response.json();
-            const newTasks : Task[] = data.tasks;
+            const newTasks : Task[] = json.tasks;
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: newTasks });
+            console.log(newTasks);
         }
         catch (error) {
             console.log(error);
         }
     }
 
-    async function updateTask(task : Task) {
-
+    async function updateTask(updateTask : Task) {
+        try {
+            const response = await fetch(`/api/projects/${projectId}/board/task/update`, {
+                method: "POST", 
+                body: JSON.stringify({
+                    task: updateTask
+                })
+            });
+            const json = await response.json();
+            if (!response.ok) {
+                throw new Error(json.error);
+            }
+            const tasks : Task[] = tasksCol.tasks;
+            const updatedTasks : Task[] = [];
+            for (let task of tasks) {
+                updatedTasks.push(task.id == updateTask.id ? updateTask : task);
+            }
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: updatedTasks });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
-    async function removeTask( id : string ) {
+    async function removeTask(id : string) {
         try {
 
         } catch (error) {
@@ -259,6 +281,7 @@ function TasksColumn(
                                 deleteTask={() => deleteTask(task.id)} 
                                 removeTask={() => removeTask(task.id)} 
                                 handleOnDrag={(e) => handleOnDrag(e, task)}
+                                updateTask={updateTask}
                             />
                     ))
                     }
@@ -282,19 +305,14 @@ type MoreMenuItem = {
 
 // TODO: to much argumentsa need to be better solved
 function TaskComponent(
-        { task, projectId, removeTask, deleteTask, handleOnDrag } : 
-        { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void }) {
+        { task, projectId, removeTask, deleteTask, handleOnDrag, updateTask } : 
+        { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void , updateTask : (task : Task) => void},) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false)
 
     function changeName(name : string) {
-        try {
-
-        }
-        catch (error) {
-
-        }
-        console.log("submited");
+        task.name = name;
+        updateTask(task);
     }
 
     function displayMoreMenu() {
@@ -321,7 +339,7 @@ function TaskComponent(
     return (
         <>
             <li className="rounded bg-neutral-900 p-2 flex flex-col gap-4 relative" draggable onDragStart={handleOnDrag} >
-                <div className='flex w-full items-center justify-between'>
+                <div className='flex w-full justify-between'>
                     <Name name={task.name} submitName={changeName}/>
                     <MoreButton handleClick={() => displayMoreMenu()}/>
                     {
@@ -353,8 +371,8 @@ function CreatorOfTask({ createTask } : { createTask: (text : string) => void })
     }
 
     return (
-        <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2">
-            <input type="text" className="bg-neutral-900" id="name" onKeyDown={handleKeyDown}></input>
+        <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 ">
+            <input type="text" className="bg-neutral-900 outline-none border-b" id="name" onKeyDown={handleKeyDown}></input>
         </li>
     )
 }
@@ -455,6 +473,7 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
         if (event.key === 'Enter') {
             if (inputValue.length > 0) {
                 submitName(inputValue);
+                toggleEdit();
             }
         }
     }
