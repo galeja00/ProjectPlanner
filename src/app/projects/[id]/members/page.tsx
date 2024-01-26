@@ -57,7 +57,7 @@ export default function Members({ params } : { params : { id : string }}) {
     }
 
     return (
-        <main className="py-14 px-14 w-3/4 mx-auto  relative">
+        <main className="py-14 px-14 relative w-full">
             <Head text="Members"/>
             <div className='flex gap-4 mb-4 w-full h-fit items-end'>
                 <SearchInput/>

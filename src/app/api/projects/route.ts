@@ -161,7 +161,7 @@ export async function POST(req : Request) {
 
     
         if (!projMem) {
-            return NextResponse.json({ error: "error"}, { status: 400 });
+            return NextResponse.json({ error: "Server siede error"}, { status: 400 });
         }
 
         return NextResponse.json({ message: "Project succesfully created" }, { status: 200 });

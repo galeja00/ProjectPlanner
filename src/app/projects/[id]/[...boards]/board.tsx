@@ -287,7 +287,7 @@ function TasksColumn(
                     }
                     {   
                         creating ? 
-                            <CreatorOfTask key={"create"} createTask={createTask}/>
+                            <CreatorOfTask key={"create"} createTask={createTask} endCreate={toggle}/>
                             :
                             <li></li>
                     }
@@ -339,7 +339,7 @@ function TaskComponent(
     return (
         <>
             <li className="rounded bg-neutral-900 p-2 flex flex-col gap-4 relative" draggable onDragStart={handleOnDrag} >
-                <div className='flex w-full justify-between'>
+                <div className='flex w-full justify-between gap-1'>
                     <Name name={task.name} submitName={changeName}/>
                     <MoreButton handleClick={() => displayMoreMenu()}/>
                     {
@@ -360,13 +360,15 @@ function TaskComponent(
 }
 
 
-function CreatorOfTask({ createTask } : { createTask: (text : string) => void }) {
+function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string) => void, endCreate : () => void }) {
     function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
         const inputValue = event.currentTarget.value;
         if (event.key === 'Enter') {
             if (inputValue.length > 0) {
                 createTask(inputValue);
             }
+        } else if (event.key === 'Escape') {
+            endCreate();
         }
     }
 
