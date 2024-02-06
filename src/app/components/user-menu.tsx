@@ -31,7 +31,9 @@ function UserMenu() {
     return (
         <ul className='absolute flex flex-col p-4 bg-neutral-950 right-0 top-10 rounded gap-1'>
             <li><Link href="" className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Your profile</Link></li>
-            <li><button onClick={() => signOut()} className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Sign Out</button></li>
+            <li><Link href="" className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Invites</Link></li>
+            <li><Link href="" className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Settings</Link></li>
+            <li><button onClick={() => signOut()} className='hover:text-red-600 hover:border-b text-red-500 hover:border-red-600 ease-in-out'>Sign Out</button></li>
         </ul>
     )
 }

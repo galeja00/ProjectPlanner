@@ -125,10 +125,6 @@ model Issue {
   description String
 }
 
-enum NotificationTypes {
-  ProjectInvite
-}
-
 model ProjectInvite {
   id String @id @default(cuid())
   invitedUserId String
@@ -136,13 +132,9 @@ model ProjectInvite {
   projectId String
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createAt DateTime @default(now())
+  displayed Boolean
 }
 
-model UserNotification {
-  id String @id @default(cuid())
-  userId String
-  type NotificationTypes
-}
 
 // TODO ////////////////////////////////
 model Scrum {
