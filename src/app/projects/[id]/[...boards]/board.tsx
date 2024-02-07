@@ -42,7 +42,7 @@ export default function Board({ id } : { id : string }) {
             }
 
             if (!data.data) {
-                throw new Error("");
+                throw new Error(data.error);
             }
             setTaskColumns(data.data);
             

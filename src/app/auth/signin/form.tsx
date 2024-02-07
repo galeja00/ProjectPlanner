@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { FormEvent, useState } from 'react'
 import EmailValidator from 'email-validator';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
@@ -27,13 +28,21 @@ export default function LoginForm() {
             setFaildMsg("You need to insert valid email");
             return;
         }
+        
         const response = await signIn('credentials', {
             email: formData.get("email"),
             password: formData.get("password")
         });
+        
+        if (response && response.ok) {
+            setCorrectPsw(false);
+            setCorrectEmail(false);
+            setFaildMsg("We didnt found this user credentials");
+            return;
+        }
     }
     return (
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8'>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8 pb-8 border-b w-96'>
             <FormItem item="Email" type="email" name="email" correct={correctPsw}></FormItem>
             <FormItem item="Password" type="password" name="password" correct={correctEmail}></FormItem>
             <SendButton/>

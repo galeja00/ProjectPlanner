@@ -7,10 +7,10 @@
     @apply px-4 py-1 border rounded border-violet-500 text-violet-500 hover:bg-violet-500 hover:border-violet-700 hover:text-neutral-50 focus:bg-violet-500 focus:text-neutral-50 ease-in-out;
   }
   .input-primary {
-    @apply text-neutral-950 rounded px-4 py-2 focus:outline focus:outline-2 focus:outline-violet-500
+    @apply rounded px-4 py-2 focus:outline focus:outline-2 focus:outline-violet-500 bg-neutral-900 text-neutral-50
   }
   .input-faild {
-    @apply text-neutral-950 rounded px-4 py-2 outline outline-2 outline-red-500
+    @apply text-neutral-50 rounded px-4 py-2 outline outline-2 outline-red-500 bg-neutral-900
   }
   .link {
     @apply text-violet-500 border-violet-500 hover:border-b focus:border-b 
