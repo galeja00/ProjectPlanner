@@ -7,7 +7,6 @@ import { DateTime } from 'next-auth/providers/kakao'
 
 export default function UserInfo() {
     const [menu, setMenu] = useState<boolean>(false);
-    const [displaydNotif, toggleNotif] = useReducer((displaydNotif) => !displaydNotif, false); 
     function toggleUserMenu() {
         if (menu) {
             setMenu(false);
@@ -18,8 +17,7 @@ export default function UserInfo() {
 
     return (
         <>
-            <Image onClick={toggleNotif} src="/bell.svg" alt="notification" width={8} height={8} className='w-6 h-6 cursor-pointer rounded-full hover:bg-neutral-900 '></Image>
-            { displaydNotif ? <Notifications/> : <></> }
+            <NotificationIcon/>
             <Image onClick={toggleUserMenu} src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer'></Image>
             { menu ? <UserMenu/> : <></> }
         </>
@@ -38,62 +36,36 @@ function UserMenu() {
     )
 }
 
-type Notification = {
-    type : string,
-    name : string,
-    text : string,
-    image : string,
-    time : DateTime
-}
+function NotificationIcon() {
+    const [ring, toggle] = useReducer((ring) => !ring, false);
+    const [count, setCount] = useState<number>(0);
 
-function Notifications() {
-    const [notifs, setNotifs] = useState<Notification[]>([]); 
-    
-    async function fetchNotifications() {
-        let id = 10;
+    async function fetchInfo() {
         try {
-            const res = await fetch(`/api/users/${id}/notifications`, {
+            const res = await fetch(`/api/users/notifications/count`, {
                 method: "GET"
             })
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.error);
-            } 
-
+            }
+            if (data.count > 0) {
+                toggle();
+                setCount(data.count)
+            }
         }
         catch (error) {
-
+            console.log(error);
         }
     }
 
-    useEffect(() => {
-        fetchNotifications();
+    useEffect(() => {fetchInfo()
     }, [])
 
     return (
-        <div className='absolute flex flex-col bg-neutral-950 right-0 top-10 rounded gap-1 p-2 w-72'>
-            <h4>Notifiactions</h4>
-            <ul >
-                {
-                    notifs.map((notif) => (
-                        <></>
-                    ))
-                }
-            </ul>
-        </div>
+        <Link href="/notifications" className='relative'>
+            <Image src="/bell.svg" alt="notification" width={8} height={8} className='w-7 h-7 cursor-pointer rounded-full hover:bg-neutral-900 '></Image>
+            <div className='absolute rounded-full right-0 top-0 bg-red-600 w-4 h-4 text-xs justify-center' style={ {display: ring ? "flex" : "none"}}>{count}</div> 
+        </Link>
     )
 }
-
-function NotificationsItem() {
-    return (
-        <li className='bg-neural-900'>
-            <Image src={''} alt={''} width={30} height={30} className="bg-neutral-50 rounded h-fit block mt-auto mb-auto"></Image>
-            <div>
-                <h5>name</h5>
-                <div>7h</div>
-            </div>
-            
-            <p>text</p>
-        </li>
-    )
-} 

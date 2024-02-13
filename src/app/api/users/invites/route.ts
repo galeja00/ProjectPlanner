@@ -3,30 +3,18 @@ import { authorize, getUserId } from "@/app/api/static";
 import { ProjectInvite } from "@prisma/client";
 import { DateTime } from "next-auth/providers/kakao";
 
-type Notification = {
-    type : NotificationTypes,
-    name : string,
-    text : string,
-    image : string,
-
-}
-
-enum NotificationTypes {
-    ProjectInvite
-}
-
-export async function GET(req : Request, { params } : { params : { id : string }}) {
+export async function GET(req : Request) {
     try {
         const email : string | null = await authorize(req);
         if (email == null) {
             return Response.json({ error: ""}, { status: 400 });
         }
         const id : string | null = await getUserId(email);
-        if (id == null || id != params.id) {
+        if (id == null) {
             return Response.json({ error: ""}, { status: 400 });
         }
 
-        const notifications : Notification[] = [];
+        
 
         const projectInvites : ProjectInvite[] = await prisma.projectInvite.findMany({
             where: {
@@ -34,12 +22,10 @@ export async function GET(req : Request, { params } : { params : { id : string }
             }
         })
 
-        for (const invite of projectInvites) {
-            notifications.push({ type: NotificationTypes.ProjectInvite, name: "", text: "", image: "", time: invite.createAt})
-        }
+        return Response.json({ invites: projectInvites }, { status: 200 });
 
     } catch (error) {
         console.error(error);
-        return Response.json({error: "Somthing wen wrong on server"}, { status: 400 });
+        return Response.json({ error: "Somthing wen wrong on server" }, { status: 400 });
     }
 }
