@@ -44,7 +44,7 @@ export default function NotifiactionsList() {
     }, [])
 
     return (
-        <ul className="bg-neutral-950 rounded p-1">
+        <ul className="bg-neutral-950 rounded p-1 min-h-[40rem]">
             {
                 notifs.map((notif) => (
                     <NotificationsItem notif={notif}/>
@@ -73,7 +73,7 @@ function NotificationsItem({notif} : {notif : Notification}) {
     }
 
     return (
-        <li className='bg-neural-900'>
+        <li className='bg-neural-900 rounded p-1'>
             <Image src={''} alt={''} width={30} height={30} className="bg-neutral-50 rounded h-fit block mt-auto mb-auto"></Image>
             <div>
                 <h3>{notif.name}</h3>

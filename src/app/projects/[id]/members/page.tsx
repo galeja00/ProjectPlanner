@@ -1,6 +1,6 @@
 "use client"
 import Image from 'next/image'
-import { useEffect, useReducer, useRef, useState } from "react"
+import { useEffect, useReducer, useRef, useState, KeyboardEvent } from "react"
 import { FilterButton, SearchInput } from '../components/filter-tables'
 import { Head } from '../components/other'
 import { User } from '@prisma/client'
@@ -33,7 +33,6 @@ export default function Members({ params } : { params : { id : string }}) {
     
     async function fetchMembers() {
         try {
-            console.log(params.id);
             const response = await fetch(`/api/projects/${params.id}/members`, {
                 method: "GET"
             })
@@ -48,7 +47,7 @@ export default function Members({ params } : { params : { id : string }}) {
 
         }
         catch (error) { 
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -193,18 +192,45 @@ enum TypeOfSearh {
 type UserInfo = {
     id : string,
     name : string,
-    surname : string
+    surname : string,
+    image : string
 }
 
 function AddDialog({onClose} : { onClose : () => void }) {
     const [ results, setResults ] = useState<UserInfo[]>([]);
     const [ type, setType ] = useState<TypeOfSearh>(TypeOfSearh.Id);
+    //const [ value, setValue ] = useState<String>("");
     const typesOfSearh = [ TypeOfSearh.Id, TypeOfSearh.Name ]
 
+    async function searchUser(value : string) {
+        try {
+            console.log(value);
+            console.log(type);
+            const res = await fetch("/api/users/search", {
+                method: "POST",
+                body: JSON.stringify({
+                    type: type,
+                    value: value
+                })
+            })
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error();
+            }
+            console.log()
+            setResults(data.users);
+
+        } catch (error) {
+            //console.error(error);
+            console.error(error);
+        }
+    }
+
     return (
-        <dialog className='absolute z-50 block bg-neutral-950 left-0 top-24 w-2/6 h-2/4 rounded text-neutral-100'>
-            <search className='p-4 relative h-full'>
-                <AddForm actualType={type} types={typesOfSearh}/>
+        <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0  w-full h-full text-neutral-100 justify-center items-center'>
+            <search className='p-4 relative h-2/3 w-1/3 bg-neutral-950 rounded flex flex-col gap-4'>
+                <AddForm actualType={type} types={typesOfSearh} search={searchUser}/>
                 <ListUsers users={results}/>
                 <button className='btn-primary h-fit w-fit absolute right-4 bottom-4' onClick={onClose}>Close</button>
             </search>
@@ -212,7 +238,14 @@ function AddDialog({onClose} : { onClose : () => void }) {
     )
 }
 
-function AddForm({ actualType, types } : { actualType : TypeOfSearh, types : TypeOfSearh[] }) {
+function AddForm({ actualType, types, search } : { actualType : TypeOfSearh, types : TypeOfSearh[], search : (value : string) => void }) {
+    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
+        const inputValue = event.currentTarget.value;
+        if (inputValue.length > 0) {
+            search(inputValue);
+        }
+    }
+
     return (
         <div>
             <div className='flex'>
@@ -223,7 +256,7 @@ function AddForm({ actualType, types } : { actualType : TypeOfSearh, types : Typ
                 }
             </div>
             <div className='py-2 px-4 bg-neutral-900 rounded-tr rounded-br rounded-bl w-full'>
-                <input className=" bg-neutral-900 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-950 w-full" type="text"></input>
+                <input className="bg-neutral-900 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-950 w-full" type="text" onKeyDown={handleKeyDown}></input>
             </div>
         </div>
     )
@@ -234,9 +267,19 @@ function ListUsers({ users } : { users : UserInfo[] }) {
         <ul>
             {
                 users.map((user) => (
-                    <li key={user.id}>{user.name}</li>
+                    <UsersItem user={user}/>
                 ))
             }
         </ul>
-)
+    )
+}
+
+function UsersItem({ user } : { user : UserInfo }) {
+    return (
+        <li key={user.id} className='bg-neutral-900 rounded p-2 flex'>
+            <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer'></Image>
+            <div>{user.name} {user.surname}</div>
+            <button className='btn-primary'>Send</button>
+        </li>
+    )
 }
