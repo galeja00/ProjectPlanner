@@ -132,7 +132,9 @@ model ProjectInvite {
   projectId String
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createAt DateTime @default(now())
-  displayed Boolean
+  displayed Boolean @default(false)
+
+  @@unique([invitedUserId, projectId], name: "Unique_InvitedUser_Project")
 }
 
 
@@ -168,7 +170,7 @@ model ProjectMember {
   teamId    String?
   tasks     Task[]
 
-   @@unique([userId, projectId], name: "Unique_User_Project")
+  @@unique([userId, projectId], name: "Unique_User_Project")
 }
 
 

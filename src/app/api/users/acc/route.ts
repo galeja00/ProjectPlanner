@@ -2,21 +2,15 @@ import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { NextResponse } from "next/server";
+import { authorize } from "../../static";
 
 
 
 export async function GET(req : Request) {
     try {
-        const session = await getServerSession(options);
-
-        if (!(session && session.user)) {
-            return NextResponse.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
-        }
-
-        const email = session.user.email;
-            
+        const email = await authorize(req);
         if (!email) {
-            return NextResponse.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
 
 

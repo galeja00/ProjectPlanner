@@ -37,7 +37,7 @@ function UserMenu() {
 }
 
 function NotificationIcon() {
-    const [ring, toggle] = useReducer((ring) => !ring, false);
+    const [ring, toggle] = useReducer((ring) => !ring,true);
     const [count, setCount] = useState<number>(0);
 
     async function fetchInfo() {
@@ -50,8 +50,10 @@ function NotificationIcon() {
                 throw new Error(data.error);
             }
             if (data.count > 0) {
-                toggle();
-                setCount(data.count)
+                /*if (!ring) {
+                    toggle();
+                }*/
+                setCount(data.count);
             }
         }
         catch (error) {
@@ -59,7 +61,7 @@ function NotificationIcon() {
         }
     }
 
-    useEffect(() => {fetchInfo()
+    useEffect(() => { fetchInfo();
     }, [])
 
     return (

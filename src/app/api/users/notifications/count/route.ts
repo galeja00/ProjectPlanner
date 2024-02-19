@@ -8,7 +8,7 @@ export async function GET(req : Request, { params } : { params : { id : string }
     try {
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ rror: "Fail to authorize" }, { status: 400 });
         }
         const id : string | null = await getUserId(email);
         if (id == null) {
@@ -16,15 +16,14 @@ export async function GET(req : Request, { params } : { params : { id : string }
         }
         
         let count : number = 0;
-
-        const numberProjInv : number = await prisma.projectInvite.count({
+        const numberOfProjInv : number = await prisma.projectInvite.count({
             where: {
                 invitedUserId: id,
-                displayed: true
+                displayed: false
             }
         })
 
-        count += numberProjInv;
+        count += numberOfProjInv;
     
         return Response.json({ count: count }, { status: 200 });
     }

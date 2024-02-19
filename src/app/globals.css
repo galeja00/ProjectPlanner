@@ -6,6 +6,9 @@
   .btn-primary {
     @apply px-4 py-1 border rounded border-violet-500 text-violet-500 hover:bg-violet-500 hover:border-violet-700 hover:text-neutral-50 focus:bg-violet-500 focus:text-neutral-50 ease-in-out;
   }
+  .btn-destructive {
+    @apply px-4 py-1 border rounded border-red-500 text-red-500 hover:bg-red-500 hover:border-red-700 hover:text-neutral-50 focus:bg-red-500 focus:text-neutral-50 ease-in-out;
+  }
   .input-primary {
     @apply rounded px-4 py-2 focus:outline focus:outline-2 focus:outline-violet-500 bg-neutral-900 text-neutral-50
   }

@@ -66,7 +66,7 @@ export default function Members({ params } : { params : { id : string }}) {
             <TableMembers members={members}/>
             {
                 isAddDialog ?
-                    <AddDialog onClose={handleAddButton}/>
+                    <AddDialog onClose={handleAddButton} id={params.id} />
                     :
                     <></>
             }
@@ -196,7 +196,7 @@ type UserInfo = {
     image : string
 }
 
-function AddDialog({onClose} : { onClose : () => void }) {
+function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
     const [ results, setResults ] = useState<UserInfo[]>([]);
     const [ type, setType ] = useState<TypeOfSearh>(TypeOfSearh.Id);
     //const [ value, setValue ] = useState<String>("");
@@ -204,8 +204,6 @@ function AddDialog({onClose} : { onClose : () => void }) {
 
     async function searchUser(value : string) {
         try {
-            console.log(value);
-            console.log(type);
             const res = await fetch("/api/users/search", {
                 method: "POST",
                 body: JSON.stringify({
@@ -218,7 +216,7 @@ function AddDialog({onClose} : { onClose : () => void }) {
             if (!res.ok) {
                 throw new Error();
             }
-            console.log()
+
             setResults(data.users);
 
         } catch (error) {
@@ -228,10 +226,10 @@ function AddDialog({onClose} : { onClose : () => void }) {
     }
 
     return (
-        <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0  w-full h-full text-neutral-100 justify-center items-center'>
+        <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
             <search className='p-4 relative h-2/3 w-1/3 bg-neutral-950 rounded flex flex-col gap-4'>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser}/>
-                <ListUsers users={results}/>
+                <ListUsers users={results} id={id}/>
                 <button className='btn-primary h-fit w-fit absolute right-4 bottom-4' onClick={onClose}>Close</button>
             </search>
         </dialog>
@@ -262,24 +260,50 @@ function AddForm({ actualType, types, search } : { actualType : TypeOfSearh, typ
     )
 }
 
-function ListUsers({ users } : { users : UserInfo[] }) {
+function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
     return (
         <ul>
             {
                 users.map((user) => (
-                    <UsersItem user={user}/>
+                    <UsersItem user={user} id={id}/>
                 ))
             }
         </ul>
     )
 }
 
-function UsersItem({ user } : { user : UserInfo }) {
+function UsersItem({ user, id } : { user : UserInfo, id : string }) {
+    const [notif, toggle] = useReducer(notif => !notif, false);
+
+    async function inviteUser() {
+        try {
+            const res = await fetch(`/api/projects/${id}/members/add`, {
+                method: "POST",
+                body: JSON.stringify({
+                    userId: user.id,
+                })
+            })
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.eror);
+            }
+
+            console.log(data.message)
+            //TODO: Notification of succes
+        } 
+        catch (error) {
+            console.error(error);
+        }
+    }
+
     return (
-        <li key={user.id} className='bg-neutral-900 rounded p-2 flex'>
+        <li key={user.id} className='bg-neutral-900 rounded p-2 flex w-full'>
             <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer'></Image>
-            <div>{user.name} {user.surname}</div>
-            <button className='btn-primary'>Send</button>
+            <div className='w-full'>{user.name} {user.surname}</div>
+            <div className='flex w-full flex-row-reverse'>
+                <button className='btn-primary' onClick={inviteUser}>Send</button>
+            </div>
         </li>
     )
 }
