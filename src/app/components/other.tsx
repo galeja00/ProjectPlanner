@@ -11,6 +11,12 @@ export function ButtonWithImg() {
     )
 }
 
+export function ButtonWithText({ text, type, handle } : { text : string, type : string, handle : () => void }) {
+    return (
+        <button className={`btn-${type} h-fit flex flex-col`} onClick={handle}>{text}</button>
+    )
+}
+
 export function SearchInput() {
     return (
         <search className='flex flex-col'>

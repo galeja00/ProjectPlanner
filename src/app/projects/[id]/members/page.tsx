@@ -94,7 +94,7 @@ function TableMembers({ members } : { members : MemberInfo[] }) {
                     <th className='w-fit'>Tasks Load</th>
                 </tr>
             </thead>
-            <tbody className='flex flex-col gap-1'>
+            <tbody className='flex flex-col gap-1 p-1'>
                 {
                     members.map((member) => (
                         <MemberRow memberInfo={member}/>
@@ -107,7 +107,7 @@ function TableMembers({ members } : { members : MemberInfo[] }) {
 
 function MemberRow({ memberInfo } : { memberInfo : MemberInfo }) {
     return (
-        <tr key={memberInfo.memberId} className='bg-neutral-900 rounded m-1 grid grid-cols-5 p-2 justify-items-left items-center'>
+        <tr key={memberInfo.memberId} className='bg-neutral-900 rounded grid grid-cols-5 p-2 justify-items-left items-center'>
             <td><Image src={memberInfo.image ? memberInfo.image : "/avatar.svg"} height={20} width={20} alt="image" className='w-6 h-6 rounded-full bg-neutral-300'/></td>
             <td>{memberInfo.name} {memberInfo.surname}</td>
             <td>{memberInfo.position}</td>

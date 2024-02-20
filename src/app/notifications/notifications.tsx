@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from 'next/image' 
-import { DateTime } from "next-auth/providers/kakao"
-import { ButtonWithImg, SearchInput } from "../components/other";
+import { ButtonWithImg, ButtonWithText, SearchInput } from "../components/other";
 
 type Notification = {
     id : string,
@@ -11,7 +10,7 @@ type Notification = {
     name : string,
     icon : string | null,
     type : string,
-    creatAt : Date,
+    agoInHours : number,
     displayd : boolean
 }
 
@@ -53,7 +52,7 @@ export default function NotifiactionsList() {
             <ul className="rounded p-1 min-h-[40rem]">
                 {
                     notifs.map((notif) => (
-                        <NotificationsItem notif={notif}/>
+                        <NotificationsItem notif={notif} updateNotif={fetchNotifications}/>
                     ))
                 }
             </ul>
@@ -62,14 +61,26 @@ export default function NotifiactionsList() {
 }
 
 // TODO: accept/decline and design
-function NotificationsItem({notif} : {notif : Notification}) {
-    const currentDate: Date = new Date();
-    /*var time : number = currentDate.getTime() - notif.creatAt.getTime() / (1000 * 60 * 60); // in Hours
-    const day : number = 24
-    if (time > day) { //If longer the one day then convert o days
-        time = time / day;
-    }*/
-
+function NotificationsItem({notif, updateNotif} : {notif : Notification, updateNotif : () => void}) {
+    async function handleButtonClick(type : string) {
+        try {
+            const res = await fetch(`/api/users/projectInvites/${type}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    userId: notif.id
+                })
+            })
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error);
+            }
+            updateNotif();
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+    
     var text : string;
     switch (notif.type) {
         case "ProjectInvite":
@@ -79,17 +90,24 @@ function NotificationsItem({notif} : {notif : Notification}) {
             text = NotifictionsText.ProjectInvite
     }
 
+    var ago : number = notif.agoInHours;
+    var agoText : string = "h";
+    if (ago > 24) {
+        ago = ago / 24;
+        agoText = "d";
+    }
+
     return (
         <li className='bg-neutral-950 rounded p-2 w-full flex gap-4 relative'>
-            <Image src={'/project.svg'} alt={''} width={30} height={30} className="bg-neutral-50 rounded w-16 h-fit block mt-auto mb-auto"></Image>
-            <div className="flex flex-col gap-1 w-max">
-                <h3>{notif.name}</h3>
-                <p className="w-max">{text}</p>
-                <time>{}</time>
+            <Image src={'/project.svg'} alt={''} width={30} height={30} className="bg-neutral-50 rounded w-20 h-fit block mt-auto mb-auto"></Image>
+            <div className="flex flex-col gap-1 w-max h-fit justify-between">
+                <h3 className="w-max">{text}</h3>
+                <p className="w-max">{notif.name}</p>
+                <time className="text-sm text-neutral-400">{notif.agoInHours} {agoText}</time>
             </div>
             <div className="gap-2 flex w-full flex-row justify-end items-end">
-                <button className="btn-primary h-fit flex flex-col">Accept</button>
-                <button className="btn-destructive h-fit flex flex-col">Decline</button>
+                <ButtonWithText text={"Accept"} type={"primary"} handle={() => handleButtonClick("accept")}/>
+                <ButtonWithText text={"Decline"} type={"destructive"} handle={() => handleButtonClick("decline")}/>
             </div>
         </li>
     )

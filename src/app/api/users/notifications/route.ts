@@ -9,7 +9,7 @@ type Notification = {
     name : string,
     icon : string | null,
     type : NotificationTypes,
-    creatAt : Date,
+    agoInHours : number,
     displayd : boolean
 }
 
@@ -44,11 +44,15 @@ export async function GET(req : Request, { params } : { params : { id : string }
             if (project == null) {
                 throw new Error();
             }
+            const currentDate: Date = new Date();
+            const timeDifferenceInHours = Math.floor((currentDate.getTime() - projectInvite.createAt.getTime()) / (1000 * 60 * 60));
+            //const timeDifferenceInHours = Math.floor(timeDifferenceInMillis / (1000 * 60 * 60));
+            
             const notif : Notification = { 
                 id:  projectInvite.id, 
                 projectId: projectInvite.projectId,
                 type: NotificationTypes.ProjectInvite, 
-                creatAt: projectInvite.createAt, 
+                agoInHours: timeDifferenceInHours, 
                 displayd: projectInvite.displayed, 
                 name: project.name,
                 icon: project.icon
