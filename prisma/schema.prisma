@@ -52,7 +52,6 @@ model Project {
   invites   ProjectInvite[]
   
   kanban    Kanban?
-  scrum     Scrum?
 }
 
 model Kanban {
@@ -64,6 +63,7 @@ model Kanban {
   timetable TimeTable?
   backlogId   String?
   backlog   Backlog?
+  tasks     Task[]
 }
 
 model Board {
@@ -90,13 +90,22 @@ enum Complexity {
   Heigh
 }
 
+enum Priority {
+  Low
+  Middium
+  Heigh
+}
+
 model Task {
   id            String  @id @default(cuid()) 
   taskColumn    TaskColumn? @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
   taskColumnId  String?
+  kanban        Kanban @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  projectId     String 
   createAt      DateTime @default(now())
   name          String
   type          String
+  priority      Priority?
   estimatedHours Int?
   complexity    Complexity?
   description   String?
@@ -108,7 +117,7 @@ model Task {
 
 model Tag {
   id      String  @id @default(cuid()) 
-  taskId  String  @unique
+  taskId  String  
   task    Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
   name    String
   type    String?
@@ -140,7 +149,7 @@ model ProjectInvite {
 
 // TODO ////////////////////////////////
 model Scrum {
-  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  //project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String    @id
 }
 model TimeTable {

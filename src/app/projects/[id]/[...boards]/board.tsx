@@ -1,8 +1,9 @@
 'use client'
-import { ProjectMember, Tag, Task, User } from '@prisma/client'
+import { Complexity, ProjectMember, Tag, Task, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterButton, SearchInput } from '../components/filter-tables'
+import { TaskInfo } from '../components/task-info'
 
 
 type BoardTasksColumn = {
@@ -308,6 +309,7 @@ function TaskComponent(
         { task, projectId, removeTask, deleteTask, handleOnDrag, updateTask } : 
         { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void , updateTask : (task : Task) => void},) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
+    const [ isInfo, toggleInfo ] = useReducer((isInfo) => !isInfo, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false)
 
     function changeName(name : string) {
@@ -320,10 +322,7 @@ function TaskComponent(
     }
 
     function displayInfo() {
-
-    }
-    function moveTask() {
-
+        toggleInfo();
     }
 
     function displaySolversMenu() {
@@ -331,7 +330,6 @@ function TaskComponent(
     }
 
     const MoreMenuItems : MoreMenuItem[] = [
-        { name: "Move To", handler: moveTask },
         { name: "Info", handler: displayInfo },
         { name: "Remove", handler: removeTask },
         { name: "Delete", handler: deleteTask },
@@ -355,9 +353,16 @@ function TaskComponent(
                     </div>
                 </div>
             </li>
+            {
+                isInfo ?
+                    <TaskInfo id={task.id} projectId={projectId} handleClose={toggleInfo}/>
+                    :
+                    <></>
+            }
         </>
     )
 }
+
 
 
 function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string) => void, endCreate : () => void }) {
@@ -487,7 +492,7 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
                 edit ? 
                     <input defaultValue={name} type="text" className='w-fit bg-neutral-900 border-b outline-none' onKeyDown={handleKeyDown}></input>
                     :
-                    <h3>{name}</h3>
+                    <h3 className='w-fit'>{name}</h3>
             }
             <button onClick={editInput} className='w-fit h-fit rounded hover:bg-neutral-950 p-1' title="edit name" style={ {backgroundColor: edit ? "#0a0a0a" : ""}}>
                 <Image src="/pencil.svg" alt="more" width={2} height={2} className='w-5 h-5 rounded-full cursor-pointer'></Image>
@@ -498,7 +503,7 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
 
 function MoreButton({ handleClick } : { handleClick : () => void}) {
     return (
-        <button className='w-fit h-fit rounded hover:bg-neutral-950 p-1'>
+        <button className='h-fit rounded hover:bg-neutral-950 p-1'>
             <Image src="/more.svg" alt="more" width={2} height={2} onClick={handleClick} className='w-5 h-5 rounded-full cursor-pointer'></Image>
         </button>
     )
@@ -525,12 +530,6 @@ function MoreMenuItems({ name, handleClick } : { name : string, handleClick : ()
     )
 }
 
-function TaskInfo() {
-    return (
-        <div>
-        </div>
-    )
-}
 
 // Not implemented
 function TagList() {

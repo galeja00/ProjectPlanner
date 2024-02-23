@@ -66,7 +66,7 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
     return (
         <section>
             <div className='flex justify-between items-center mb-4'>
-                <h2 className='text-2xl  font-bold'>{name}</h2>
+                <h2 className='text-xl  font-bold'>{name}</h2>
                 {list.length > 5 ?
                         <div className='flex gap-4'>
                             <button onClick={() => changeIndex(-1)}><Image src="/arrow-small-left.svg" alt="to left" width={40} height={40} className='hover:stroke-violet-500'></Image></button>

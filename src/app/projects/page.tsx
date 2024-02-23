@@ -17,7 +17,7 @@ export default async function Projects() {
     return (
         <main className="flex max-w-screen flex-col m-auto py-16 px-24">
             <div className='flex justify-between mb-8'>
-                <h1 className='text-4xl font-bold'>Projects</h1>
+                <h1 className='text-2xl font-bold'>Projects</h1>
                 <Link href="/projects/add" className='btn-primary w-fit'>Add Project</Link>
             </div>
             <ListProjects/>

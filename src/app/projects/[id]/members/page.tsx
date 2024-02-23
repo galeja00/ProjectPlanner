@@ -22,7 +22,7 @@ type MemberInfo = {
     tasksLoad: number
 }
 
-
+//TODO: beter structure of code and calls
 export default function Members({ params } : { params : { id : string }}) {
     const [ members, setMembers] = useState<MemberInfo[]>([]);
     const [ isAddDialog, toggleDialog ] = useState<boolean>(false)
