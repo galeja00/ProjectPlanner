@@ -9,7 +9,7 @@ export default async function Menu() {
     const session = await getServerSession(options);
     // TODO: insted nodes maybe use issues
     return (
-        <header className='flex flex-row items-center sticky gap-4 h-12 bg-neutral-950 border-b border-neutral-600'>
+        <header className='flex flex-row items-center relative gap-4 h-12 bg-neutral-950 border-b border-neutral-600'>
             <div className='w-48 border-r border-neutral-600 h-full flex items-center justify-center'>
                     <Link href="/" className='w-fit h-fit'>Project Planner</Link>
             </div>
@@ -29,7 +29,10 @@ export default async function Menu() {
             {session ? (
                 <UserMenu></UserMenu>
             ) : (
-                <Link href="/auth/signin" className='mr-4 link'>Sign in</Link> 
+                <div className='w-full flex flex-row-reverse'>
+                    <Link href="/auth/signin" className='mr-4 link'>Sign in</Link> 
+                </div>
+                
             )}
         </header>
     )

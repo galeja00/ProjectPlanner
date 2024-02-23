@@ -3,19 +3,31 @@
 import { useEffect, useState } from "react";
 import Image from 'next/image' 
 import { Main } from "next/document";
-import { Tag, Task } from "@prisma/client";
+import { Issue, Tag, Task } from "@prisma/client";
 import { on } from "stream";
 
+// TODO: Error handeling + loading screen
+// dialog about displaying all info abou task
 export function TaskInfo({ id, projectId, handleClose } : { id : string, projectId : string, handleClose : () => void }) {
     const [task, setTask] = useState<Task | null>(null);
+    const [tags, setTags] = useState<Tag[]>([]);
+    const [error, setError] = useState<boolean>(false);
     async function fetchInfo() {
         try {
-            const res = await fetch(`/api/projects/${projectId}/task/info`, {
+            const res = await fetch(`/api/projects/${projectId}/task/${id}/info`, {
                 method: "GET"
             })
+
+            const data = await res.json();
+            if(!res.ok) {
+                throw new Error(data.error);
+            }
+            setTask(data.task);
+            setTags(data.tags);
         }
         catch (error) {
-
+            console.error(error);
+            setError(true);
         }
     }
 
@@ -29,11 +41,11 @@ export function TaskInfo({ id, projectId, handleClose } : { id : string, project
                 { task 
                     ?
                     <>
-                        <HeaderContainer task={task} handleClose={handleClose}/>
-                        <div className='flex h-full'>
+                        <HeaderContainer task={task} tags={tags} handleClose={handleClose}/>
+                        <div className='grid grid-cols-3 h-full'>
                             <MainInfoContainer task={task}/>
                             <section className='py-2 px-4 w-[20rem] flex flex-col gap-4'>
-                                <Data/>
+                                <Data task={task}/>
                                 <Solver/>
                             </section>
                         </div>
@@ -50,11 +62,11 @@ export function TaskInfo({ id, projectId, handleClose } : { id : string, project
 }  
 
 // HEADER PART //
-function HeaderContainer({task, handleClose} : {task : Task, handleClose : () => void}) {
+function HeaderContainer({task, tags, handleClose} : {task : Task, tags : Tag[], handleClose : () => void}) {
     return (
-        <section className='px-6 py-4 border-b border-neutral-400 relative'>
-            <Name taskName=""/>
-            <TagList taskTags={[]}/>
+        <section className='px-6 py-4 border-b border-neutral-400 relative '>
+            <Name taskName={task.name}/>
+            <TagList taskTags={tags}/>
             <DialogClose handleClose={handleClose}/>
         </section>
     )
@@ -67,9 +79,11 @@ function Name({taskName} : {taskName : string}) {
     }
 
     return (
-        <div>
-            <h3 className='text-xl font-bold mb-4 '>{name}</h3>
-            <button onClick={handleNameChange}><Image src={""} alt={""} height={10} width={10}></Image></button>
+        <div className="flex mb-4 gap-4">
+            <h3 className='text-xl font-bold'>{name}</h3>
+            <button onClick={handleNameChange} title="Edit Name">
+                <Image src={"/pencil.svg"} alt={"custom name"} height={20} width={20}/>
+            </button>
         </div>
     )
 }
@@ -82,13 +96,19 @@ function TagList({taskTags} : {taskTags : Tag[]}) {
 
 
     return (
-        <ul className='flex gap-2 rounded-lg '>
-            {
-                tags.map((tag) => (
-                    <TagElement tag={tag} handleDeleteTag={handleDeleteTag}/>
-                ))
-            }
-        </ul>
+        <div className="flex gap-1">
+            <ul className='flex gap-2 rounded-lg '>
+                {
+                    tags.map((tag) => (
+                        <TagElement tag={tag} handleDeleteTag={handleDeleteTag}/>
+                    ))
+                }
+            </ul>
+            <button title="Create Tag">
+                <Image src={"/plus.svg"} alt={"create tag"} height={20} width={20}/>
+            </button>
+        </div>
+        
     )
 }
 
@@ -119,24 +139,33 @@ enum TypeOfInfo {
 
 function MainInfoContainer({ task } : { task : Task }) {
     const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes];
-    const [actualInfoType, setActualInfoType] = useState<TypeOfInfo>(menuItems[0]);
-    var desc = "";
-    if (task.description) {
-        desc = task.description; 
-    } 
-    const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description desc={desc}/>);
+    const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
+    
+    const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task}/>);
 
     function handleChangeType(type : TypeOfInfo) {
-
+        switch (type) {
+            case TypeOfInfo.issues:
+                setActualInfo(<Issues issues={[]}/>);
+                setActualInfoType(TypeOfInfo.issues);
+                break;
+            case TypeOfInfo.nodes:
+                setActualInfo(<Nodes/>);
+                setActualInfoType(TypeOfInfo.nodes);
+                break;
+            default:
+                setActualInfo(<Description task={task}/>);
+                setActualInfoType(TypeOfInfo.description);
+        }
     }
 
 
     return (
-        <section className=' w-[40rem] h-full border-r border-neutral-400'>
+        <section className='col-span-2 border-r border-neutral-400'>
             <menu className='flex w-full border-b border-neutral-400'>
                 {
                     menuItems.map((type) => (
-                        <MenuItem name={type} onClick={() => handleChangeType(type)}></MenuItem>
+                        <MenuItem name={type} actualType={actualTypeInfo} onClick={() => handleChangeType(type)}></MenuItem>
                     ))
                 }
             </menu>
@@ -145,26 +174,33 @@ function MainInfoContainer({ task } : { task : Task }) {
     )
 }
 
-function MenuItem({ name, onClick } : { name : string, onClick : () => void}) {
+function MenuItem({ name, actualType, onClick } : { name : string, actualType : TypeOfInfo, onClick : () => void}) {
+    var bg : string = "bg-neutral-950";
+    if (actualType == name) {
+        bg = "bg-neutral-900";
+    }
     return (
-        <li className='px-4 py-2'>
-            <button onClick={onClick}>{name}</button>
+        <li className={`relative  ${bg}`}>
+            <button onClick={onClick} className="hover:text-purple-600 px-4 py-2" >{name}</button>
         </li>
     )
 }
 
-function Description({ desc } : { desc : string}) {
+function Description({ task } : { task : Task }) {
+    var desc = "Create description for better understending of task";
+    if (task.description) {
+        desc = task.description; 
+    } 
     return (
         <article className='m-4'>
-            <h4 className='font-bold mb-2'>Description</h4>
             <p className='p-2 bg-neutral-900 rounded '>
-                v tomto ukolu vytvor pole kere bude sciat prvky kazdy s kazdym vyhodi vysledek na standartni vystup programu nasledně ho posle dalsi komponente ktera to zpracuje dodrzy prosim rozhrani
+                {desc}
             </p>
         </article>
     )
 }
 
-function Issues() {
+function Issues({ issues } : { issues : Issue[] }) {
     return (
         <>
         </>
@@ -180,28 +216,74 @@ function Nodes() {
 
 // DATA INFORMATIONS
 
-function Data() {
+enum Colors {
+    Green = "green",
+    Yellow = "yellow",
+    Red = "red",
+}
+
+enum Complexity {
+    Low = "low",
+    Medium = "medium",
+    Heigh = "heigh",
+    Undefined = "undefined"
+}
+
+function Data({ task } : { task : Task }) {
+    const undefined = "undefined";
     return (
         <div>
             <h3 className='font-bold mb-2'>Info</h3>
             <ul className='bg-neutral-900 p-2 rounded w-full flex flex-col gap-2'>
-                <li className='flex gap-2'><span>type:</span><span>xxxxx</span></li>
-                <li className='flex gap-2'><span>complexity:</span><span>low</span></li>
-                <li className='flex gap-2'><span>estimated hours:</span><span>10</span></li>
-                <li className='flex gap-2'><span>priority:</span><span>10</span></li>
+                <DataItem name="type" value={task.type}></DataItem>
+                <DataItem name="priority" value={task.priority}></DataItem>
+                <DataItem name="complexity" value={task.complexity}></DataItem>
+                <DataItem name="estimated hours" value={task.estimatedHours}></DataItem>
             </ul>
         </div>
     )
 }
 
+function DataItem({name, value} : { name: string, value : any}) {
+    var displaydVal : any = "undefined";
+    if (value) {
+        displaydVal = value;
+    } 
+    var textColor = "";
+    if (name == "complexity" || name == "priority") {
+        switch (value) {
+            case Complexity.Heigh:
+                textColor = Colors.Red;
+                break;
+            case Complexity.Medium:
+                textColor = Colors.Yellow;
+                break;
+            case Complexity.Low:
+                textColor = Colors.Green;
+                break;
+        }
+    }  
+    return (
+        <li className='grid grid-cols-2 gap-2'>
+            <span>{name}:</span>
+            <span style={{ color:textColor }}>{displaydVal}</span>
+        </li>
+    )
+}
+
+function ChackUndef() {
+
+}
+
 function Solver() {
+    //<button className='btn-primary absolute px-3 py-1 right-0 mr-2'>Change</button>
     return (
         <div>
             <h3 className='font-bold mb-2'>Solver</h3>
             <div className='bg-neutral-900 p-2 rounded w-full flex flex-row gap-1 relative'>
                 <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-300 mr-2 text-color cursor-pointer'></Image>
                 <div>Jakub Galeta</div>
-                <button className='btn-primary absolute px-3 py-1 right-0 mr-2'>Change</button>
+                
             </div>
         </div>
     )

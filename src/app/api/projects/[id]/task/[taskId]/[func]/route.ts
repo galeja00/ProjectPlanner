@@ -1,5 +1,5 @@
 import { authorize } from "@/app/api/static";
-import { getMember } from "../../static";
+import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { Task } from "@prisma/client";
 
@@ -7,7 +7,7 @@ enum TaskFunctions {
     info = "info"
 }
 
-export async function GET(req : Request, { params } : { params: { id: string, func: string } }) {
+export async function GET(req : Request, { params } : { params: { id: string, taskId : string, func: string } }) {
     try {
         const email = await authorize(req);
         if (!email) {
@@ -18,23 +18,24 @@ export async function GET(req : Request, { params } : { params: { id: string, fu
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
-        const task : Task | null = await findInfo(params.id);
+        const task : Task | null = await findInfo(params.taskId);
         if (!task) {
             return Response.json({ error: "This task dosen`t exist"}, { status: 400 });
         }
-        const Issues = await prisma.issue.findMany({
+        /*
+        const issues = await prisma.issue.findMany({
             where: {
-                taskId: params.id
+                taskId: params.taskId
+            }
+        })
+        */
+        const tags = await prisma.tag.findMany({
+            where: {
+                taskId: params.taskId
             }
         })
 
-        const Tags = await prisma.tag.findMany({
-            where: {
-                taskId: params.id
-            }
-        })
-
-        return Response.json({ task : task }, {status: 200});
+        return Response.json({ task : task, tags : tags }, {status: 200});
     } catch (error) {
 
     }

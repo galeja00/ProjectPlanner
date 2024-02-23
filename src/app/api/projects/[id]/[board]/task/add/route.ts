@@ -18,7 +18,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
 
         const { name, colId } = await req.json();
-        const type = "test"; // TODO: typ of task, "test" = only placeholder
+        const type = ""; // TODO: typ of task, "test" = only placeholder
 
         if (!(name || colId)) {
             return Response.json({ error: "Bad reqest: You need specify name and colId in data segment"}, { status: 400 });
@@ -48,7 +48,8 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                 name: name,
                 type: type, 
                 taskColumnId: colId,
-                projectMemberId: member.id
+                projectMemberId: member.id,
+                projectId: params.id
             }
         })
 

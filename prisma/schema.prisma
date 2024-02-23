@@ -92,7 +92,7 @@ enum Complexity {
 
 enum Priority {
   Low
-  Middium
+  Midium
   Heigh
 }
 
@@ -100,8 +100,8 @@ model Task {
   id            String  @id @default(cuid()) 
   taskColumn    TaskColumn? @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
   taskColumnId  String?
-  kanban        Kanban @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   projectId     String 
+  kanban        Kanban @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   createAt      DateTime @default(now())
   name          String
   type          String
