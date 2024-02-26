@@ -220,6 +220,7 @@ function TasksColumn(
             for (let task of tasks) {
                 updatedTasks.push(task.id == updateTask.id ? updateTask : task);
             }
+            console.log(updatedTasks);
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: updatedTasks });
         } catch (error) {
             console.log(error);
@@ -325,6 +326,10 @@ function TaskComponent(
         toggleInfo();
     }
 
+    function closeInfo() {
+        toggleInfo();
+    }
+
     function displaySolversMenu() {
         toggleSolversMenu();
     }
@@ -355,7 +360,7 @@ function TaskComponent(
             </li>
             {
                 isInfo ?
-                    <TaskInfo id={task.id} projectId={projectId} handleClose={toggleInfo}/>
+                    <TaskInfo id={task.id} projectId={projectId} handleClose={closeInfo} submitTask={updateTask}/>
                     :
                     <></>
             }
