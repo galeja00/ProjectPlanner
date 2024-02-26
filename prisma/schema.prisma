@@ -120,8 +120,7 @@ model Tag {
   taskId  String  
   task    Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
   name    String
-  type    String?
-  color   String?
+  color   String
 }
 
 model Issue {

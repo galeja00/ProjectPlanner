@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState, KeyboardEvent, SetStateAction, ChangeEvent, FormEvent } from "react";
 import Image from 'next/image' 
 import { Main } from "next/document";
 import { Issue, Tag, Task } from "@prisma/client";
@@ -90,13 +90,72 @@ function Name({taskName} : {taskName : string}) {
 
 function TagList({taskTags} : {taskTags : Tag[]}) {
     const [tags, setTags] = useState<Tag[]>([]);
-    function handleDeleteTag(tag : Tag) {
+    const [creating, toggle] = useReducer(creating => !creating, false);
+    const [color, setColor] = useState<string>("#FFFFFF");
+    const [name, setName] = useState<string>("");
 
+    async function handleDeleteTag(delTag : Tag) {
+        try {
+            /*const res = await fetch("/api/[]/task/tag/delete", {
+                method: "POST",
+                body: JSON.stringify({
+                    name: name,
+                    color: color
+                })
+            })*/
+            const newTags : Tag[] = [];
+            for (const tag of tags) {
+                if (tag.id != delTag.id) {
+                    newTags.push(tag);
+                }
+            }
+            setTags(newTags);
+        }
+        catch {
+
+        }
     }
 
+    async function handleCreateTag(name : string, color : string) {
+        try {
+            /*const res = await fetch("/api/[]/task/tag/create", {
+                method: "POST",
+                body: JSON.stringify({
+                    name: name,
+                    color: color
+                })
+            })*/
+            const id = Math.random().toString();
+            const newTags : Tag[] = tags;
+            newTags.push({id: id, taskId: "asdads", name: name, color: color});
+            setTags(newTags);
+            toggle();
+        }
+        catch {
+
+        }
+    }
+
+    function startCreatingTag() {
+        toggle();
+    }
+
+    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Escape') {
+            toggle();
+        } 
+    }
+
+    function handleColorChange(event: ChangeEvent<HTMLInputElement>) {
+        setColor(event.currentTarget.value);
+    }
+
+    function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setName(event.currentTarget.value);
+    }
 
     return (
-        <div className="flex gap-1">
+        <div className="flex gap-1 h-8">
             <ul className='flex gap-2 rounded-lg '>
                 {
                     tags.map((tag) => (
@@ -104,7 +163,17 @@ function TagList({taskTags} : {taskTags : Tag[]}) {
                     ))
                 }
             </ul>
-            <button title="Create Tag">
+            {
+                creating ?
+                    <div className="flex gap-2 items-center px-3 py-1 bg-neutral-900 rounded">
+                        <input type="text" className="bg-neutral-900 outline-none border-b w-32 text-sm h-5 " id="tagName" onChange={handleInputChange} onKeyDown={handleKeyDown}></input>
+                        <input type="color" value={color} onChange={handleColorChange} className="w-5 h-5 bg-neutral-950 rounded outline-nonecursor-pointer"></input>
+                        <button onClick={() => handleCreateTag(name, color)} className="w-fit h-fit"><Image src={"/check.svg"} alt="submit" height={40} width={40} className="w-5 h-5 rounded bg-neutral-950"></Image></button>
+                    </div>
+                    :
+                    <></>
+            }
+            <button title="Create Tag" onClick={startCreatingTag}>
                 <Image src={"/plus.svg"} alt={"create tag"} height={20} width={20}/>
             </button>
         </div>
@@ -113,11 +182,16 @@ function TagList({taskTags} : {taskTags : Tag[]}) {
 }
 
 function TagElement({ tag, handleDeleteTag } : { tag : Tag, handleDeleteTag : (tag : Tag) => void }) {
+    const opacity = 0.6; // Průhlednost v rozmezí 0 až 1 (0 - 100%)
+    const rgbaColor = `${tag.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`;
+    //console.log(rgbaColor);
     return (
-        <li className='rounded-full bg-green-500 border border-green-500 bg-opacity-60 px-3 py-1 flex gap-3 text-sm'>
+        <li className='rounded-full border px-3 py-1 flex gap-3 text-sm'
+            style={{ backgroundColor: rgbaColor, borderColor: tag.color}}
+        >
             {tag.name}
             <button onClick={() => handleDeleteTag(tag)}>
-                <Image src={"/x.svg"} alt={"close"} className=""/>            
+                <Image src={"/x.svg"} alt={"close"} height={5} width={5} className="w-full h-full"/>            
             </button>
         </li>
     )
