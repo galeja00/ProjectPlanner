@@ -2,7 +2,7 @@
 
 import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "react";
 import Image from 'next/image' 
-import { Issue, Tag, Task } from "@prisma/client";
+import { Issue, Tag, Task, Ranking } from "@prisma/client";
 
 // TODO: Error handeling + loading screen
 // dialog about displaying all info abou task
@@ -36,7 +36,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     function updateTask(task : Task) {
         setTask(task);
-        console.log(task);
+        //console.log(task);
         submitTask(task);
     }
  
@@ -46,15 +46,15 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     return (
         <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 '>
-            <div className='bg-neutral-950 rounded w-[60rem] h-[33rem] mx-72 my-36 overflow-hidden relative'>
+            <div className='bg-neutral-950 rounded w-[80rem] h-[33rem] mx-72 my-36 overflow-hidden relative'>
                 { task 
                     ?
                     <>
                         <HeaderContainer task={task} tags={tags} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
                         <div className='grid grid-cols-3 h-full'>
                             <MainInfoContainer task={task}/>
-                            <section className='py-2 px-4 w-[20rem] flex flex-col gap-4'>
-                                <Data task={task}/>
+                            <section className='py-2 px-4  flex flex-col gap-4'>
+                                <Data task={task} updateTask={updateTask}/>
                                 <Solver/>
                             </section>
                         </div>
@@ -114,7 +114,7 @@ function Name({taskName, updateName} : {taskName : string, updateName : (name : 
             {
                 isEditing ? 
                     <>
-                        <input type="text" defaultValue={name} onKeyDown={handleNameChange} className="bg-neutral-950 outline-none border-b text-xl font-bold w-full"></input>
+                        <input type="text" defaultValue={name} onKeyDown={handleNameChange} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
                     </>
                     :
                     <>
@@ -334,58 +334,133 @@ enum Colors {
     Red = "red",
 }
 
-enum Complexity {
-    Low = "low",
-    Medium = "medium",
-    Heigh = "heigh",
-    Undefined = "undefined"
+
+
+type SelectType = {
+    name : string
 }
 
-function Data({ task } : { task : Task }) {
-    const undefined = "undefined";
+type DataItemType = {
+    name : string,
+    value : any,
+    editing : boolean
+}
+
+function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
+    const [isEditing, toggleEditing] = useReducer(isEditing => !isEditing, false);
+    const [editedTask, setEditedTask] = useState<Task>(task);
+
+    function changeMode() {
+        
+        if (isEditing) {
+            console.log(editedTask);
+            updateTask(editedTask);
+        }
+        toggleEditing();
+    }
+
+    function updateVal(name : string, newVal : any) {
+        if (name == "estimatedHours" && typeof newVal == "string") {
+            newVal = parseInt(newVal);
+        }
+        setEditedTask(editedTask => ({ ...editedTask, [name]: newVal }));
+    }
+
     return (
         <div>
-            <h3 className='font-bold mb-2'>Info</h3>
+            <div className="flex gap-4">
+                <h3 className='font-bold mb-2'>Info</h3>
+                <button onClick={changeMode} className="h-fit"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
+            </div>
             <ul className='bg-neutral-900 p-2 rounded w-full flex flex-col gap-2'>
-                <DataItem name="type" value={task.type}></DataItem>
-                <DataItem name="priority" value={task.priority}></DataItem>
-                <DataItem name="complexity" value={task.complexity}></DataItem>
-                <DataItem name="estimated hours" value={task.estimatedHours}></DataItem>
+                <DataItem name="type" value={task.type} isEditing={isEditing} updateVal={(newVal : any) => updateVal("type", newVal)}></DataItem>
+                <DataItem name="priority" value={task.priority} isEditing={isEditing} updateVal={(newVal : any) => updateVal("priority", newVal)}></DataItem>
+                <DataItem name="complexity" value={task.complexity} isEditing={isEditing} updateVal={(newVal : any) => updateVal("complexity", newVal)}></DataItem>
+                <DataItem name="estimated hours" value={task.estimatedHours} isEditing={isEditing}  updateVal={(newVal : any) => updateVal("estimatedHours", newVal)}></DataItem>
             </ul>
         </div>
     )
 }
 
-function DataItem({name, value} : { name: string, value : any}) {
+
+
+
+function DataItem({name, value, isEditing, updateVal } : { name: string, value : any, isEditing : boolean, updateVal : (newVal : any) => void}) {
     var displaydVal : any = "undefined";
     if (value) {
         displaydVal = value;
     } 
     var textColor = "";
+    var editElement : JSX.Element = <DataEditInput name={name} value={value} changeVal={(newValue : any) => updateVal(newValue)}/>;
     if (name == "complexity" || name == "priority") {
         switch (value) {
-            case Complexity.Heigh:
+            case Ranking.heigh:
                 textColor = Colors.Red;
                 break;
-            case Complexity.Medium:
+            case Ranking.medium:
                 textColor = Colors.Yellow;
                 break;
-            case Complexity.Low:
+            case Ranking.low:
                 textColor = Colors.Green;
                 break;
         }
+
+        const select : SelectType[] = [
+            { name: Ranking.heigh },
+            { name: Ranking.medium },
+            { name: Ranking.low }
+        ]
+        editElement = <SelectButtons items={select} value={value} changeVal={(newValue : string) => updateVal(newValue)}/>;
     }  
     return (
         <li className='grid grid-cols-2 gap-2'>
             <span>{name}:</span>
-            <span style={{ color:textColor }}>{displaydVal}</span>
+            {
+                isEditing ?
+                    <>{editElement}</>
+                    :
+                    <span style={{ color:textColor }}>{displaydVal}</span>
+            }
         </li>
     )
 }
 
-function ChackUndef() {
+function SelectButtons({ items, value, changeVal } : { items : SelectType[], value : string | null, changeVal : (newValue : string) => void}) {
+    const [ selected, setSelected ] = useState<string | null>(value); 
+    function select(value : string) {
+        setSelected(value);
+        changeVal(value);
+    }
 
+    return (
+        <ul className="flex gap-1"> 
+            {
+                items.map(item => (
+                    <li id={item.name}>
+                        <button 
+                            className={`btn btn-primary ${selected  == item.name ? "bg-violet-600 text-neutral-100" : ""} text-xs px-1 py-0.5`} 
+                            onClick={() => select(item.name)}
+                        >
+                            {item.name}
+                        </button>
+                    </li>
+                ))
+            }
+        </ul>
+    )
 }
+
+function DataEditInput({ value, name, changeVal } : { value : string, name : string, changeVal : (newVal : any) => void }) {
+    const type = name === "estimated hours" ? "number" : "text";
+    function handleChange(event: ChangeEvent<HTMLInputElement>) {
+        changeVal(event.target.value);
+    }
+    return (
+        <input type={type} defaultValue={value} min={"0"} className="bg-neutral-900 outline-none border-b" onChange={handleChange}></input>
+    )
+}
+
+
 
 function Solver() {
     //<button className='btn-primary absolute px-3 py-1 right-0 mr-2'>Change</button>

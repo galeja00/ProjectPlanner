@@ -83,17 +83,10 @@ model TaskColumn {
   numOfTasks  Int   @default(0)
   position  Int        
 }
-
-enum Complexity {
-  Low
-  Middium
-  Heigh
-}
-
-enum Priority {
-  Low
-  Midium
-  Heigh
+enum Ranking {
+  low
+  medium
+  heigh
 }
 
 model Task {
@@ -105,9 +98,9 @@ model Task {
   createAt      DateTime @default(now())
   name          String
   type          String
-  priority      Priority?
+  priority      Ranking?
   estimatedHours Int?
-  complexity    Complexity?
+  complexity    Ranking?
   description   String?
   issues        Issue[]
   tags          Tag[]

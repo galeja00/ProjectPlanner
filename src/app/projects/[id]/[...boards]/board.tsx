@@ -1,5 +1,5 @@
 'use client'
-import { Complexity, ProjectMember, Tag, Task, User } from '@prisma/client'
+import { ProjectMember, Tag, Task, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterButton, SearchInput } from '../components/filter-tables'
@@ -39,7 +39,7 @@ export default function Board({ id } : { id : string }) {
             })
             const data = await response.json();
             if (!response.ok) {
-                console.log(data.error);
+                console.error(data.error);
             }
 
             if (!data.data) {
@@ -49,7 +49,7 @@ export default function Board({ id } : { id : string }) {
             
         }
         catch (Error) {
-            console.log(Error);
+            console.error(Error);
         }
     }
 
@@ -104,10 +104,10 @@ export default function Board({ id } : { id : string }) {
             }*/
 
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }
-    console.log()
+
 
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
@@ -176,7 +176,7 @@ function TasksColumn(
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: newTasks });
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -196,15 +196,15 @@ function TasksColumn(
 
             const newTasks : Task[] = json.tasks;
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: newTasks });
-            console.log(newTasks);
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
     async function updateTask(updateTask : Task) {
         try {
+            console.log(updateTask);
             const response = await fetch(`/api/projects/${projectId}/board/task/update`, {
                 method: "POST", 
                 body: JSON.stringify({
@@ -220,10 +220,9 @@ function TasksColumn(
             for (let task of tasks) {
                 updatedTasks.push(task.id == updateTask.id ? updateTask : task);
             }
-            console.log(updatedTasks);
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: updatedTasks });
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -418,7 +417,6 @@ function SolversMenu({ projectId } : { projectId : string }) {
 
     async function fetchProjectUsers(projectId : string) {
         try {
-            console.log(projectId);
             const response = await fetch(`/api/projects/${projectId}/members`, {
                 method: "GET"
             });
@@ -432,7 +430,7 @@ function SolversMenu({ projectId } : { projectId : string }) {
             setUsers(data.data);
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 

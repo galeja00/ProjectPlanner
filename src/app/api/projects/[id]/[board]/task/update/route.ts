@@ -15,7 +15,9 @@ export async function POST(req : Request, { params } : { params : { id : string 
         }
 
         const { task } : { task : Task } = await req.json();
-
+        if (typeof task.estimatedHours == "string") {
+            task.estimatedHours = parseInt(task.estimatedHours);
+        }
         const res = await prisma.task.update({
             where: {
                 id: task.id
@@ -24,13 +26,15 @@ export async function POST(req : Request, { params } : { params : { id : string 
                 name: task.name,
                 type: task.type,
                 estimatedHours: task.estimatedHours,
-                Complexity: task.Complexity,
+                complexity: task.complexity,
+                priority: task.priority,
                 description: task.description
             }
         })
 
         return Response.json({ message: "succesfully updated task" }, { status: 200 });
     } catch (error) {
+        console.error(error);
         return Response.json({ error: "Somthing went wrong" }, { status: 400 });
     }
 }
