@@ -2,6 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { ProjectMember, Task } from "@prisma/client";
 import { prisma } from "@/db";
+import { RSC } from "next/dist/client/components/app-router-headers";
 
 export async function POST(req : Request, { params } : { params : { id : string }}) {
     try {
@@ -17,6 +18,9 @@ export async function POST(req : Request, { params } : { params : { id : string 
         const { task } : { task : Task } = await req.json();
         if (typeof task.estimatedHours == "string") {
             task.estimatedHours = parseInt(task.estimatedHours);
+            if (task.estimatedHours < 0) {
+                return Response.json({ error: "Estimated hour need o be more the 0"}, { status: 400 }); 
+            }
         }
         const res = await prisma.task.update({
             where: {

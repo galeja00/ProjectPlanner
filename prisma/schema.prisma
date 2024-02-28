@@ -126,6 +126,11 @@ model Issue {
   description String
 }
 
+model IssueComments {
+  id    String @id @default(cuid())
+  issueId String
+}
+
 model ProjectInvite {
   id String @id @default(cuid())
   invitedUserId String
@@ -140,10 +145,7 @@ model ProjectInvite {
 
 
 // TODO ////////////////////////////////
-model Scrum {
-  //project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String    @id
-}
+
 model TimeTable {
   id          String   @id @default(cuid()) 
   projectId   String   @unique

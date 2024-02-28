@@ -46,13 +46,13 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     return (
         <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 '>
-            <div className='bg-neutral-950 rounded w-[80rem] h-[33rem] mx-72 my-36 overflow-hidden relative'>
+            <div className='bg-neutral-950 rounded w-[80rem] h-fit mx-72 my-36 overflow-hidden relative'>
                 { task 
                     ?
                     <>
                         <HeaderContainer task={task} tags={tags} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
                         <div className='grid grid-cols-3 h-full'>
-                            <MainInfoContainer task={task}/>
+                            <MainInfoContainer task={task} updateTask={updateTask}/>
                             <section className='py-2 px-4  flex flex-col gap-4'>
                                 <Data task={task} updateTask={updateTask}/>
                                 <Solver/>
@@ -249,11 +249,10 @@ enum TypeOfInfo {
     nodes = "Nodes"
 }
 
-function MainInfoContainer({ task } : { task : Task }) {
+function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
     const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
-    
-    const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task}/>);
+    const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task} updateTask={updateTask}/>);
 
     function handleChangeType(type : TypeOfInfo) {
         switch (type) {
@@ -266,14 +265,14 @@ function MainInfoContainer({ task } : { task : Task }) {
                 setActualInfoType(TypeOfInfo.nodes);
                 break;
             default:
-                setActualInfo(<Description task={task}/>);
+                setActualInfo(<Description task={task} updateTask={updateTask}/>);
                 setActualInfoType(TypeOfInfo.description);
         }
     }
 
 
     return (
-        <section className='col-span-2 border-r border-neutral-400'>
+        <section className='col-span-2 border-r border-neutral-400 h-[28rem]'>
             <menu className='flex w-full border-b border-neutral-400'>
                 {
                     menuItems.map((type) => (
@@ -298,24 +297,67 @@ function MenuItem({ name, actualType, onClick } : { name : string, actualType : 
     )
 }
 
-function Description({ task } : { task : Task }) {
-    var desc = "Create description for better understending of task";
+function Description({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
+    const [ isEditing, toggleEdit ] = useReducer(isEditing => !isEditing, false);
+    function handleDesc(event : KeyboardEvent<HTMLTextAreaElement>) {
+        const inputValue = event.currentTarget.value;
+        if (event.key == 'Enter') {
+            if (inputValue.length > 0) {
+                task.description = inputValue;
+                updateTask(task);
+                toggleEdit();
+            }
+        }
+    }
+    
+    var desc = "Create a description for better understending of the task";
     if (task.description) {
         desc = task.description; 
     } 
     return (
-        <article className='m-4'>
-            <p className='p-2 bg-neutral-900 rounded '>
-                {desc}
-            </p>
+        <article className='m-4 space-y-4'>
+            <button onClick={toggleEdit} className={`w-fit h-fit flex gap-2 items-center hover:text-neutral-100 text-neutral-400 ${isEditing ? "text-violet-600" : ""}`}>
+                <img src="/pencil.svg" alt="Edit Description" className="rounded w-7 h-7 bg-neutral-900 p-1"/>
+                <div>Edit Description</div>
+            </button>
+            {
+                isEditing ? 
+                    <textarea defaultValue={desc} onKeyDown={handleDesc} className="bg-neutral-900 w-full h-64 outline-none rounded focus:ring-2 focus:ring-violet-500 px-3 py-1"/>
+                    :
+                    <p className='px-3 py-1 bg-neutral-900 rounded '>
+                        {desc}
+                    </p> 
+            }
         </article>
     )
 }
 
 function Issues({ issues } : { issues : Issue[] }) {
+    const [isCreating, toggleCreating] = useReducer(isCreating => !isCreating, false); 
     return (
-        <>
-        </>
+        <div>
+            <div className="flex flex-row gap-4">
+                <button className="bg-neutral-900 rounded" onClick={toggleCreating}>
+                    <img src="plus.svg" alt="create"/>
+                </button>
+                <div>Create new Issue</div>
+            </div>
+            <ul>
+                {
+                    issues.map(issue => (
+                        <IsssuesItem issue={issue}/>
+                    ))
+                }
+            </ul>
+        </div>
+    )
+}
+
+function IsssuesItem({ issue } : { issue : Issue }) {
+    return ( 
+        <li key={issue.id}>
+            {issue.type}
+        </li>
     )
 }
 
@@ -370,7 +412,7 @@ function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) =
         <div>
             <div className="flex gap-4">
                 <h3 className='font-bold mb-2'>Info</h3>
-                <button onClick={changeMode} className="h-fit"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
+                <button onClick={changeMode} className="h-fit" title="Edit Info"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
             </div>
             <ul className='bg-neutral-900 p-2 rounded w-full flex flex-col gap-2'>
                 <DataItem name="type" value={task.type} isEditing={isEditing} updateVal={(newVal : any) => updateVal("type", newVal)}></DataItem>
