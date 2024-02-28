@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterButton, SearchInput } from '../components/filter-tables'
 import { TaskInfo } from '../components/task-info'
+import { Head } from '../components/other'
 
 
 type BoardTasksColumn = {
@@ -111,6 +112,7 @@ export default function Board({ id } : { id : string }) {
 
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
+            <Head text='Board'/>
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                 <SearchInput/>
                 <FilterButton/>

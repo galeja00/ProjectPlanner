@@ -99,10 +99,6 @@ function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vi
             <div className='p-4 mt-16'>
                 <h3 className='relative z-10 text-xl mb-2 font-bold'>{proj.name}</h3>
                 <dl className='mb-4'>
-                    <div className='flex gap-4'> 
-                        <dt>Type:</dt>
-                        <dd>{proj.type}</dd>
-                    </div>
                     <div className='flex gap-4'>
                         <dt>Category: </dt>
                         <dd>{proj.category ? proj.category : "undefined"}</dd>

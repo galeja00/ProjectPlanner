@@ -32,7 +32,6 @@ export default function Boards({ params } :  { params: { id : string, boards : s
     
     return (
         <main className="px-14 py-14 relative w-full">
-            <Head text={params.boards[1]}/>
             {board}
         </main>
         
