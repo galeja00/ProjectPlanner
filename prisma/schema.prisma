@@ -32,11 +32,6 @@ model Profile {
   userId  String  @unique
 }
 
-enum ProjectType {
-  Kanban
-  Scrum
-}
-
 model Project {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
@@ -45,7 +40,7 @@ model Project {
   icon      String?
   color     String
   done      Boolean     @default(false)
-  type      ProjectType
+  doneAt    DateTime?
   members   ProjectMember[]
   teams     Team[]
   issues    Issue[]
@@ -143,19 +138,25 @@ model ProjectInvite {
   @@unique([invitedUserId, projectId], name: "Unique_InvitedUser_Project")
 }
 
-
-// TODO ////////////////////////////////
-
 model TimeTable {
   id          String   @id @default(cuid()) 
   projectId   String   @unique
   kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
 }
 
+/// TODO ////////////////////////////
+
 model Backlog {
   id  String @id @default(cuid()) 
   projectId   String   @unique
   kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+}
+
+model BaclockTasksGroup {
+  id String @id @default(cuid()) 
+  backlogId String @unique
+  name  String
+
 }
 /////////////////////////////////////////
 

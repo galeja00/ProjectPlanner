@@ -37,3 +37,6 @@ next-env.d.ts
 # db
 .env
 dev.db*
+
+# images
+/images
