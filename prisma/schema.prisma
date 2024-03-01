@@ -23,7 +23,6 @@ model User {
   image     String?
   skills    String[]
   projects  ProjectMember[]
-  teams     TeamMember[]
   projectInvites   ProjectInvite[]
 }
 
@@ -171,28 +170,38 @@ model ProjectMember {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId String  
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  teamId    String?
+  team      Team?      @relation(fields: [teamId], references: [id])
   seniority String?
   position  String?
   creator   Boolean   @default(false)
   isAdmin   Boolean   @default(false)
-  teamId    String?
   tasks     Task[]
 
   @@unique([userId, projectId], name: "Unique_User_Project")
-}
-
-
-model TeamMember {
-  id      String      @id @default(cuid()) 
-  userId  String  
-  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId  String  
-  team    Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  creator   Boolean   @default(false)
-  position  String?
-
   @@unique([userId, teamId], name: "Unique_User_Team")
 }
+
+model Team {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  name      String
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade) 
+  members   ProjectMember[]
+}
+
+//model TeamMember {
+  //id      String      @id @default(cuid()) 
+  //userId  String  
+  //user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  //teamId  String  
+  //team    Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  //creator   Boolean   @default(false)
+  //position  String?
+
+  //@@unique([userId, teamId], name: "Unique_User_Team")
+//}
 
 // TODO //////////////////
 model ProjectPosition {
@@ -209,11 +218,4 @@ model TimeTable {
 
 //////////////////////////
 
-model Team {
-  id        String      @id @default(cuid())
-  createdAt DateTime    @default(now())
-  name      String
-  icon      String?
-  members   TeamMember[]
-  project   Project[]
-}
+
