@@ -18,7 +18,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
 
         const { name, colId } = await req.json();
-        const type = ""; // TODO: typ of task, "test" = only placeholder
+        const type = ""; 
 
         if (!(name || colId)) {
             return Response.json({ error: "Bad reqest: You need specify name and colId in data segment"}, { status: 400 });
@@ -33,16 +33,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             return Response.json({ error: "Bad reqest: this column dosnt exist"}, { status: 400 });
         }
 
-        await prisma.taskColumn.update({
-            where: {
-                id: colId
-            },
-            data: {
-                numOfTasks: tasksCol.numOfTasks + 1
-            }
-        })
-
-        // TODO: Argument `name`: Invalid value provided. Expected String, provided Object.
         const task : Task = await prisma.task.create({
             data: {
                 name: name,

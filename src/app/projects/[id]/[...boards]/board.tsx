@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterButton, SearchInput } from '../components/filter-tables'
 import { TaskInfo } from '../components/task-info'
-import { Head } from '../components/other'
+import { Head, CreateTaskButton } from '../components/other'
 
 
 type BoardTasksColumn = {
@@ -391,16 +391,7 @@ function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string)
 }
 
 
-function CreateTaskButton({ createTask } : { createTask : () => void }) {
-    return (
-        <div className='flex items-center gap-2'>
-            <button onClick={createTask}>
-                <Image src="/plus.svg" alt="add task" width={2} height={2} className='w-7 h-7 rounded bg-neutral-900 cursor-pointer hover:bg-violet-800'></Image>
-            </button>
-            <p className='text-neutral-400 text-sm'>Create new task</p>
-        </div>
-    )
-}
+
 
 function Solver({ handleSolversMenu } : { handleSolversMenu : () => void }) {
     return (

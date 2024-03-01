@@ -15,3 +15,14 @@ export function ButtonWithImg() {
         </div>
     )
 }
+
+export function CreateTaskButton({ createTask } : { createTask : () => void }) {
+    return (
+        <div className='flex items-center gap-2'>
+            <button onClick={createTask}>
+                <Image src="/plus.svg" alt="add task" width={2} height={2} className='w-7 h-7 rounded bg-neutral-900 cursor-pointer hover:bg-violet-800'></Image>
+            </button>
+            <p className='text-neutral-400 text-sm'>Create new task</p>
+        </div>
+    )
+}

@@ -1,8 +1,5 @@
-import { getServerSession } from "next-auth/next";
-import { options } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { Board, ProjectMember, Task, TaskColumn, User } from "@prisma/client";
-import { Session } from "next-auth";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 
@@ -12,7 +9,13 @@ type BoardTasksColumn = {
     id : string,
     boardId: string,
     name : string,
-    num : number,
+    tasks : Task[]
+}
+
+type GroupsOftasks = {
+    id : string,
+    backlogId : string,
+    name : string,
     tasks : Task[]
 }
 
@@ -53,7 +56,7 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                     taskColumnId: col.id
                 }
             })
-            boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, num: col.numOfTasks, tasks: tasks });
+            boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, tasks: tasks });
         }
         return Response.json({ data: boardTasksColumns }, { status: 200 });
             

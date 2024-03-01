@@ -1,5 +1,5 @@
 import { FilterButton, SearchInput } from "../components/filter-tables";
-import { Head } from "../components/other";
+import { CreateTaskButton, Head } from "../components/other";
 
 export default function Backlog() {
     return (
@@ -38,13 +38,26 @@ function ListOfGroups() {
 }
 
 function GroupList() {
+    function createTask() {
+
+    }
+
     return (
         <li className="bg-neutral-950 w-full rounded p-2 space-y-2">
             <h2>Name Of Group</h2>
             <ul className="space-y-2">
                 <GroupTask/>
             </ul>
+            <CreateTaskButton createTask={createTask}/>
         </li> 
+    )
+}
+
+function CreateTask() {
+    return (
+        <div>
+            <button></button>
+        </div>
     )
 }
 

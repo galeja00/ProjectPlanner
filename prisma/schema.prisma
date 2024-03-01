@@ -75,9 +75,11 @@ model TaskColumn {
   boardId   String  
   name      String  
   tasks     Task[]
-  numOfTasks  Int   @default(0)
-  position  Int        
+  position  Int   
+
+  @@unique([boardId, name], name: "Unique_ColumnInBoard_Project")     
 }
+
 enum Ranking {
   low
   medium
@@ -101,6 +103,9 @@ model Task {
   tags          Tag[]
   projectMember  ProjectMember? @relation(fields: [projectMemberId], references: [id])
   projectMemberId String?
+  tasksGroupId  String?
+  tasksGroup    TasksGroup? @relation(fields: [tasksGroupId], references: [id])
+  
 }
 
 model Tag {
@@ -138,27 +143,26 @@ model ProjectInvite {
   @@unique([invitedUserId, projectId], name: "Unique_InvitedUser_Project")
 }
 
-model TimeTable {
-  id          String   @id @default(cuid()) 
-  projectId   String   @unique
-  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
-}
-
-/// TODO ////////////////////////////
 
 model Backlog {
   id  String @id @default(cuid()) 
   projectId   String   @unique
   kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  tasksGroups TasksGroup[]
 }
 
-model BaclockTasksGroup {
+model TasksGroup {
   id String @id @default(cuid()) 
-  backlogId String @unique
+  backlogId String 
+  backlog Backlog @relation(fields: [backlogId], references: [id], onDelete: Cascade)
   name  String
+  tasks Task[]
+  createAt DateTime @default(now())
+  position Int
 
+  @@unique([backlogId, name], name: "Unique_GroupsInBaclog_Project")
 }
-/////////////////////////////////////////
+
 
 
 model ProjectMember {
@@ -195,6 +199,13 @@ model ProjectPosition {
   id    String    @id @default(cuid()) 
   name  String
 }
+
+model TimeTable {
+  id          String   @id @default(cuid()) 
+  projectId   String   @unique
+  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+}
+
 
 //////////////////////////
 

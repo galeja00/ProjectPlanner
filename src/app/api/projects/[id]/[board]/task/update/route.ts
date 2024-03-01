@@ -2,7 +2,6 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { ProjectMember, Task } from "@prisma/client";
 import { prisma } from "@/db";
-import { RSC } from "next/dist/client/components/app-router-headers";
 
 export async function POST(req : Request, { params } : { params : { id : string }}) {
     try {
