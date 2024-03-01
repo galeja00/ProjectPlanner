@@ -1,5 +1,5 @@
 import { prisma } from "@/db";
-import { Board, ProjectMember, Task, TaskColumn, User } from "@prisma/client";
+import { Backlog, Board, ProjectMember, Task, TaskColumn, TasksGroup, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 
@@ -12,13 +12,15 @@ type BoardTasksColumn = {
     tasks : Task[]
 }
 
-type GroupsOftasks = {
+type GroupOfTasks = {
     id : string,
     backlogId : string,
     name : string,
     tasks : Task[]
 }
 
+// TODO: change querys on DB for better performace 
+// id: je id daného projektu v kterým 
 export async function GET(req : Request, { params } : { params: { id: string, board: string } }) {
     try {
         const email = await authorize(req);
@@ -29,37 +31,23 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         if (!member) {
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
-       
-        
-        const board : Board | null = await prisma.board.findFirst( {
-            where: {
-                projectId: params.id
-            }
-        })
-        if (!board) {
-            return Response.json({ error: "You are not Project member of this project"}, { status: 400 });
-        }
 
-        const taskColumns : TaskColumn[] = await prisma.taskColumn.findMany( {
-            where: {
-                boardId: board.id
-            },
-            orderBy: {
-                position: 'asc'
-            }
-        })
-
-        const boardTasksColumns : BoardTasksColumn[] = [];
-        for (const col of taskColumns) {
-            var tasks : Task[] = await prisma.task.findMany( {
-                where: {
-                    taskColumnId: col.id
+        switch (params.board) {
+            case "board": 
+                const board = await getBoard(params.id);
+                if (!board) {
+                    throw new Error();
                 }
-            })
-            boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, tasks: tasks });
+                return Response.json({ data: board }, { status: 200 });
+            case "backlog": 
+                const backlog = await getBacklog(params.id);
+                if (!backlog) { 
+                    throw new Error(); 
+                }
+                return Response.json({ data: backlog }, { status: 200 });
+            default:
+                return Response.json({ error: "Bad type of board in api request"}, { status: 400});
         }
-        return Response.json({ data: boardTasksColumns }, { status: 200 });
-            
         
     } 
     catch (error) {
@@ -68,3 +56,73 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
     }
 }
 
+async function getBoard(projectId : string) : Promise<BoardTasksColumn[] | null> {
+    const board : Board | null = await prisma.board.findFirst( {
+        where: {
+            projectId: projectId
+        }
+    })
+    if (!board) {
+        return null
+    }
+
+    const taskColumns : TaskColumn[] = await prisma.taskColumn.findMany( {
+        where: {
+            boardId: board.id
+        },
+        orderBy: {
+            position: 'asc'
+        }
+    })
+
+    const boardTasksColumns : BoardTasksColumn[] = [];
+    for (const col of taskColumns) {
+        var tasks : Task[] = await prisma.task.findMany( {
+            where: {
+                taskColumnId: col.id
+            }
+        })
+        boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, tasks: tasks });
+    }
+
+    return boardTasksColumns;
+}
+
+async function getBacklog(projectId : string) : Promise<GroupOfTasks[] | null> {
+    const backlog : Backlog | null = await prisma.backlog.findFirst({
+        where: {
+            projectId: projectId
+        }
+    }) 
+    if (!backlog) {
+        return null;
+    }
+
+    const taskGroups : TasksGroup[] = await prisma.tasksGroup.findMany({
+        where: {
+            backlogId: backlog.id
+        },
+        orderBy: {
+            position: 'asc'
+        }
+    })
+
+    const groups : GroupOfTasks[] = [];
+    for (const group of taskGroups) {
+        var tasks : Task[] = await prisma.task.findMany({
+            where: {
+                tasksGroupId: group.id 
+            }
+        })
+        groups.push({ id: group.id, name: group.name, backlogId: group.backlogId, tasks: tasks });
+    }
+    var tasks : Task[] = await prisma.task.findMany({
+        where: {
+            tasksGroupId: null,
+            projectId: projectId
+        }
+    })
+    groups.push({ id: "unassigned", name: "unassigned", backlogId: backlog.id, tasks : tasks });
+
+    return groups;
+}
