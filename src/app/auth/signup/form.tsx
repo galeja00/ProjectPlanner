@@ -56,7 +56,7 @@ export default function RegisterForm() {
                 if  (!response.ok) {
                     setMsg({ message: "Error in communication with server, try again", type: false });
                 } else {
-                    setMsg({ message: "Succesfully registration", type: true});
+                    setMsg({ message: "Succesfull registration", type: true});
                 }
             } catch (error) {
                 setMsg({ message: "Error in communication with server, try again", type: false });

@@ -24,7 +24,7 @@ export default function Boards({ params } :  { params: { id : string, boards : s
                 setBoard(<TimeTable/>);
                 break;
             case "backlog":
-                setBoard(<Backlog/>);
+                setBoard(<Backlog id={params.id}/>);
                 break;
         }
     }, [nameOfBoard]);

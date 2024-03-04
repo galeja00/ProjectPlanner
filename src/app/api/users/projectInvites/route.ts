@@ -1,7 +1,7 @@
 import { prisma } from "@/db";
 import { authorize, getUserId } from "@/app/api/static";
 import { ProjectInvite } from "@prisma/client";
-import { DateTime } from "next-auth/providers/kakao";
+
 
 export async function GET(req : Request) {
     try {
@@ -9,12 +9,11 @@ export async function GET(req : Request) {
         if (email == null) {
             return Response.json({ error: ""}, { status: 400 });
         }
+
         const id : string | null = await getUserId(email);
         if (id == null) {
             return Response.json({ error: ""}, { status: 400 });
         }
-
-        
 
         const projectInvites : ProjectInvite[] = await prisma.projectInvite.findMany({
             where: {

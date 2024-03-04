@@ -12,19 +12,16 @@ export async function GET(req : Request) {
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
-
-
         const user = await prisma.user.findFirst({
             where: {
                 email: email
             }
         })
-
         if(!user) {
             return NextResponse.json({ error: "Fail to authorize"}, { status: 401 });
         }
 
-        return NextResponse.json({ message: "succes", user: user}, { status: 200 });
+        return NextResponse.json({ user: user }, { status: 200 });
     }
     catch (error) {
         return NextResponse.json({ error: error }, { status: 500 })

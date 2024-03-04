@@ -1,6 +1,6 @@
 
 
-export function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
+export function FormItem({ item, type, name, correct } : { item : string, type: string, name : string, correct : null | boolean }) {
     var inputClass = "input-primary";
     if (correct == false) {
         inputClass = "input-faild";

@@ -27,7 +27,7 @@ export async function POST(req : Request, { params } : { params : { func : strin
                 projectId: data.id
             }
         })
-        // check if invitte is in DB
+        // check if invite is in DB
         if(invite == null) {
             return Response.json({ error: ""}, { status: 400 });
         }

@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Project Planner',
-  description: 'aplication for planning your teams and projects on one web side',
+  description: 'Aplication for planning your teams and projects on one web side with kanban.',
 }
 
 export default function RootLayout({

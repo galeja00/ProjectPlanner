@@ -1,7 +1,25 @@
+"use client"
+import { useState } from "react";
 import { FilterButton, SearchInput } from "../components/filter-tables";
 import { CreateTaskButton, Head } from "../components/other";
 
-export default function Backlog() {
+type Group = {
+
+}
+
+export default function Backlog({ id } : { id : string }) {
+    const [groups, setGroups] = useState<Group[]>([]); 
+    async function fatchGroups() {
+        try {
+            const res = await fetch(`/api/projects/${id}/`, {
+                method: "GET"
+            })
+        }
+        catch (error) {
+
+        }
+    }
+
     return (
         <div className="w-2/3 mx-auto">
             <Head text="Backlog"/>
@@ -9,25 +27,30 @@ export default function Backlog() {
                 <SearchInput/>
                 <FilterButton/>
             </section>
-            <ListOfGroups/>
+            <ListOfGroups groups={groups}/>
         </div>
         
     )
 }
 
-function GroupCreate() {
+function GroupCreate({ createGroup } : { createGroup : () => void}) {
     return (
-        <button className="flex gap-2 items-center mb-2 text-neutral-400">
+        <button onClick={createGroup} className="flex gap-2 items-center mb-2 text-neutral-400">
             <img src="/plus.svg" className="w-8 h-8 bg-neutral-950 rounded"/>
             <div>Create new group</div>
         </button>
     )
 }
 
-function ListOfGroups() {
+function ListOfGroups({ groups } : { groups : Group[] }) {
+    function createGroup() {
+
+    }
+
+
     return (
         <section className="w-full">
-            <GroupCreate/>
+            <GroupCreate createGroup={createGroup}/>
             <ul className="space-y-4 w-full">
                 <GroupList/>
                 <GroupList/>
@@ -53,13 +76,6 @@ function GroupList() {
     )
 }
 
-function CreateTask() {
-    return (
-        <div>
-            <button></button>
-        </div>
-    )
-}
 
 function GroupTask() {
     return (

@@ -21,7 +21,7 @@ export async function POST(request : Request) {
         }
 
         const hashedPassword = await hash(password, 10);
-        const response = await prisma.user.create({data: { email: email, name: name, surname: surname, password: hashedPassword}});
+        const response = await prisma.user.create({data: { email: email, name: name, surname: surname, password: hashedPassword }});
         if (response) {
             return NextResponse.json({ massage: "succes"}, { status: 200 })
         } else {
