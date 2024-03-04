@@ -253,11 +253,15 @@ function TasksColumn(
 
     function handleDragOver(e : React.DragEvent) {
         e.preventDefault();
-        setIsDragetOver(true);
+        if (!isDragetOver) {
+            setIsDragetOver(true);
+        }
     }
 
     function handleOnLeave(e : React.DragEvent) {
-        setIsDragetOver(false);
+        if (isDragetOver) {
+            setIsDragetOver(false);
+        }
     }
 
     return (
