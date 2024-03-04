@@ -33,16 +33,18 @@ export default function LoginForm() {
         
         const response = await signIn('credentials', {
             email: formData.get("email"),
-            password: formData.get("password")
+            password: formData.get("password"),
+            callbackUrl: "/dashboard"
         });
         
-        if (response && response.ok) {
+        if (response) {
             setCorrectPsw(false);
             setCorrectEmail(false);
             setFaildMsg("We didnt found this user credentials");
-            router.push("/dashboard");
             return;
         }
+        //
+        
     }
     return (
         <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8 pb-8 border-b w-96'>

@@ -4,6 +4,7 @@ import { signOut } from "next-auth/react"
 import Image from 'next/image'
 import Link from 'next/link'
 import { DateTime } from 'next-auth/providers/kakao'
+import { useRouter } from 'next/navigation'
 
 export default function UserInfo() {
     const [menu, setMenu] = useState<boolean>(false);
@@ -26,10 +27,16 @@ export default function UserInfo() {
 }
 
 function UserMenu() {
+    const router = useRouter();
+    function handleSignOut() {
+        signOut();
+        router.push("/auth/signin");
+        return;
+    }
     return (
         <ul className='absolute z-50 flex flex-col p-4 bg-neutral-950 right-0 top-10 rounded gap-1'>
             <li><Link href="/profil" className='hover:text-violet-500 hover:border-b hover:border-violet-500 ease-in-out'>Your profile</Link></li>
-            <li><button onClick={() => signOut()} className='hover:text-red-600 hover:border-b text-red-500 hover:border-red-600 ease-in-out'>Sign Out</button></li>
+            <li><button onClick={handleSignOut} className='hover:text-red-600 hover:border-b text-red-500 hover:border-red-600 ease-in-out'>Sign Out</button></li>
         </ul>
     )
 }
