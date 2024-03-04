@@ -3,13 +3,15 @@
 import { signIn } from 'next-auth/react';
 import { FormEvent, useState } from 'react'
 import EmailValidator from 'email-validator';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
     const [correctEmail, setCorrectEmail] = useState<boolean | null>(null); 
     const [faildMsg, setFaildMsg] = useState<string>("");
+    const router = useRouter(); 
+
 
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -38,6 +40,7 @@ export default function LoginForm() {
             setCorrectPsw(false);
             setCorrectEmail(false);
             setFaildMsg("We didnt found this user credentials");
+            router.push("/dashboard");
             return;
         }
     }

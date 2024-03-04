@@ -1,5 +1,5 @@
 'use client'
-import { ProjectMember, Tag, Task, User } from '@prisma/client'
+import { ProjectMember, Ranking, Tag, Task, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterButton, SearchInput } from '../components/filter-tables'
@@ -11,7 +11,6 @@ type BoardTasksColumn = {
     id : string,
     boardId: string,
     name : string,
-    num : number,
     tasks : Task[]
 }
 
@@ -98,7 +97,6 @@ export default function Board({ id } : { id : string }) {
                     }
                 }
                 setTaskColumns(newBoardColumns);
-                
             }
             else {
                 await fetchColumns(id);
@@ -175,7 +173,7 @@ function TasksColumn(
             const newTasks : Task[] = tasksCol.tasks;
             newTasks.push(newTask);
             toggle();
-            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: newTasks });
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: newTasks });
         }
         catch (error) {
             console.error(error);
@@ -197,7 +195,7 @@ function TasksColumn(
             }
 
             const newTasks : Task[] = json.tasks;
-            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: newTasks });
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: newTasks });
         }
         catch (error) {
             console.error(error);
@@ -222,7 +220,7 @@ function TasksColumn(
             for (let task of tasks) {
                 updatedTasks.push(task.id == updateTask.id ? updateTask : task);
             }
-            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, num: tasksCol.num, tasks: updatedTasks });
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name,tasks: updatedTasks });
         } catch (error) {
             console.error(error);
         }
@@ -340,9 +338,25 @@ function TaskComponent(
         { name: "Remove", handler: removeTask },
         { name: "Delete", handler: deleteTask },
     ];
+    var priorityImg : string = "";
+    var priorityClasses : string = "";
+    switch (task.priority) {
+        case Ranking.low:
+            priorityImg = "/dash.svg";
+            priorityClasses = "bg-green-500 border-green-500";
+            break;
+        case Ranking.medium:
+            priorityImg = "/chevron-up.svg"; 
+            priorityClasses = "bg-yellow-500 border-yellow-500";
+            break
+        case Ranking.heigh:
+            priorityImg = "/chevron-double-up.svg";
+            priorityClasses= "bg-red-500 border-red-600";
+            break;
+    }
     return (
         <>
-            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-4 relative" draggable onDragStart={handleOnDrag} >
+            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} >
                 <div className='flex w-full justify-between gap-1'>
                     <Name name={task.name} submitName={changeName}/>
                     <MoreButton handleClick={() => displayMoreMenu()}/>
@@ -350,7 +364,15 @@ function TaskComponent(
                         isMenu ? <MoreMenu items={MoreMenuItems}/> : <></>
                     }
                 </div>
-                <div className='flex flex-row-reverse'>
+                <div className={`flex justify-between ${task.priority ? "" : "flex-row-reverse"}`}>
+                    {
+                        task.priority ? 
+                            <div className='flex items-center'>
+                                <img src={priorityImg} alt={task.priority.toString()} title={`priority: ${task.priority.toString()}`} className={`stroke-2 p-1 border rounded bg-opacity-20 ${priorityClasses}`}/>
+                            </div>
+                            :
+                            <></>
+                    }
                     <div className='relative'>
                         <Solver handleSolversMenu={displaySolversMenu}/>
                         {
@@ -395,7 +417,7 @@ function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string)
 
 function Solver({ handleSolversMenu } : { handleSolversMenu : () => void }) {
     return (
-        <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1' onClick={handleSolversMenu}>
+        <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1' title={"hahaha"} onClick={handleSolversMenu}>
             <Image src="/avatar.svg" alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-300 cursor-pointer'></Image>
         </button>    
     )

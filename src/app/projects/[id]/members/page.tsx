@@ -17,7 +17,7 @@ type MemberInfo = {
     memberId: string,
     name: string,
     position: string | null,
-    seniority: string | null,
+    teamName: string | null,
     surname: string,
     tasksLoad: number
 }
@@ -90,7 +90,7 @@ function TableMembers({ members } : { members : MemberInfo[] }) {
                     <th className='w-fit'>Image</th>
                     <th className='w-fit'>Name</th>
                     <th className='w-fit'>Position</th>
-                    <th className='w-fit'>Senority</th>
+                    <th className='w-fit'>Team</th>
                     <th className='w-fit'>Tasks Load</th>
                 </tr>
             </thead>
@@ -111,7 +111,7 @@ function MemberRow({ memberInfo } : { memberInfo : MemberInfo }) {
             <td><Image src={memberInfo.image ? memberInfo.image : "/avatar.svg"} height={20} width={20} alt="image" className='w-6 h-6 rounded-full bg-neutral-300'/></td>
             <td>{memberInfo.name} {memberInfo.surname}</td>
             <td>{memberInfo.position}</td>
-            <td>{memberInfo.seniority}</td>
+            <td>{memberInfo.teamName}</td>
             <MemberLoad load={memberInfo.tasksLoad}/>
         </tr>
     )

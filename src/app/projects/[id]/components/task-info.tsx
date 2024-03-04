@@ -221,7 +221,7 @@ function TagCreator({ handleCreateTag } : { handleCreateTag : (name : string, co
 
 function TagElement({ tag, handleDeleteTag } : { tag : Tag, handleDeleteTag : (tag : Tag) => void }) {
     const opacity = 0.6; // Průhlednost v rozmezí 0 až 1 (0 - 100%)
-    const rgbaColor = `${tag.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`;
+    const rgbaColor = `${tag.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`; //Vytvoří hexadecimal zápis pro RGBA
 
     return (
         <li className='rounded-full border px-3 py-1 flex gap-3 text-sm'
@@ -298,8 +298,13 @@ function MenuItem({ name, actualType, onClick } : { name : string, actualType : 
 }
 
 function Description({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
+    var desc = "Create a description for better understending of the task";
+    if (task.description) {
+        desc = task.description; 
+    } 
     const [ isEditing, toggleEdit ] = useReducer(isEditing => !isEditing, false);
-    function handleDesc(event : KeyboardEvent<HTMLTextAreaElement>) {
+    const [ editDesc, setEditDesc ] = useState<string>(desc);
+    /*function handleDesc(event : KeyboardEvent<HTMLTextAreaElement>) {
         const inputValue = event.currentTarget.value;
         if (event.key == 'Enter') {
             if (inputValue.length > 0) {
@@ -308,25 +313,42 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
                 toggleEdit();
             }
         }
+    }*/
+    
+    function handleSubmit() {
+        if (editDesc != "") {
+            task.description = editDesc;
+            updateTask(task);
+            toggleEdit();
+        } 
+    }
+
+    function handleChange(event : ChangeEvent<HTMLTextAreaElement>) {
+        setEditDesc(event.target.value);
     }
     
-    var desc = "Create a description for better understending of the task";
-    if (task.description) {
-        desc = task.description; 
-    } 
+    desc = editDesc;
     return (
         <article className='m-4 space-y-4'>
-            <button onClick={toggleEdit} className={`w-fit h-fit flex gap-2 items-center hover:text-neutral-100 text-neutral-400 ${isEditing ? "text-violet-600" : ""}`}>
-                <img src="/pencil.svg" alt="Edit Description" className="rounded w-7 h-7 bg-neutral-900 p-1"/>
+            <button onClick={toggleEdit} className={`w-fit h-fit flex gap-2 items-center hover:text-neutral-100 text-neutral-400 `}>
+                <img src="/pencil.svg" alt="Edit Description" className={`rounded w-7 h-7 ${isEditing ? "bg-violet-600" : "bg-neutral-900"} p-1`}/>
                 <div>Edit Description</div>
             </button>
             {
                 isEditing ? 
-                    <textarea defaultValue={desc} onKeyDown={handleDesc} className="bg-neutral-900 w-full h-64 outline-none rounded focus:ring-2 focus:ring-violet-500 px-3 py-1"/>
+                    <div className="space-y-2">
+                        <textarea defaultValue={desc} onChange={handleChange} className="bg-neutral-900 w-full h-64 outline-none rounded focus:ring-1 focus:ring-violet-500 px-3 py-1"/>
+                        <div className="flex flex-row-reverse">   
+                            <button className="btn-primary relative right-0 bottom-0" onClick={handleSubmit}>Submit</button>
+                        </div>
+                    </div>
                     :
-                    <p className='px-3 py-1 bg-neutral-900 rounded '>
-                        {desc}
-                    </p> 
+                    <div>
+                        <p className='px-3 py-1 bg-neutral-900 rounded '>
+                            {desc}
+                        </p>   
+                    </div>
+
             }
         </article>
     )

@@ -1,8 +1,31 @@
+"use client"
+import { useRouter } from 'next/navigation';
 import { Head } from "../components/other";
 import Image from "next/image";
 
 
-export default function Settings() {
+export default function Settings({ params } : { params : { id : string }}) {
+    const router = useRouter();
+    async function handleDelete() {
+        try {
+            const res = await fetch(`/api/projects/${params.id}/delete`, {
+                method: "POST"
+            }); 
+
+            if (res.ok) {
+                router.push("/projects"); 
+                return;
+            }
+
+            const data = await res.json();
+            throw new Error(data.error);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+
     return (
         <main className="flex w-2/4 flex-col mx-auto py-14">
             <Head text="Settings"/>
@@ -21,8 +44,16 @@ export default function Settings() {
                         <li className="grid grid-cols-3 gap-2"><div>color:</div> <div className="rounded-full bg-blue-600 w-6 h-6"></div></li>
                     </ul>
                 </section>
+                <ButtonDel onClick={handleDelete}/>
             </div>
             
         </main>
+    )
+}
+
+
+function ButtonDel({ onClick } : { onClick : () => void }) {
+    return (
+        <button className="btn-destructive" onClick={onClick}>Delete</button>
     )
 }

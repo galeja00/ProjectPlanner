@@ -3,8 +3,6 @@ import { options } from '../auth/[...nextauth]/options'
 import { prisma } from '@/db'
 import { Board, Project, TaskColumn, User } from "@prisma/client";
 import { getServerSession } from "next-auth/next"
-import { ChildProcessWithoutNullStreams } from "child_process";
-import { Session } from "inspector";
 
 // GET: for user will get him all projects he worked on 
 export async function GET(req : Request) {
@@ -72,24 +70,21 @@ function selectColor() : string{
     return arrColors[Math.floor(Math.random() * arrColors.length)]
 }
 
-async function createStartingBoard(boardId : string) : Promise<void> {
-    const colums = await prisma.taskColumn.createMany({
+async function createStartingBoard(boardId : string) {
+    await prisma.taskColumn.createMany({
         data: [{
             boardId: boardId,
             name: "To Do",
-            numOfTasks: 0,
             position: 1,
         },
         {
             boardId: boardId,
             name: "In Work",
-            numOfTasks: 0,
             position: 2,
         },
         {
             boardId: boardId,
             name: "Done",
-            numOfTasks: 0,
             position: 3
         }]
     })
@@ -105,10 +100,10 @@ export async function POST(req : Request) {
             return NextResponse.json({ error: "You cant create project when you arent authorize"}, { status: 400 })  
         }
 
-        const { name, type } = await req.json();
-
         const email = session.user.email ?? "";
         const user : User | null = await prisma.user.findFirst({ where: { email: email }});    
+
+        const { name } = await req.json();
 
         if (!user) {
             return NextResponse.json({ error: "error"}, { status: 400 });
@@ -116,7 +111,6 @@ export async function POST(req : Request) {
 
         const project : Project = await prisma.project.create({ data: {
             name: name,
-            type: type,
             color: selectColor()     
         }});
 
@@ -156,7 +150,8 @@ export async function POST(req : Request) {
                 userId: user.id,
                 projectId: project.id,
                 creator: true,
-                teamId: null
+                teamId: null,
+                isAdmin: false
             }});
 
     
@@ -167,6 +162,7 @@ export async function POST(req : Request) {
         return NextResponse.json({ message: "Project succesfully created" }, { status: 200 });
 
     } catch (error) {
+        console.log(error);
         return NextResponse.json({ error: "Comunication on server faild try again later"}, { status: 400 })
     }
 }

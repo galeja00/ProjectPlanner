@@ -179,7 +179,6 @@ model ProjectMember {
   tasks     Task[]
 
   @@unique([userId, projectId], name: "Unique_User_Project")
-  @@unique([userId, teamId], name: "Unique_User_Team")
 }
 
 model Team {

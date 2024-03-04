@@ -2,14 +2,21 @@
 
 import { FormEvent, useState } from 'react';
 import EmailValidator from 'email-validator';
+import { useRouter } from 'next/navigation';
 //import { FormItem, SubmitButton } from '@/app/components/form';
+
+type Msg = {
+    message : string,
+    type : boolean
+}
 
 export default function RegisterForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
     const [correctEmail, setCorrectEmail] = useState<boolean | null>(null); 
     const [correctName, setCorrectName] = useState<boolean | null>(null);
     const [correctSurName, setCorrectSurName] = useState<boolean | null>(null);
-    const [faildMsg, setFaildMsg] = useState<string>("");
+    const [Msg, setMsg] = useState<Msg>({ message: "",  type: false});
+    const router = useRouter();
 
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -22,7 +29,7 @@ export default function RegisterForm() {
 
         // TODO: validaci emailu a potvrzení emailove adresy... (nodemailer...)
         if (!(email && name && surname && password && repeatpassword )) {
-            setFaildMsg("You need to fill all inputs");
+            setMsg({ message: "You need to fill all inputs", type: false});
             setCorrectPsw(false);
             setCorrectEmail(false);
             setCorrectName(false);
@@ -31,7 +38,7 @@ export default function RegisterForm() {
         }
         if (!EmailValidator.validate(email.toString())) {
             setCorrectEmail(false);
-            setFaildMsg("You need to insert valid email");
+            setMsg({ message: "You need to insert valid email", type: false});
             return;
         }
         if (password == repeatpassword) {
@@ -47,17 +54,16 @@ export default function RegisterForm() {
                     })
                 }) 
                 if  (!response.ok) {
-                    //TODO: Zachitit errory ktere vraci api
-                    setFaildMsg("Error in communication with server, try again");
+                    setMsg({ message: "Error in communication with server, try again", type: false });
                 } else {
-                    console.log("succes registration")
+                    setMsg({ message: "Succesfully registration", type: true});
                 }
             } catch (error) {
-                setFaildMsg("Error in communication with server, try again");
+                setMsg({ message: "Error in communication with server, try again", type: false });
             }
         } else {
             setCorrectPsw(false);
-            setFaildMsg("Your passwords arent same");
+            setMsg({ message: "Your passwords arent same", type: false });
         }
         
     }
@@ -72,7 +78,7 @@ export default function RegisterForm() {
             <FormItem item="Password" name="password" type="password" correct={correctPsw}/>
             <FormItem item="Repeat Password" name="repeatpassword" type="password" correct={correctPsw}/>
             <SubmitButton/>
-            {faildMsg === "" ? <p>  </p> : <p className='text-red-500 w-fit m-auto'>{faildMsg}</p>}
+            {Msg.message === "" ? <p>  </p> : <p className={`${Msg.type ? "text-green-500" : "text-red-500"} w-fit m-auto`}>{Msg.message}</p>}
         </form>
     )
 }
