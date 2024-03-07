@@ -20,8 +20,8 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             if(!res.ok) {
                 throw new Error(data.error);
             }
-            setTask(data.task);
-            setTags(data.tags);
+            setTask(data.taskInfo.task);
+            setTags(data.taskInfo.tags);
         }
         catch (error) {
             console.error(error);
@@ -61,7 +61,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                     </>
                     :
                     <>
-                        <h3>Loading...</h3>
+                        <h3 className="h-60">Loading...</h3>
                         <DialogClose handleClose={handleClose}/>
                     </>
                 }

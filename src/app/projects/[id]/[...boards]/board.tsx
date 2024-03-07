@@ -225,7 +225,7 @@ function TasksColumn(
             console.error(error);
         }
     }
-
+    //TODO
     async function removeTask(id : string) {
         try {
 
@@ -308,13 +308,47 @@ type MoreMenuItem = {
     handler: () => void
 }
 
+type Solver = {
+    id: string,
+    memberId: string,
+    name: string,
+    surname: string,
+    image: string | null,
+}
+
+
+
 // TODO: to much argumentsa need to be better solved
 function TaskComponent(
         { task, projectId, removeTask, deleteTask, handleOnDrag, updateTask } : 
         { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void , updateTask : (task : Task) => void},) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isInfo, toggleInfo ] = useReducer((isInfo) => !isInfo, false);
-    const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false)
+    const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
+    const [ solver, setSolver ] = useState(null);
+
+    async function fetchSolver() {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/task/${task.id}/solver`, {
+                method: "GET"
+            })
+            if (!res.ok) {
+                fetchSolver();
+            }
+            const data = await res.json();
+            if (!data.solver) {
+                throw new Error();
+            }
+            setSolver(data.solver);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+        fetchSolver()
+    }, []);
 
     function changeName(name : string) {
         task.name = name;
@@ -378,9 +412,9 @@ function TaskComponent(
                             <></>
                     }
                     <div className='relative'>
-                        <Solver handleSolversMenu={displaySolversMenu}/>
+                        <Solver handleSolversMenu={displaySolversMenu} solver={solver}/>
                         {
-                            isSolversMenu ? <SolversMenu projectId={projectId}/>: <></>
+                            isSolversMenu ? <SolversMenu projectId={projectId} solver={solver}/>: <></>
                         }
                     </div>
                 </div>
@@ -419,21 +453,40 @@ function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string)
 
 
 
-function Solver({ handleSolversMenu } : { handleSolversMenu : () => void }) {
+function Solver({ handleSolversMenu, solver} : { handleSolversMenu : () => void, solver : Solver | null}) {
+    var img = "/avatar.svg";
+    if (solver && solver.image) {
+        img = solver.image
+    }
     return (
-        <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1' title={"hahaha"} onClick={handleSolversMenu}>
-            <Image src="/avatar.svg" alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-300 cursor-pointer'></Image>
+        <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1' title={solver ? `${solver.name} ${solver.surname}` : "add solver"} onClick={handleSolversMenu}>
+            <Image src={img} alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-300 cursor-pointer'></Image>
         </button>    
     )
 }
 
-function SolversMenu({ projectId } : { projectId : string }) {
-    const [ users, setUsers ] = useState<User[]>([]);
+type MemberTableInfo = {
+    memberId: string,
+    image: string | null,
+    name: string,
+    surname: string,
+    seniority: string | null,
+    position: string | null,
+}
 
+
+function SolversMenu({ projectId, solver } : { projectId : string, solver : Solver | null }) {
+    const [ users, setUsers ] = useState<MemberTableInfo[]>([]);
+    var img = "/avatar.svg";
+    if (solver && solver.image) {
+        img = solver.image;
+    }
+    
     useEffect(() => {
         fetchProjectUsers(projectId);
     }, []);
 
+    // TODO: change type to solver insted of user
     async function fetchProjectUsers(projectId : string) {
         try {
             const response = await fetch(`/api/projects/${projectId}/members`, {
@@ -445,7 +498,8 @@ function SolversMenu({ projectId } : { projectId : string }) {
             if (!response.ok) {
                 throw new Error(data.error);
             }
-
+            console.log(data.data);
+            console.log(solver);
             setUsers(data.data);
         }
         catch (error) {
@@ -463,15 +517,25 @@ function SolversMenu({ projectId } : { projectId : string }) {
         }
     }
 
+
     return (
         <div className='w-fit bg-neutral-950  absolute right-0 z-50 p-0 rounded'>
             <input className='w-fit bg-neutral-900 rounded m-1 outline-none border-none py-1 px-2'></input>
             <ul>
                 {
                     users.map((user) => (
-                        <li key={user.id} className='flex gap-2 m-1 p-1 hover:bg-neutral-800 cursor-pointer rounded relative' onClick={() => changeSolver(user.id)}> 
-                            <Image src="/avatar.svg" alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
+                        <li key={user.memberId} 
+                            className={`flex gap-2 m-1 p-1 hover:bg-neutral-800 cursor-pointer rounded relative`} 
+                            onClick={() => changeSolver(user.memberId)}>
+                            <Image src={img} alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
                             <h5>{user.name} {user.surname}</h5>
+                            {
+                                solver?.memberId == user.memberId ?
+                                <p className='text-green-600'>current</p>
+                                :
+                                <></>
+                            }
+                            
                         </li>
                     ))
                 }
