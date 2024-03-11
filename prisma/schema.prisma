@@ -94,6 +94,7 @@ model Task {
   createAt      DateTime @default(now())
   name          String
   type          String
+  colIndex      Int?
   priority      Ranking?
   estimatedHours Int?
   complexity    Ranking?

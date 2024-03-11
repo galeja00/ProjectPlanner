@@ -3,6 +3,8 @@ import { Session, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
+import { Task } from "@prisma/client";
+import { getColumnsTasks, updateColumnIndexes } from "../static";
 
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
@@ -16,22 +18,46 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
-        const { taskId, fromColId, toColId } : { taskId : string, fromColId : string, toColId : string } = await req.json(); 
-
-        const task = await prisma.task.update({
+        const { taskId, fromColId, toColId,  taskIndex } : { taskId : string, fromColId : string, toColId : string, taskIndex : number } = await req.json(); 
+        const task = await prisma.task.findFirst({
+            where: {
+                id: taskId
+            },
+        });
+        if (!task) {
+            return Response.json({status : 400});
+        }
+        updateColumnIndexes(toColId, task, taskIndex, true);
+        /*if (task.colIndex && fromColId != toColId) {
+            updateColumnIndexes(fromColId, task, task.colIndex, false);
+        }*/
+        
+        const updatedTask = await prisma.task.update({
             where: {
                 id: taskId,
-                taskColumnId: fromColId
             },
             data: {
-                taskColumnId: toColId
+                taskColumnId: toColId,
+                colIndex: taskIndex
             }
         })
-
+        // for tests
+        const updatedColumn = await prisma.task.findMany({
+            where: {
+                taskColumnId: toColId
+            },
+            orderBy: {
+                colIndex: "asc"
+            }
+        })
+        console.log(updatedColumn);
         // TODO: select column update nuber of tasks
-        return Response.json({ task: task }, { status: 200 });
+        return Response.json({ task: updatedTask }, { status: 200 });
     }
     catch (error) {
        return Response.json({ error: "Somthing went wrong on server" }, { status: 400 });  
     }
 }
+
+
+

@@ -33,13 +33,27 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             return Response.json({ error: "Bad reqest: this column dosnt exist"}, { status: 400 });
         }
 
+        const colTasks : Task[] = await prisma.task.findMany({
+            where: {
+                taskColumnId: colId
+            }
+        })
+
+        let index : number = 0;
+        for (const task of colTasks) {
+            if (task.colIndex !== null && task.colIndex >= index) {
+                index = task.colIndex + 1;
+            }
+        } 
+
         const task : Task = await prisma.task.create({
             data: {
                 name: name,
                 type: type, 
                 taskColumnId: colId,
                 projectMemberId: member.id,
-                projectId: params.id
+                projectId: params.id,
+                colIndex: index
             }
         })
 

@@ -80,6 +80,9 @@ async function getBoard(projectId : string) : Promise<BoardTasksColumn[] | null>
         var tasks : Task[] = await prisma.task.findMany( {
             where: {
                 taskColumnId: col.id
+            }, 
+            orderBy: {
+                colIndex: "asc"
             }
         })
         boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, tasks: tasks });

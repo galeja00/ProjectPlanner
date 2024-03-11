@@ -19,6 +19,12 @@ type ProviderColumns = {
     setTaskColumns: Dispatch<SetStateAction<BoardTasksColumn[]>>;
 }
 
+type MoveTaskInfo = {
+    fromColId: string,
+    toColId: string,
+    taskId: string,
+    taskIndex: number
+}
 
 const TasksColumnsContext = createContext<ProviderColumns>(({
     tasksColumns: [],
@@ -46,21 +52,22 @@ export default function Board({ id } : { id : string }) {
                 throw new Error(data.error);
             }
             setTaskColumns(data.data);
-            
         }
         catch (Error) {
             console.error(Error);
         }
     }
 
-    async function handleMoveOfTask(fromColId : string, toColId : string, taskId : string) {
+    async function handleMoveOfTask(fromColId : string, toColId : string, taskId : string, taskIndex : number) {
         try {
+
             const response = await fetch(`/api/projects/${id}/board/task/move`, {
                 method: "POST",
                 body: JSON.stringify({
                     taskId: taskId,
                     fromColId: fromColId,
-                    toColId: toColId
+                    toColId: toColId,
+                    taskIndex: taskIndex
                 })
             })
     
@@ -70,18 +77,38 @@ export default function Board({ id } : { id : string }) {
             }
 
             const movedTask : Task = data.task;
+            movedTask.colIndex = taskIndex;
             const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
             const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
             await fetchColumns(id);
-            //FIX: bug in this optimalisation pls fix
-            /*if (toCol && fromCol) {
-                toCol.tasks.push(movedTask);
+            // Moving task on client side for better optimalization
+            /*
+            if (toCol && fromCol) {
+                let add : boolean = true;
+                for (const task of toCol.tasks) {
+                    if (task.id == movedTask.id) {
+                        add = false;
+                    }
+                }
+                if (add) {
+                    toCol.tasks.push(movedTask);
+                }
+                // preskladaní tasků podle indexu v danem poly
+                toCol.tasks.sort((task1, task2) => {
+                    return sortTaskByColIndex(task1, task2); 
+                })
+                if (fromCol.id == toCol.id) {
+                    return;
+                }
                 const newFromTasks : Task[] = [];
                 for (const task of fromCol.tasks) {
                     if (task.id != movedTask.id) {
                         newFromTasks.push(task);
                     }
                 }
+                newFromTasks.sort((task1, task2) => {
+                    return sortTaskByColIndex(task1, task2); 
+                })
                 fromCol.tasks = newFromTasks;
                 const newBoardColumns : BoardTasksColumn[] = [];
                 for (const col of tasksColumns) {
@@ -99,8 +126,9 @@ export default function Board({ id } : { id : string }) {
                 setTaskColumns(newBoardColumns);
             }
             else {
-                await fetchColumns(id);
-            }*/
+                await fetchColumns(id);    
+            }
+            */
 
         } catch (error) {
             console.error(error)
@@ -137,13 +165,14 @@ export default function Board({ id } : { id : string }) {
 
 function TasksColumn(
         { index, projectId, handleMoveOfTask } : 
-        { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string) => void }
+        { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string, taskIndex : number) => void }
     ) {
     const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false);
     const { tasksColumns: tasksColumns } = useContext(TasksColumnsContext);
     const [ tasksCol , setTasksCol ] = useState<BoardTasksColumn>(tasksColumns[index]);
     const [ isDragetOver, setIsDragetOver ] = useState<boolean>(false);
-    
+    const tasksRef = useRef<HTMLUListElement>(null);
+
     function handleCreateTaskForm() {
         toggle();
     }
@@ -204,7 +233,6 @@ function TasksColumn(
 
     async function updateTask(updateTask : Task) {
         try {
-            console.log(updateTask);
             const response = await fetch(`/api/projects/${projectId}/board/task/update`, {
                 method: "POST", 
                 body: JSON.stringify({
@@ -220,7 +248,7 @@ function TasksColumn(
             for (let task of tasks) {
                 updatedTasks.push(task.id == updateTask.id ? updateTask : task);
             }
-            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name,tasks: updatedTasks });
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: updatedTasks });
         } catch (error) {
             console.error(error);
         }
@@ -235,20 +263,27 @@ function TasksColumn(
     }
 
     async function handleOnDrop(e : React.DragEvent) {
-        const [ fromColId, taskId ] : string[] = e.dataTransfer.getData("colId/taskId").split("/"); 
+        const fromColId : string = e.dataTransfer.getData("text/colId");
+        const taskId : string = e.dataTransfer.getData("text/taskId");
 
-        const colId = tasksColumns[index].id    
-        if (colId == fromColId) {
-            setIsDragetOver(false);
-            return;
-        }
-        
-        handleMoveOfTask(fromColId, colId, taskId);
+        const mouseY : number = e.clientY;
+        const tasksElements : NodeListOf<Element> | undefined = tasksRef.current?.querySelectorAll('[data-task-id]');
+        if (!tasksElements) return;
+        const tasksPositions : number[] = Array.from(tasksElements).map(taskElement => {
+            const taskRect = taskElement.getBoundingClientRect();
+            return taskRect.top + taskRect.height / 2;
+        })
+        let taskIndex : number = 0;
+        while (taskIndex < tasksPositions.length && mouseY > tasksPositions[taskIndex]) taskIndex++;
+        const colId = tasksColumns[index].id;    
+
+        handleMoveOfTask(fromColId, colId, taskId, taskIndex);
         setIsDragetOver(false);
     }
         
     function handleOnDrag(e : React.DragEvent, task : Task) {
-        e.dataTransfer.setData("colId/taskId", tasksCol.id + "/" + task.id);
+        e.dataTransfer.setData("text/colId", tasksCol.id);
+        e.dataTransfer.setData("text/taskId", task.id);
     }
 
     function handleDragOver(e : React.DragEvent) {
@@ -259,9 +294,7 @@ function TasksColumn(
     }
 
     function handleOnLeave(e : React.DragEvent) {
-        if (isDragetOver) {
-            setIsDragetOver(false);
-        }
+        setIsDragetOver(false);
     }
 
     return (
@@ -276,7 +309,7 @@ function TasksColumn(
                 <h2 className="">{tasksCol.name}</h2>
             </div>
             <div className="p-2">
-                <ul className={`flex flex-col gap-2 mb-2`}>
+                <ul className={`flex flex-col gap-2 mb-2`} ref={tasksRef}>
                     { 
                         tasksCol.tasks.map((task) => (
                             <TaskComponent 
@@ -325,7 +358,7 @@ function TaskComponent(
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isInfo, toggleInfo ] = useReducer((isInfo) => !isInfo, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
-    const [ solver, setSolver ] = useState(null);
+    const [ solver, setSolver ] = useState<Solver | null>(null);
 
     async function fetchSolver() {
         try {
@@ -344,6 +377,12 @@ function TaskComponent(
         catch (error) {
             console.error(error);
         }
+    }
+
+    function updateSolver(memberId : string) {
+        task.projectMemberId =  memberId;
+        updateTask(task); 
+        fetchSolver();
     }
 
     useEffect(() => {
@@ -376,8 +415,8 @@ function TaskComponent(
         { name: "Remove", handler: removeTask },
         { name: "Delete", handler: deleteTask },
     ];
-    var priorityImg : string = "";
-    var priorityClasses : string = "";
+    let priorityImg : string = "";
+    let priorityClasses : string = "";
     switch (task.priority) {
         case Ranking.low:
             priorityImg = "/dash.svg";
@@ -394,7 +433,7 @@ function TaskComponent(
     }
     return (
         <>
-            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} >
+            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} data-task-id={task.id}>
                 <div className='flex w-full justify-between gap-1'>
                     <Name name={task.name} submitName={changeName}/>
                     <MoreButton handleClick={() => displayMoreMenu()}/>
@@ -414,7 +453,14 @@ function TaskComponent(
                     <div className='relative'>
                         <Solver handleSolversMenu={displaySolversMenu} solver={solver}/>
                         {
-                            isSolversMenu ? <SolversMenu projectId={projectId} solver={solver}/>: <></>
+                            isSolversMenu 
+                                ? 
+                                <SolversMenu 
+                                    projectId={projectId} 
+                                    solver={solver} 
+                                    changeSolver={updateSolver}/>
+                                : 
+                                <></>
                         }
                     </div>
                 </div>
@@ -454,7 +500,7 @@ function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string)
 
 
 function Solver({ handleSolversMenu, solver} : { handleSolversMenu : () => void, solver : Solver | null}) {
-    var img = "/avatar.svg";
+    let img = "/avatar.svg";
     if (solver && solver.image) {
         img = solver.image
     }
@@ -475,9 +521,9 @@ type MemberTableInfo = {
 }
 
 
-function SolversMenu({ projectId, solver } : { projectId : string, solver : Solver | null }) {
+function SolversMenu({ projectId, solver, changeSolver } : { projectId : string, solver : Solver | null, changeSolver : (memberId : string) => void }) {
     const [ users, setUsers ] = useState<MemberTableInfo[]>([]);
-    var img = "/avatar.svg";
+    let img = "/avatar.svg";
     if (solver && solver.image) {
         img = solver.image;
     }
@@ -487,6 +533,7 @@ function SolversMenu({ projectId, solver } : { projectId : string, solver : Solv
     }, []);
 
     // TODO: change type to solver insted of user
+    // TODO: error hendeling
     async function fetchProjectUsers(projectId : string) {
         try {
             const response = await fetch(`/api/projects/${projectId}/members`, {
@@ -498,25 +545,12 @@ function SolversMenu({ projectId, solver } : { projectId : string, solver : Solv
             if (!response.ok) {
                 throw new Error(data.error);
             }
-            console.log(data.data);
-            console.log(solver);
             setUsers(data.data);
         }
         catch (error) {
             console.error(error);
         }
     }
-
-    // TODO: solvers to project
-    async function changeSolver(solverId : string) {
-        try {
-           
-        }
-        catch (error) {
-
-        }
-    }
-
 
     return (
         <div className='w-fit bg-neutral-950  absolute right-0 z-50 p-0 rounded'>
@@ -648,4 +682,11 @@ function TagList() {
             </div>   
         </div>
     )
+}
+
+function sortTaskByColIndex(task1 : Task, task2 : Task) : number {
+    if (!task1.colIndex && !task2.colIndex) return 0; // obě hodnoty jsou null, vrátíme nulu
+    if (!task1.colIndex) return 1; // task1 má null colIndex, takže ho umístíme za task2  
+    if (!task2.colIndex) return -1; // task2 má null colIndex, takže ho umístíme za task2
+    return task2.colIndex - task1.colIndex;
 }

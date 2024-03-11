@@ -4,6 +4,8 @@ import { Session, User, getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
+import { Task } from "@prisma/client";
+import { updateColumnIndexes } from "../static";
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
@@ -28,14 +30,19 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             return Response.json({ error: "This task is not existing"}, { status: 400 });
         } 
 
-        const tasks = await prisma.task.findMany({
+
+        if (res.taskColumnId && res.colIndex) {
+            updateColumnIndexes(res.taskColumnId, taskId, res.colIndex, false);
+        }
+        
+
+        const finalTasks = await prisma.task.findMany({
             where: {
                 taskColumnId: res.taskColumnId
             }
         })
 
-
-        return Response.json({ tasks: tasks }, { status: 200 });
+        return Response.json({ tasks: finalTasks }, { status: 200 });
     } 
     catch (error) {
         console.log(error);
