@@ -10,14 +10,26 @@ export async function getColumnsTasks(columnId : string) : Promise<Task[]> {
     })
     return tasks;
 }
+
+export async function saveTasks(tasks : Task[]) {
+    for (const task of tasks) {
+        await prisma.task.update({
+            where: {
+                id: task.id,
+            },
+            data: {
+                colIndex: task.colIndex
+            }
+        })
+    }
+}
 //TODO: bugs
 //TODO: pro vice sloupcu
-export async function updateColumnIndexes(columnId : string, uTask : Task, index : number, up : boolean) {
+export async function movInColumnIndexes(columnId : string, uTask : Task, index : number) {
     const tasks : Task[] = await getColumnsTasks(columnId);
     if (!uTask.colIndex) {
         uTask.colIndex = 99999999999;
     }
-     //place holder becose of null problems
     const updateTasks : Task[] = [];
     for (const task of tasks) {
         if (task.colIndex != null && task.id != uTask.id) {
@@ -37,20 +49,41 @@ export async function updateColumnIndexes(columnId : string, uTask : Task, index
             }
         }
     }
-    console.log("index: " + index);
-    console.log(updateTasks);
-    const upTasks = [];
-    for (const task of updateTasks) {
-        const upTask = await prisma.task.update({
-            where: {
-                id: task.id,
-            },
-            data: {
-                colIndex: task.colIndex
-            }
-        })
-    }
+    await saveTasks(updateTasks);
 }
+
+export async function movAwayColumnIndexes(columnId : string, uTask : Task) {
+    const tasks : Task[] = await getColumnsTasks(columnId);
+    if (!uTask.colIndex) {
+        return;
+    }
+    const updateTasks : Task[] = [];
+    for (const task of tasks) {
+        if (task.colIndex != null && task.id != uTask.id) {
+            if (task.colIndex > uTask.colIndex) {
+                task.colIndex--;
+                updateTasks.push(task);
+            }
+        }
+    }
+    await saveTasks(updateTasks);
+}
+
+export async function movToColumnIndexes(columnId : string, uTask : Task, index : number) {
+    const tasks : Task[] = await getColumnsTasks(columnId);
+    const updateTasks : Task[] = [];
+    for (const task of tasks) {
+        if (task.colIndex != null && task.id != uTask.id) {
+            if (task.colIndex >= index) {
+                task.colIndex++;
+                updateTasks.push(task);
+            } 
+        }
+    }
+    await saveTasks(updateTasks);
+}
+
+
 
 
 function sortTaskByColIndex(task1 : Task, task2 : Task) : number {

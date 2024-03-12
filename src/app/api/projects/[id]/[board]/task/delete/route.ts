@@ -1,11 +1,8 @@
-import { options } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/db";
-import { Session, User, getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
 import { Task } from "@prisma/client";
-import { updateColumnIndexes } from "../static";
+import { movAwayColumnIndexes, movInColumnIndexes } from "../static";
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
@@ -32,7 +29,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
 
 
         if (res.taskColumnId && res.colIndex) {
-            updateColumnIndexes(res.taskColumnId, taskId, res.colIndex, false);
+            await movAwayColumnIndexes(res.taskColumnId, res);
         }
         
 

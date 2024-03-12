@@ -4,7 +4,7 @@ import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
 import { Task } from "@prisma/client";
-import { getColumnsTasks, updateColumnIndexes } from "../static";
+import { getColumnsTasks,movAwayColumnIndexes,movInColumnIndexes, movToColumnIndexes } from "../static";
 
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
@@ -27,10 +27,14 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         if (!task) {
             return Response.json({status : 400});
         }
-        updateColumnIndexes(toColId, task, taskIndex, true);
-        /*if (task.colIndex && fromColId != toColId) {
-            updateColumnIndexes(fromColId, task, task.colIndex, false);
-        }*/
+        if (fromColId == toColId) {
+            await movInColumnIndexes(toColId, task, taskIndex);
+        }
+        else {
+            await movAwayColumnIndexes(fromColId, task);
+            await movToColumnIndexes(toColId, task, taskIndex);
+        }
+
         
         const updatedTask = await prisma.task.update({
             where: {

@@ -82,7 +82,7 @@ model TaskColumn {
 enum Ranking {
   low
   medium
-  heigh
+  high
 }
 
 model Task {
@@ -92,6 +92,7 @@ model Task {
   projectId     String 
   kanban        Kanban @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   createAt      DateTime @default(now())
+  deadlineAt    DateTime?
   name          String
   type          String
   colIndex      Int?

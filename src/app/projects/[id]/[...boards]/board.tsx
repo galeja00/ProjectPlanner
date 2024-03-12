@@ -2,7 +2,7 @@
 import { ProjectMember, Ranking, Tag, Task, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
-import { FilterButton, SearchInput } from '../components/filter-tables'
+import { FilterButton, FilterDialog, SearchInput } from '../components/filter-tables'
 import { TaskInfo } from '../components/task-info'
 import { Head, CreateTaskButton } from '../components/other'
 
@@ -33,6 +33,7 @@ const TasksColumnsContext = createContext<ProviderColumns>(({
 
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]);
+    const [ isFilterDialog, toggleFilterDialog ] = useReducer(isFilterDialog => !isFilterDialog, false);
     
     useEffect(() => {
         fetchColumns(id);
@@ -136,13 +137,20 @@ export default function Board({ id } : { id : string }) {
     }
 
 
+
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
             <Head text='Board'/>
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                 <SearchInput/>
-                <FilterButton/>
+                <FilterButton onClick={toggleFilterDialog}/>
             </section>
+            {
+                isFilterDialog ?
+                    <FilterDialog/>
+                    :
+                    <></>
+            }
             <section className="flex gap-2 w-full">
                 {
                     tasksColumns.map((col, index) => (
@@ -280,7 +288,7 @@ function TasksColumn(
         handleMoveOfTask(fromColId, colId, taskId, taskIndex);
         setIsDragetOver(false);
     }
-        
+    // TODO: animace pro tasky posunuti dolu
     function handleOnDrag(e : React.DragEvent, task : Task) {
         e.dataTransfer.setData("text/colId", tasksCol.id);
         e.dataTransfer.setData("text/taskId", task.id);
@@ -426,7 +434,7 @@ function TaskComponent(
             priorityImg = "/chevron-up.svg"; 
             priorityClasses = "bg-yellow-500 border-yellow-500";
             break
-        case Ranking.heigh:
+        case Ranking.high:
             priorityImg = "/chevron-double-up.svg";
             priorityClasses= "bg-red-500 border-red-600";
             break;

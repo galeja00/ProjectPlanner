@@ -150,8 +150,8 @@ function TagList({taskTags} : {taskTags : Tag[]}) {
             }
             setTags(newTags);
         }
-        catch {
-
+        catch (error) {
+            console.error(error);
         }
     }
 
@@ -458,7 +458,7 @@ function DataItem({name, value, isEditing, updateVal } : { name: string, value :
     var editElement : JSX.Element = <DataEditInput name={name} value={value} changeVal={(newValue : any) => updateVal(newValue)}/>;
     if (name == "complexity" || name == "priority") {
         switch (value) {
-            case Ranking.heigh:
+            case Ranking.high:
                 textColor = Colors.Red;
                 break;
             case Ranking.medium:
@@ -470,7 +470,7 @@ function DataItem({name, value, isEditing, updateVal } : { name: string, value :
         }
 
         const select : SelectType[] = [
-            { name: Ranking.heigh },
+            { name: Ranking.high },
             { name: Ranking.medium },
             { name: Ranking.low }
         ]
@@ -525,7 +525,7 @@ function DataEditInput({ value, name, changeVal } : { value : string, name : str
 }
 
 
-
+//TODO : solover fecth and change it
 function Solver() {
     //<button className='btn-primary absolute px-3 py-1 right-0 mr-2'>Change</button>
     return (
