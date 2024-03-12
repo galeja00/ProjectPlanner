@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef, useState, KeyboardEvent } from "react"
 import { FilterButton, SearchInput } from '../components/filter-tables'
 import { Head } from '../components/other'
 import { User } from '@prisma/client'
+import { DialogClose } from '@/app/components/other'
 
 
 enum Load {
@@ -60,7 +61,9 @@ export default function Members({ params } : { params : { id : string }}) {
             <Head text="Members"/>
             <div className='flex gap-4 mb-4 w-full h-fit items-end'>
                 <SearchInput/>
-                <FilterButton/>
+                <FilterButton onClick={function (): void {
+                    throw new Error('Function not implemented.')
+                } }/>
                 <AddMemberButton handleClick={handleAddButton}/>
             </div>
             <TableMembers members={members}/>
@@ -228,9 +231,9 @@ function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
     return (
         <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
             <search className='p-4 relative h-2/3 w-1/3 bg-neutral-950 rounded flex flex-col gap-4'>
+                <DialogClose handleClose={onClose}/>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser}/>
                 <ListUsers users={results} id={id}/>
-                <button className='btn-primary h-fit w-fit absolute right-4 bottom-4' onClick={onClose}>Close</button>
             </search>
         </dialog>
     )
@@ -262,7 +265,7 @@ function AddForm({ actualType, types, search } : { actualType : TypeOfSearh, typ
 
 function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
     return (
-        <ul>
+        <ul className='space-y-2'>
             {
                 users.map((user) => (
                     <UsersItem user={user} id={id}/>

@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction, createContext, useContext, useEffect, useRedu
 import { FilterButton, FilterDialog, SearchInput } from '../components/filter-tables'
 import { TaskInfo } from '../components/task-info'
 import { Head, CreateTaskButton } from '../components/other'
-
+import { useRouter } from 'next/router';
 
 type BoardTasksColumn = {
     id : string,
@@ -34,7 +34,9 @@ const TasksColumnsContext = createContext<ProviderColumns>(({
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]);
     const [ isFilterDialog, toggleFilterDialog ] = useReducer(isFilterDialog => !isFilterDialog, false);
-    
+    //const router = useRouter();
+    //const { filter, sort } = router.query;
+
     useEffect(() => {
         fetchColumns(id);
     }, [])
@@ -147,7 +149,7 @@ export default function Board({ id } : { id : string }) {
             </section>
             {
                 isFilterDialog ?
-                    <FilterDialog/>
+                    <FilterDialog handleClose={toggleFilterDialog}/>
                     :
                     <></>
             }

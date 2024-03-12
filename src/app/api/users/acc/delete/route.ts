@@ -1,17 +1,13 @@
-import { getServerSession } from "next-auth";
-import { options } from "../../auth/[...nextauth]/options";
+import { authorize } from "@/app/api/static";
 import { prisma } from "@/db";
-import { authorize } from "../../static";
 
-
-
-export async function GET(req : Request) {
+export async function POST(req : Request) {
     try {
         const email = await authorize(req);
         if (!email) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
-        const user = await prisma.user.findFirst({
+        const user = await prisma.user.delete({
             where: {
                 email: email
             }

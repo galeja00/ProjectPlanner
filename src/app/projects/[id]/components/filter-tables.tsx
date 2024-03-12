@@ -1,4 +1,6 @@
+import { DialogClose } from '@/app/components/other'
 import Image from 'next/image'
+import { Ranking, Task} from '@prisma/client'
 
 export function SearchInput() {
     return (
@@ -19,12 +21,25 @@ export function FilterButton({ onClick } : { onClick : () => void }) {
     )
 }
 
-export function FilterDialog() {
+export function FilterDialog({ handleClose } : { handleClose : () => void}) {
     return ( 
-        <dialog className="dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 '">
+        <dialog className="dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100">
             <div className='bg-neutral-950 rounded w-[80rem] h-fit mx-72 my-36 overflow-hidden relative'>
-
+                <h2>Filters</h2>
+                <DialogClose handleClose={handleClose}/>
+                <section>
+                    <h3>Priority</h3>
+                    <ul>
+                        <li>low</li>
+                        <li>meddium</li>
+                        <li>high</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3></h3>
+                </section>
             </div>
         </dialog>
     )
 }
+
