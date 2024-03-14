@@ -1,6 +1,6 @@
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
-import { ProjectMember, Task } from "@prisma/client";
+import { ProjectMember, Task, TaskSolver } from "@prisma/client";
 import { prisma } from "@/db";
 
 export async function POST(req : Request, { params } : { params : { id : string }}) {
@@ -14,29 +14,18 @@ export async function POST(req : Request, { params } : { params : { id : string 
             return Response.json({ error: "You are not project member" }, { status: 400 });
         }
 
-        const { user, task } = await req.json();
+        const { task, memberId } = await req.json();
 
-        const solver : ProjectMember | null = await prisma.projectMember.findFirst( {
-            where: {
-                userId: user.id
-            }
-        })
-        if (!solver) {
-            return Response.json({ error: "This solver is not existing" }, { status: 400 });
-        }
-
-        const custTask : Task = await prisma.task.update({
-            where: {
-                id: task.id
-            },
+        const newSolver : TaskSolver = await prisma.taskSolver.create({
             data: {
-                projectMemberId: solver.id
+                memberId: memberId,
+                taskId: task.id
             }
         })
 
-        return Response.json({ task: custTask }, {status: 200 }); 
+        return Response.json({ solver: newSolver }, {status: 200 }); 
     }
     catch (error) {
-
+        return Response.json({error: ""}, {status: 400});
     }
 }

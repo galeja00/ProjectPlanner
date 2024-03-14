@@ -3,6 +3,8 @@
 import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "react";
 import Image from 'next/image' 
 import { Issue, Tag, Task, Ranking } from "@prisma/client";
+import { DialogClose } from "@/app/components/other";
+
 
 // TODO: Error handeling + loading screen
 // dialog about displaying all info abou task
@@ -45,7 +47,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
     }, []);
 
     return (
-        <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 '>
+        <dialog className='absolute z-50 flex bg-neutral-900 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 '>
             <div className='bg-neutral-950 rounded w-[80rem] h-fit mx-72 my-36 overflow-hidden relative'>
                 { task 
                     ?
@@ -235,11 +237,7 @@ function TagElement({ tag, handleDeleteTag } : { tag : Tag, handleDeleteTag : (t
     )
 }
 
-function DialogClose({ handleClose } : { handleClose : () => void}) {
-    return (
-        <button onClick={handleClose} className='absolute right-0 top-0 mt-2 mr-2'><Image src={'/x.svg'} alt={'close'} width={20} height={20}></Image></button>
-    )
-}
+
 
 // MAIN INFRMATIONS
 

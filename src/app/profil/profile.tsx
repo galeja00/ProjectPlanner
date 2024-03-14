@@ -7,6 +7,8 @@ import { User } from "@prisma/client";
 import { ButtonItems, ButtonList, DeleleteDialog, DialogClose } from "../components/other";
 import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react";
+import { FormItem, SubmitButton } from "../components/form";
+import { pathToImages } from "@/config";
 
 enum UpdateTypes {
     Name = "Name",
@@ -79,11 +81,19 @@ export default function Profile() {
         }
     }
 
+    function updateImg(img : string) {
+        if (user) {
+            user.image = img;
+            setUser(user);
+        }
+    }
+
     if(!user) {
         return (
             <h1>Loading...</h1>
         )
     }
+
     const date = new Date(user.createdAt);
     let formattedDate = "";
     const day = date.getDate();
@@ -95,11 +105,15 @@ export default function Profile() {
     buttons.push({name: "Change Password", onClick: togglePassw, type: "primary"});
     buttons.push({name: "Delete", onClick: toggleDell, type: "destructive"});
     
+    let image : string = "/avatar.svg";
+    if (user.image) {
+        image = `/uploads/user/${user.image}`;
+    }
     return ( 
         <>
             {
                 isDrop ? 
-                    <DropImage closeDrop={toggleDrop}/>
+                    <DropImage closeDrop={toggleDrop} updateImg={updateImg}/>
                     :
                     <></>
             }
@@ -117,7 +131,7 @@ export default function Profile() {
             }
             <div className="flex w-2/4 flex-col m-auto py-14 space-y-4" >
                 <section className="bg-neutral-950 rounded flex gap-16 p-4">
-                    <Image src={"/avatar.svg"} onClick={toggleDrop} alt={""} height={50} width={50} className="rounded-full bg-neutral-300  w-32 h-32 cursor-pointer"></Image>
+                    <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:bg-neutral-500 hover:outline  w-32 h-32 cursor-pointer"></Image>
                     <div className="flex flex-col gap-4">
                         <Name user={user}/>
                         <Email user={user}/>
@@ -156,6 +170,7 @@ function Id({ user } : { user : User }) {
 
 function PasswordChange({ onClose } : { onClose : () => void}) {
     const [msg, setMsg] = useState<string>("");
+    const [isCorrect, toggleCorrect] = useReducer(isCorrect => !isCorrect, true);
 
     async function handleChangePassword() {
         try {
@@ -167,16 +182,14 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
     }
 
     return ( 
-        <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
-            <div className='bg-neutral-950 rounded w-fit h-fit overflow-hidden relative p-8 space-y-8'>
+        <dialog className='absolute z-50 flex bg-neutral-900 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
+            <div className='bg-neutral-950 rounded w-fit h-fit overflow-hidden relative p-8 '>
                 <DialogClose handleClose={onClose}/>
-                <h2>Change password</h2>
-                <form>
-                    <label>New password</label>
-                    <input></input>
-                    <label>Repeat password</label>
-                    <input></input>
-                    <button>Submit</button>
+                <h2 className="font-bold text-xl mb-8">Change password</h2>
+                <form className="flex flex-col gap-4 m-0 w-96">
+                    <FormItem item="Password" type="password" name="password" correct={isCorrect}/>
+                    <FormItem item="Repeat Password" type="password" name="password" correct={isCorrect}/>
+                    <SubmitButton/>
                     <p>{msg}</p>
                 </form>
             </div>

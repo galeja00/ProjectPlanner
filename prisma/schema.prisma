@@ -102,11 +102,22 @@ model Task {
   description   String?
   issues        Issue[]
   tags          Tag[]
-  projectMember  ProjectMember? @relation(fields: [projectMemberId], references: [id])
-  projectMemberId String?
+  //projectMembers  ProjectMember? @relation(fields: [projectMemberId], references: [id])
+  taskSolvers   TaskSolver[]
+  //projectMemberId String?
   tasksGroupId  String?
   tasksGroup    TasksGroup? @relation(fields: [tasksGroupId], references: [id])
   
+}
+
+model TaskSolver {
+  id      String @id @default(cuid())
+  memberId  String
+  member   ProjectMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  taskId  String
+  task    Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+ 
+  @@unique([taskId, memberId], name: "Unique_task_member")
 }
 
 model Tag {
@@ -130,6 +141,7 @@ model Issue {
 model IssueComments {
   id    String @id @default(cuid())
   issueId String
+
 }
 
 model ProjectInvite {
@@ -178,7 +190,7 @@ model ProjectMember {
   position  String?
   creator   Boolean   @default(false) 
   isAdmin   Boolean   @default(false)
-  tasks     Task[]
+  tasks     TaskSolver[]
 
   @@unique([userId, projectId], name: "Unique_User_Project")
 }

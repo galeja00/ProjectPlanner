@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { authorize } from "../../static";
-
+import fs from "fs"
 
 
 export async function GET(req : Request) {

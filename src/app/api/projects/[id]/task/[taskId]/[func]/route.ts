@@ -1,7 +1,7 @@
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
-import { Tag, Task } from "@prisma/client";
+import { ProjectMember, Tag, Task, TaskSolver } from "@prisma/client";
 
 enum TaskFunctions {
     info = "info",
@@ -40,11 +40,11 @@ export async function GET(req : Request, { params } : { params: { id: string, ta
                 }
                 return Response.json({ taskInfo: taskInfo }, {status: 200});
             case TaskFunctions.solver:
-                const solver : Solver | null = await findSolver(params.taskId);
-                if (!solver) {
+                const solvers : Solver[] = await findSolver(params.taskId);
+                if (!solvers) {
                     throw new Error();
                 }
-                return Response.json({ solver: solver}, { status: 200});
+                return Response.json({ solvers: solvers}, { status: 200});
         }
     } catch (error) {
         return Response.json({ error: ""}, { status: 400 }); 
@@ -76,34 +76,47 @@ async function findInfo(id : string) : Promise<TaskInfo | null> {
     return taskInfo
 }
 
-async function findSolver(id : string) : Promise<Solver | null> {
+async function findSolver(id : string) : Promise<Solver[]> {
+    
     const task = await prisma.task.findFirst({
         where: {
             id: id
         }
     })
-    if (!(task && task.projectMemberId)) {
-        return null;
+    if(!task) {
+        return [];
     }
-    const member = await prisma.projectMember.findFirst({
+    const solvers : TaskSolver[] = await prisma.taskSolver.findMany({
         where: {
-            id: task.projectMemberId
+            taskId: task.id
         }
     })
-    const user = await prisma.user.findFirst({
-        where: {
-            id: member?.userId
+    const finalSolvers : Solver[] = [];
+    for (const x of solvers) {
+        const member = await prisma.projectMember.findFirst({
+            where: {
+                id: x.memberId
+            }
+        })
+        if (!member) {
+            continue;
         }
-    })
-    if (!(member && user)) {
-        return null;
+        const user = await prisma.user.findFirst({
+            where: {
+                id: member.userId
+            }
+        })
+        if (!user) {
+            continue;
+        }
+        const solver : Solver = { 
+            id: user.id, 
+            memberId: member.id, 
+            name: user.name, 
+            surname: user.surname,
+            image: user.image,
+        }
+        finalSolvers.push(solver);
     }
-    const solver : Solver = { 
-        id: user.id, 
-        memberId: member.id, 
-        name: user.name, 
-        surname: user.surname,
-        image: user.image,
-    }
-    return solver
+    return finalSolvers
 }

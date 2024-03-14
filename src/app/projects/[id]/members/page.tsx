@@ -109,9 +109,13 @@ function TableMembers({ members } : { members : MemberInfo[] }) {
 }
 
 function MemberRow({ memberInfo } : { memberInfo : MemberInfo }) {
+    let imgSrc = "/avatar.svg"; 
+    if (memberInfo.image) {
+        imgSrc = `/uploads/user/${memberInfo.image}`;
+    }
     return (
         <tr key={memberInfo.memberId} className='bg-neutral-900 rounded grid grid-cols-5 p-2 justify-items-left items-center'>
-            <td><Image src={memberInfo.image ? memberInfo.image : "/avatar.svg"} height={20} width={20} alt="image" className='w-6 h-6 rounded-full bg-neutral-300'/></td>
+            <td><Image src={imgSrc} height={20} width={20} alt="image" className='w-6 h-6 rounded-full bg-neutral-300'/></td>
             <td>{memberInfo.name} {memberInfo.surname}</td>
             <td>{memberInfo.position}</td>
             <td>{memberInfo.teamName}</td>
@@ -229,7 +233,7 @@ function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
     }
 
     return (
-        <dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
+        <dialog className='absolute z-50 flex bg-neutral-900 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
             <search className='p-4 relative h-2/3 w-1/3 bg-neutral-950 rounded flex flex-col gap-4'>
                 <DialogClose handleClose={onClose}/>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser}/>

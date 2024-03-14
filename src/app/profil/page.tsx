@@ -2,7 +2,7 @@ import Profile from "./profile";
 
 export default function Page() {
     return (
-        <main className="h-full w-full">
+        <main className="h-full w-full relative">
             <Profile/>
         </main>
     )
