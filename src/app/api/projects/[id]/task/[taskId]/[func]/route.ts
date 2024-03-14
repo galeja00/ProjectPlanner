@@ -8,12 +8,13 @@ enum TaskFunctions {
     solver = "solver"
 }
 
-type Solver = {
+export type Solver = {
     id: string,
     memberId: string,
     name: string,
     surname: string,
     image: string | null,
+    teamId: string | null,
 }
 
 type TaskInfo = {
@@ -44,7 +45,7 @@ export async function GET(req : Request, { params } : { params: { id: string, ta
                 if (!solvers) {
                     throw new Error();
                 }
-                return Response.json({ solvers: solvers}, { status: 200});
+                return Response.json({ solvers: solvers }, { status: 200});
         }
     } catch (error) {
         return Response.json({ error: ""}, { status: 400 }); 
@@ -115,6 +116,7 @@ async function findSolver(id : string) : Promise<Solver[]> {
             name: user.name, 
             surname: user.surname,
             image: user.image,
+            teamId: member.teamId
         }
         finalSolvers.push(solver);
     }

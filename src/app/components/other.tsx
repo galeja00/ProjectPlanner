@@ -60,8 +60,15 @@ export function DeleleteDialog({ message, onConfirm, onClose } : { message : str
                     <ButtonWithText text={"Yes"} type={"destructive"} handle={onConfirm}/>
                     <ButtonWithText text={"No"} type={"primary"} handle={onClose}/>
                 </div>
-
             </div>
         </dialog>
+    )
+}
+
+export function EditTextButton({ onClick } : { onClick : () => void}) {
+    return (
+        <button onClick={onClick} title="Edit Name">
+            <Image src={"/pencil.svg"} alt={"custom name"} height={20} width={20}/>
+        </button>
     )
 }

@@ -4,6 +4,7 @@ import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "rea
 import Image from 'next/image' 
 import { Issue, Tag, Task, Ranking } from "@prisma/client";
 import { DialogClose } from "@/app/components/other";
+import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 
 
 // TODO: Error handeling + loading screen
@@ -57,7 +58,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                             <MainInfoContainer task={task} updateTask={updateTask}/>
                             <section className='py-2 px-4  flex flex-col gap-4'>
                                 <Data task={task} updateTask={updateTask}/>
-                                <Solver/>
+                                <Solvers task={task} projectId={projectId}/>
                             </section>
                         </div>
                     </>
@@ -396,17 +397,10 @@ enum Colors {
     Red = "red",
 }
 
-
-
 type SelectType = {
     name : string
 }
 
-type DataItemType = {
-    name : string,
-    value : any,
-    editing : boolean
-}
 
 function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
     const [isEditing, toggleEditing] = useReducer(isEditing => !isEditing, false);
@@ -524,16 +518,45 @@ function DataEditInput({ value, name, changeVal } : { value : string, name : str
 
 
 //TODO : solover fecth and change it
-function Solver() {
+function Solvers({ task, projectId } : { task : Task, projectId : string }) {
+    const [solvers, setSolvers] = useState<Solver[]>([]); 
     //<button className='btn-primary absolute px-3 py-1 right-0 mr-2'>Change</button>
+    async function fetchSolvers() {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/task/${task.id}/solver`, {
+                method: "GET",
+            }); 
+            const data = await res.json();
+            if (!res.ok) {
+                console.error(data.error);
+                return;
+            }
+
+            setSolvers(data.solvers);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => { fetchSolvers() }, []);
     return (
         <div>
-            <h3 className='font-bold mb-2'>Solver</h3>
-            <div className='bg-neutral-900 p-2 rounded w-full flex flex-row gap-1 relative'>
-                <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-300 mr-2 text-color cursor-pointer'></Image>
-                <div>Jakub Galeta</div>
-                
+            <div className="flex gap-2">
+                <h3 className='font-bold mb-2'>Solvers</h3>
+                <button onClick={fetchSolvers} className="h-fit" title="Edit Info"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
             </div>
+            <ul className="space-y-2">
+                {solvers.map((solver) => {
+                    const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";
+                    return (
+                        <li key={solver.id} className='bg-neutral-900 p-2 rounded w-full flex flex-row gap-1 relative items-center'>
+                        <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-300 mr-2 text-color cursor-pointer'></Image>
+                            <div>{solver.name} {solver.surname}</div>
+                        </li>
+                    )
+                })}
+            </ul>
         </div>
     )
 }

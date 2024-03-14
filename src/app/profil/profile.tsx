@@ -1,10 +1,10 @@
 "use client"
 
 import Image from "next/image"
-import { DragEventHandler, useReducer, useState, DragEvent, useRef, ChangeEvent, useEffect, ButtonHTMLAttributes } from "react"
+import { useReducer, useState, useEffect, KeyboardEvent, FormEvent } from "react"
 import DropImage from "../components/drop-image";
 import { User } from "@prisma/client";
-import { ButtonItems, ButtonList, DeleleteDialog, DialogClose } from "../components/other";
+import { ButtonItems, ButtonList, DeleleteDialog, DialogClose, EditTextButton } from "../components/other";
 import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react";
 import { FormItem, SubmitButton } from "../components/form";
@@ -61,13 +61,12 @@ export default function Profile() {
         }
     }
 
-    async function handleUpdateAcc(upUser : User, type : UpdateTypes) {
+    async function handleUpdateAcc(upUser : User) {
         try {
             const res = await fetch("api/users/acc/update", {
                 method: "POST",
                 body: JSON.stringify({
                     user: upUser,
-                    type: type
                 })
             })
             const data = await res.json();
@@ -111,30 +110,15 @@ export default function Profile() {
     }
     return ( 
         <>
-            {
-                isDrop ? 
-                    <DropImage closeDrop={toggleDrop} updateImg={updateImg}/>
-                    :
-                    <></>
-            }
-            {
-                isDell ? 
-                    <DeleleteDialog message="Do you realy wont to delete your account?" onClose={toggleDell} onConfirm={handleDelete}/>
-                    :
-                    <></>
-            }
-            {
-                isPassw ? 
-                    <PasswordChange onClose={togglePassw}/>
-                    :
-                    <></>
-            }
+            { isDrop && <DropImage closeDrop={toggleDrop} updateImg={updateImg}/>}
+            { isDell && <DeleleteDialog message="Do you realy wont to delete your account?" onClose={toggleDell} onConfirm={handleDelete}/>}
+            { isPassw && <PasswordChange onClose={togglePassw}/> }
             <div className="flex w-2/4 flex-col m-auto py-14 space-y-4" >
                 <section className="bg-neutral-950 rounded flex gap-16 p-4">
                     <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:bg-neutral-500 hover:outline  w-32 h-32 cursor-pointer"></Image>
                     <div className="flex flex-col gap-4">
-                        <Name user={user}/>
-                        <Email user={user}/>
+                        <Name user={user} handleUpdate={handleUpdateAcc}/>
+                        <Email user={user} handleUpdate={handleUpdateAcc}/>
                         <p>{formattedDate}</p>
                     </div>
                 </section>
@@ -147,15 +131,71 @@ export default function Profile() {
     )
 }
 
-function Name({ user } : { user : User }) {
+function Name({ user, handleUpdate } : { user : User, handleUpdate : (user : User) => void }) {
+    const [ name, setName ] = useState<string>(user.name);
+    const [ surname, setSurname ] = useState<string>(user.surname);
+    const [ edit, toggleEdit ] = useReducer(edit => !edit, false);
+
+    function handleSubmit() {
+        user.name = name;
+        user.surname = surname;
+        handleUpdate(user);
+        toggleEdit();
+    }
+
+    function handleKeyDown(event : KeyboardEvent<HTMLInputElement>) {
+        const inputValue = event.currentTarget.value;
+        if (event.key === 'Enter') {
+            if (inputValue.length > 0) {
+                handleSubmit();
+                toggleEdit();
+            }
+        }
+    }
+
     return ( 
-        <h1 className="text-xl font-bold">{user.name} {user.surname}</h1> 
+        <div className="flex gap-2">
+            {
+                edit ? 
+                    <div className="flex gap-2">
+                        <input type="text" defaultValue={user.name} onKeyDown={handleKeyDown} onChange={(event) => setName(event.currentTarget.value)} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
+                        <input type="text" defaultValue={user.surname} onKeyDown={handleKeyDown} onChange={(event) => setSurname(event.currentTarget.value)} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
+                        <button className="btn-primary" onClick={handleSubmit}>Submit</button>
+                    </div>
+                    :
+                    <h1 className="text-xl font-bold">{user.name} {user.surname}</h1> 
+            }
+            <EditTextButton onClick={toggleEdit}/>
+        </div> 
     )
 }
 
-function Email({ user } : { user : User }) {
+function Email({ user, handleUpdate } : { user : User, handleUpdate : (user : User) => void }) {
+    const [ edit, toggleEdit ] = useReducer(edit => !edit, false);
+
+    function handleKayDown(event : KeyboardEvent<HTMLInputElement>) {
+        const inputValue = event.currentTarget.value;
+        if (event.key === 'Enter') {
+            if (inputValue.length > 0) {
+                user.email = inputValue;
+                handleUpdate(user);
+                toggleEdit();
+            }
+        }
+    }
     return (
-        <p>{user?.email}</p>  
+        <div className="flex gap-2">
+            {
+                edit ? 
+                    <div>
+                        <input type="email" defaultValue={user.email} onKeyDown={handleKayDown} className="bg-neutral-950 outline-none border-b w-5/6"></input>
+                    </div>
+                    :
+                    <p>{user.email}</p> 
+                    
+            }
+            <EditTextButton onClick={toggleEdit}/>
+        </div> 
     )
 }
 
@@ -172,9 +212,27 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
     const [msg, setMsg] = useState<string>("");
     const [isCorrect, toggleCorrect] = useReducer(isCorrect => !isCorrect, true);
 
-    async function handleChangePassword() {
+    async function handleChangePassword(e : FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const password = formData.get("password");
+        const repeatpassword = formData.get("repeatpassword");
         try {
-
+            console.log(password, repeatpassword);
+            const res = await fetch("/api/auth/password/change" , {
+                method: "POST", 
+                body: JSON.stringify({
+                    password: password,
+                    repeatPassword: repeatpassword
+                })
+            })
+            const data = await res.json();
+            if (!res.ok) {
+                toggleCorrect();
+                setMsg(data.error);
+                return;
+            }
+            setMsg(data.message)
         }
         catch (error) {
             console.error(error);
@@ -186,11 +244,11 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
             <div className='bg-neutral-950 rounded w-fit h-fit overflow-hidden relative p-8 '>
                 <DialogClose handleClose={onClose}/>
                 <h2 className="font-bold text-xl mb-8">Change password</h2>
-                <form className="flex flex-col gap-4 m-0 w-96">
+                <form onSubmit={handleChangePassword} className="flex flex-col gap-4 m-0 w-96">
                     <FormItem item="Password" type="password" name="password" correct={isCorrect}/>
-                    <FormItem item="Repeat Password" type="password" name="password" correct={isCorrect}/>
+                    <FormItem item="Repeat Password" type="password" name="repeatpassword" correct={isCorrect}/>
                     <SubmitButton/>
-                    <p>{msg}</p>
+                    <p className={`m-auto ${isCorrect ? "text-green-600" : "text-red-600"}`}>{msg}</p>
                 </form>
             </div>
         </dialog>
