@@ -2,8 +2,7 @@ import { useReducer, useState, DragEvent, useRef, ChangeEvent } from "react"
 import { DialogClose } from "./other";
 
 // TODO: add some arg for better use
-export default function DropImage({ closeDrop, updateImg } : { closeDrop : () => void, updateImg : (img : string) => void }) {
-    const [file, setFile] = useState<File | null>(null);
+export default function DropImage({ closeDrop, updateImg } : { closeDrop : () => void, updateImg : (file : File) => void }) {
     const [errorMsg, setErrorMsg] = useState<string>("");
     const [isOver, toggleOver] = useReducer(isOver => !isOver ,false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -16,30 +15,9 @@ export default function DropImage({ closeDrop, updateImg } : { closeDrop : () =>
         
     }
 
-    async function fetchImage(image : File) {
-        try {
-            const formData = new FormData();
-            formData.append('image', image);
-            const res = await fetch("/api/users/acc/image", {
-                method: "POST",
-                body: formData,
-            });
-            const data = await res.json();
-            if (res.ok) {
-                updateImg(data.img);
-                closeDrop();
-            }
-            
-            setErrorMsg(data.error);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-
     function submitFile(file : File) {
         if (file.type == "image/png" || file.type == "image/jpeg") {
-            fetchImage(file);
+            updateImg(file);
         } 
         else {
             setErrorMsg("Unsupported file format");

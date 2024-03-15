@@ -20,7 +20,10 @@ export default function UserInfo() {
                 console.error(data.error);
                 fetchUser();
             }
-            setImg(`/uploads/user/${data.image}`);
+            if (data.image) {
+                setImg(`/uploads/user/${data.image}`);
+            }
+            
         }
         catch (error) {
             console.log(error);

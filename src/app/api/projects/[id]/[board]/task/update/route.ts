@@ -32,7 +32,6 @@ export async function POST(req : Request, { params } : { params : { id : string 
                 complexity: task.complexity,
                 priority: task.priority,
                 description: task.description,
-                projectMemberId: task.projectMemberId
             }
         })
 

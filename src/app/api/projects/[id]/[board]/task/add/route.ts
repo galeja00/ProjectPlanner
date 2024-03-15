@@ -1,6 +1,6 @@
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/db";
-import { Task, TaskColumn } from "@prisma/client";
+import { Task, TaskColumn, TaskSolver } from "@prisma/client";
 import { Session, User, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
@@ -51,9 +51,15 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                 name: name,
                 type: type, 
                 taskColumnId: colId,
-                projectMemberId: member.id,
                 projectId: params.id,
                 colIndex: index
+            }
+        })
+
+        const solver : TaskSolver = await prisma.taskSolver.create({
+            data: {
+                memberId: member.id,
+                taskId: task.id
             }
         })
 

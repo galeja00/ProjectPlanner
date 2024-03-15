@@ -81,9 +81,27 @@ export default function Profile() {
     }
 
     function updateImg(img : string) {
-        if (user) {
-            user.image = img;
-            setUser(user);
+        
+    }
+    async function fetchImage(image : File) {
+        try {
+            const formData = new FormData();
+            formData.append('image', image);
+            const res = await fetch("/api/users/acc/image", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+            if (res.ok) {
+                if (user) {
+                    user.image = data.img;
+                    setUser(user);
+                    toggleDrop();
+                }
+            }
+        }
+        catch (error) {
+            console.error(error);
         }
     }
 
@@ -110,12 +128,12 @@ export default function Profile() {
     }
     return ( 
         <>
-            { isDrop && <DropImage closeDrop={toggleDrop} updateImg={updateImg}/>}
+            { isDrop && <DropImage closeDrop={toggleDrop} updateImg={fetchImage}/>}
             { isDell && <DeleleteDialog message="Do you realy wont to delete your account?" onClose={toggleDell} onConfirm={handleDelete}/>}
             { isPassw && <PasswordChange onClose={togglePassw}/> }
-            <div className="flex w-2/4 flex-col m-auto py-14 space-y-4" >
+            <div className="flex w-2/4 flex-col m-auto py-14 space-y-8" >
                 <section className="bg-neutral-950 rounded flex gap-16 p-4">
-                    <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:bg-neutral-500 hover:outline  w-32 h-32 cursor-pointer"></Image>
+                    <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover: w-32 h-32 cursor-pointer"></Image>
                     <div className="flex flex-col gap-4">
                         <Name user={user} handleUpdate={handleUpdateAcc}/>
                         <Email user={user} handleUpdate={handleUpdateAcc}/>

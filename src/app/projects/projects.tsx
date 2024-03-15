@@ -92,10 +92,11 @@ function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vi
     if (index < vis[0] || index > vis[1]) {
         visible = "hidden";
     } 
+    const icon = proj.icon ? `/uploads/project/${proj.icon}` : "/project.svg";
     return (
         <li key={proj.id} className={`overflow-hidden bg-neutral-950 rounded w-96 h-50 h-auto ${visible}`}>
             <div className='absolute w-96 h-10' style={{backgroundColor: proj.color}}></div>
-            <Image src="/project.svg" alt="avater" width={20} height={20} className='w-12 h-12 rounded-full bg-neutral-50 mr-5 text-color cursor-pointer absolute z-10 left-6 top-4'></Image>
+            <Image src={icon} alt="avater" width={50} height={50} className='w-12 h-12 rounded bg-neutral-50 mr-5 text-color cursor-pointer absolute z-10 left-4 top-4'></Image>
             <div className='p-4 mt-16'>
                 <h3 className='relative z-10 text-xl mb-2 font-bold'>{proj.name}</h3>
                 <dl className='mb-4'>

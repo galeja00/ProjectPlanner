@@ -13,7 +13,6 @@ export async function POST(req : Request) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
         const data = await req.json(); 
-        console.log(data);
         if(!data.password || !data.repeatPassword) {
             return Response.json({ error: "Passwords arent same"}, { status: 400}); 
         }
@@ -27,7 +26,6 @@ export async function POST(req : Request) {
                 password: hashedPassword
             }
         })
-        console.log("tak co dopici")
         return Response.json({ message: "Password change succesfully"}, { status: 200 });
     }
     catch (error) {

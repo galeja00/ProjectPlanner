@@ -33,11 +33,11 @@ export function ProjectInfo( { id } : { id : string }) {
         }
     }
 
-    const icon = info?.icon ? info.icon : "/project.svg"
+    const icon = info?.icon ? `/uploads/project/${info.icon}` : "/project.svg"
 
     return (
         <div className="flex gap-4">
-            <Image src={icon} alt="Project Icon" width={30} height={30} className="bg-neutral-50 rounded h-fit block mt-auto mb-auto"></Image>
+            <Image src={icon} alt="Project Icon" width={50} height={50} className="bg-neutral-50 rounded w-10 h-fit block mt-auto mb-auto"></Image>
             <div className=''>
                 <h2>{info?.name ? info.name : ""}</h2>
                 <p className=" text-sm text-neutral-400">{info?.category ? info.category : "undefined"}</p>
