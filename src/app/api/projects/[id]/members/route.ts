@@ -12,12 +12,14 @@ enum Load {
 }
 
 type MemberTableInfo = {
+    id : string,
     memberId: string,
-    image: string | null,
     name: string,
     surname: string,
-    seniority: string | null,
+    teamId: string | null,
+    teamName: string | null,
     position: string | null,
+    image: string | null,
     tasksLoad: Load 
 }
 
@@ -47,15 +49,25 @@ export async function GET(req : Request, { params } : { params: { id : string }}
                     id: member.userId
                 }
             })
-            
+
+            var team = null
+            if (member.teamId) {
+                team = await prisma.team.findFirst({
+                    where: {
+                        id: member.teamId
+                    }
+                })
+            }
             if (user) {
                 //TODO: math function for load (hours, complexity, avg of members "for solo project some constant (might costumizeble)")
                 users.push({ 
+                    id: user.id,
                     memberId: member.id, 
                     image: user.image,
                     name: user.name,
                     surname: user.surname,
-                    seniority: member.seniority,
+                    teamId: member.teamId,
+                    teamName: team ? team.name : null,
                     position: member.position,
                     tasksLoad: Load.low 
                 });

@@ -40,3 +40,7 @@ dev.db*
 
 # images
 /images
+/public/uploads/*
+
+# paths used in program for saving files
+/src/config.ts

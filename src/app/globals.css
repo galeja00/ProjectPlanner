@@ -58,3 +58,8 @@ body {
     )
     var(--background-start-rgb)*/
 }
+
+html {
+  scrollbar-width: thin; 
+  scrollbar-color: #fafafa transparent; 
+}

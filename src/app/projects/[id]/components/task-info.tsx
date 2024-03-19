@@ -3,7 +3,7 @@
 import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "react";
 import Image from 'next/image' 
 import { Issue, Tag, Task, Ranking } from "@prisma/client";
-import { DialogClose } from "@/app/components/other";
+import { Dialog, DialogClose } from "@/app/components/dialog";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 
 
@@ -48,7 +48,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
     }, []);
 
     return (
-        <dialog className='absolute z-50 flex bg-neutral-900 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 '>
+        <Dialog>
             <div className='bg-neutral-950 rounded w-[80rem] h-fit mx-72 my-36 overflow-hidden relative'>
                 { task 
                     ?
@@ -69,7 +69,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                     </>
                 }
             </div>
-        </dialog>
+        </Dialog>
     ) 
 }  
 
@@ -102,7 +102,7 @@ function Name({taskName, updateName} : {taskName : string, updateName : (name : 
         toggleEdit();
     }
     
-    function handleNameChange(event : KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(event : KeyboardEvent<HTMLInputElement>) {
         //event.preventDefault();
         const inputValue = event.currentTarget.value;
         if (event.key === 'Enter') {
@@ -117,7 +117,7 @@ function Name({taskName, updateName} : {taskName : string, updateName : (name : 
             {
                 isEditing ? 
                     <>
-                        <input type="text" defaultValue={name} onKeyDown={handleNameChange} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
+                        <input type="text" defaultValue={name} onKeyDown={handleKeyDown} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
                     </>
                     :
                     <>
@@ -187,12 +187,7 @@ function TagList({taskTags} : {taskTags : Tag[]}) {
                     ))
                 }
             </ul>
-            {
-                creating ?
-                    <TagCreator handleCreateTag={handleCreateTag}/>
-                    :
-                    <></>
-            }
+            {creating && <TagCreator handleCreateTag={handleCreateTag}/>}
             <button title="Create Tag" onClick={toggle}>
                 <Image src={"/plus.svg"} alt={"create tag"} height={20} width={20}/>
             </button>
@@ -544,15 +539,16 @@ function Solvers({ task, projectId } : { task : Task, projectId : string }) {
         <div>
             <div className="flex gap-2">
                 <h3 className='font-bold mb-2'>Solvers</h3>
-                <button onClick={fetchSolvers} className="h-fit" title="Edit Info"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
+                <button onClick={fetchSolvers} className="h-fit" title="Edit solvers"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
             </div>
             <ul className="space-y-2">
                 {solvers.map((solver) => {
                     const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";
                     return (
                         <li key={solver.id} className='bg-neutral-900 p-2 rounded w-full flex flex-row gap-1 relative items-center'>
-                        <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-300 mr-2 text-color cursor-pointer'></Image>
+                            <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-300 mr-2 text-color cursor-pointer'></Image>
                             <div>{solver.name} {solver.surname}</div>
+                            <div>{solver.teamId}</div>
                         </li>
                     )
                 })}

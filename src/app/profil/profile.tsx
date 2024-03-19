@@ -4,11 +4,12 @@ import Image from "next/image"
 import { useReducer, useState, useEffect, KeyboardEvent, FormEvent } from "react"
 import DropImage from "../components/drop-image";
 import { User } from "@prisma/client";
-import { ButtonItems, ButtonList, DeleleteDialog, DialogClose, EditTextButton } from "../components/other";
+import { ButtonItems, ButtonList, DeleleteDialog, EditTextButton } from "../components/other";
 import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react";
 import { FormItem, SubmitButton } from "../components/form";
 import { pathToImages } from "@/config";
+import { Dialog, DialogClose } from "../components/dialog";
 
 enum UpdateTypes {
     Name = "Name",
@@ -258,7 +259,7 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
     }
 
     return ( 
-        <dialog className='absolute z-50 flex bg-neutral-900 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
+        <Dialog>
             <div className='bg-neutral-950 rounded w-fit h-fit overflow-hidden relative p-8 '>
                 <DialogClose handleClose={onClose}/>
                 <h2 className="font-bold text-xl mb-8">Change password</h2>
@@ -269,6 +270,6 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
                     <p className={`m-auto ${isCorrect ? "text-green-600" : "text-red-600"}`}>{msg}</p>
                 </form>
             </div>
-        </dialog>
+        </Dialog>
     )
 }

@@ -2,11 +2,11 @@ import Image from 'next/image'
 import { VoidFunctionComponent } from 'react'
 
 
-export function ButtonWithImg() {
+export function ButtonWithImg({ image, onClick, alt, title } : { image : string, onClick : () => void, alt : string, title : string }) {
     return (
         <div className='w-fit h-full'>
-            <button className='btn-primary'>
-                <Image src="/filter.svg" alt="filter" height={25} width={25} className=' h-5 w-5'/>
+            <button className='btn-primary' title={title} onClick={onClick}>
+                <Image src={image} alt={alt} height={25} width={25} className=' h-5 w-5'/>
             </button>
         </div>
     )

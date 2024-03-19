@@ -26,3 +26,11 @@ export function CreateTaskButton({ createTask } : { createTask : () => void }) {
         </div>
     )
 }
+
+export function TeamBadge({ name, color} : { name : string, color : string }) {
+    return ( 
+        <div className=' px-1 rounded border border-violet-600 bg-violet-600 bg-opacity-60 text-sm'>
+            {name}
+        </div>
+    ) 
+}

@@ -47,7 +47,7 @@ export default function NotifiactionsList() {
         <>
             <section className="flex gap-4 mb-4 w-fit h-fit items-end">
                 <SearchInput/>
-                <ButtonWithImg/>
+                <ButtonWithImg image="filter.svg" alt="filter" title="Filter Members" onClick={()=>new Error("Not implemented")}/>
             </section>
             <ul className="rounded p-1 min-h-[40rem]">
                 {
@@ -60,7 +60,7 @@ export default function NotifiactionsList() {
     )
 }
 
-// TODO: accept/decline and design
+
 function NotificationsItem({notif, updateNotif} : {notif : Notification, updateNotif : () => void}) {
     async function handleButtonClick(type : string) {
         try {

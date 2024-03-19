@@ -4,8 +4,8 @@ import { useEffect, useReducer, useRef, useState, KeyboardEvent } from "react"
 import { FilterButton, SearchInput } from '../components/filter-tables'
 import { Head } from '../components/other'
 import { User } from '@prisma/client'
-import { DialogClose } from '@/app/components/other'
-
+import { ButtonWithImg } from '@/app/components/other'
+import { Dialog, DialogClose } from '@/app/components/dialog'
 
 enum Load {
     low = 1,
@@ -26,7 +26,8 @@ type MemberInfo = {
 //TODO: beter structure of code and calls
 export default function Members({ params } : { params : { id : string }}) {
     const [ members, setMembers] = useState<MemberInfo[]>([]);
-    const [ isAddDialog, toggleDialog ] = useState<boolean>(false)
+    const [ isAddDialog, toggleDialog ] = useState<boolean>(false);
+    const [ isTeamDialog, toggleTeamDialog ] = useReducer(isTeamDialog => !isTeamDialog, false);
 
     useEffect(() => {
         fetchMembers();
@@ -65,22 +66,20 @@ export default function Members({ params } : { params : { id : string }}) {
                     throw new Error('Function not implemented.')
                 } }/>
                 <AddMemberButton handleClick={handleAddButton}/>
+                <ButtonWithImg image='' alt='teams' title='edit teams' onClick={toggleTeamDialog}/>
             </div>
             <TableMembers members={members}/>
-            {
-                isAddDialog ?
-                    <AddDialog onClose={handleAddButton} id={params.id} />
-                    :
-                    <></>
-            }
+            { isAddDialog && <AddDialog onClose={handleAddButton} id={params.id} />}
         </main>
     )
 }
 
+
+
 function AddMemberButton({ handleClick } : { handleClick : () => void}) {
     return (
         <button className='btn-primary' onClick={handleClick}>
-            <Image src="/person-fill-add.svg" alt="add-person" height={20} width={20}/>
+            <Image src="/person-add.svg" alt="add-person" height={20} width={20}/>
         </button>
     )
 }
@@ -115,7 +114,7 @@ function MemberRow({ memberInfo } : { memberInfo : MemberInfo }) {
     }
     return (
         <tr key={memberInfo.memberId} className='bg-neutral-900 rounded grid grid-cols-5 p-2 justify-items-left items-center'>
-            <td><Image src={imgSrc} height={20} width={20} alt="image" className='w-6 h-6 rounded-full bg-neutral-300'/></td>
+            <td><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-300'/></td>
             <td>{memberInfo.name} {memberInfo.surname}</td>
             <td>{memberInfo.position}</td>
             <td>{memberInfo.teamName}</td>
@@ -233,13 +232,13 @@ function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
     }
 
     return (
-        <dialog className='absolute z-50 flex bg-neutral-900 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center items-center'>
+        <Dialog>
             <search className='p-4 relative h-2/3 w-1/3 bg-neutral-950 rounded flex flex-col gap-4'>
                 <DialogClose handleClose={onClose}/>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser}/>
                 <ListUsers users={results} id={id}/>
             </search>
-        </dialog>
+        </Dialog>
     )
 }
 
