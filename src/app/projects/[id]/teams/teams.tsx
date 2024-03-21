@@ -69,7 +69,6 @@ export default function Teams({ projectId } : { projectId : string}) {
                     teamId: teamId
                 })
             })
-            console.log(data);
             if (res.ok) {
                 const newTeams : TeamInfo[] = [];
                 for(const team of teams) {
