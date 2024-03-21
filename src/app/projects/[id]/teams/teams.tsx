@@ -3,7 +3,7 @@
 import { ButtonWithImg, SearchInput } from "@/app/components/other"
 import { Head, TeamBadge } from "../components/other"
 import { FilterButton } from "../components/filter-tables"
-import { Team } from "@prisma/client"
+import { Task, Team } from "@prisma/client"
 import { FormEvent, useEffect, useReducer, useState } from "react"
 import { Dialog, DialogClose } from "@/app/components/dialog"
 import { FormItem } from "@/app/components/form"
@@ -34,9 +34,15 @@ type MemberInfo = {
     image: string | null,
 }
 
+type TaskInfo = {
+
+}
+
 export default function Teams({ projectId } : { projectId : string}) {
     const [teams, setTeams] = useState<TeamInfo[]>([]);
     const [isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false); 
+    const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); 
+    const [team, setTeam] = useState<TeamInfo  | null>(null);
 
     async function fetchTeams() {
         try {
@@ -55,28 +61,71 @@ export default function Teams({ projectId } : { projectId : string}) {
         }
     }
 
+    async function deleteTeam(teamId : string) {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/team/delete`, {
+                method: "POST", 
+                body: JSON.stringify({
+                    teamId: teamId
+                })
+            })
+            console.log(data);
+            if (res.ok) {
+                const newTeams : TeamInfo[] = [];
+                for(const team of teams) {
+                    if (team.id != teamId) {
+                        newTeams.push(team);
+                    }
+                }
+                setTeams(newTeams);
+                return;
+            }
+           const data = await res.json(); 
+            console.error(data.error);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    function openSettings(teamId : string) {
+        for (const team of teams) {
+            if (team.id == teamId) {
+                setTeam(team);
+                break;
+            }
+        }
+        toggleSettings();
+    }
+
+    function closeSettings() {
+        setTeam(null);
+        toggleSettings();
+    }
+
     useEffect(() => { fetchTeams() }, []);
 
     return (
         <>
-            { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} /> }
+            { isSettings && team && <TeamDialog team={team} closeSettings={closeSettings}/>}
+            { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             <Head text="Teams" />
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                 <SearchInput/>
                 <ButtonWithImg image="/person-add.svg" alt="team" title="Create Team" onClick={toggleAdding}/>
             </section>
             <section>
-                <TeamsTable teams={teams}/>
+                <TeamsTable teams={teams} handleDelete={deleteTeam} openSettings={openSettings}/>
             </section>
         </>
     )
 }
 
-function TeamsTable({ teams } : { teams : TeamInfo[] }) {
+function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[], handleDelete : (id : string) => void, openSettings : (id : string) => void }) {
     return (
         <table className="bg-neutral-950 rounded flex flex-col">
             <thead className="">
-                <tr className='py-2 px-3 grid grid-cols-4 justify-items-left items-center'>
+                <tr className='py-2 px-3 grid grid-cols-5 justify-items-left items-center'>
                     <th className='w-fit'>Name</th>
                     <th className="w-fit">Members</th>
                     <th className='w-fit'>Num Of Members</th>
@@ -86,7 +135,7 @@ function TeamsTable({ teams } : { teams : TeamInfo[] }) {
             <tbody className='flex flex-col gap-1 p-1'>
                 {
                     teams.map((team) => (
-                        <TeamRow teamInfo={team}/>
+                        <TeamRow teamInfo={team} handleDelete={() => handleDelete(team.id)} openSettings={() => openSettings(team.id)}/>
                     ))
                 }
             </tbody>
@@ -94,30 +143,49 @@ function TeamsTable({ teams } : { teams : TeamInfo[] }) {
     )
 }
 
-function TeamRow({ teamInfo } : { teamInfo : TeamInfo }) {
+function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInfo, handleDelete : () => void, openSettings : () => void}) {
     return (
-        <tr key={teamInfo.id} className='bg-neutral-900 rounded grid grid-cols-5 p-2 justify-items-left items-center'>
+        <tr key={teamInfo.id} className='bg-neutral-900 rounded py-2 px-3 grid grid-cols-5 justify-items-left items-center'>
             <td>{teamInfo.name}</td>
             <Members members={teamInfo.members}/>
+            <td>0</td>
+            <td>0</td>
+            <td className="h-fit flex gap-2 items-center justify-end">
+                <button onClick={handleDelete} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
+                    <img src="/x.svg" title="Delete Group" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
+                </button>
+                <button onClick={openSettings} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-violet-600">
+                    <img src="/settings.svg" title="Edit Team" className="w-8 h-8 p-2 rounde hover:bg-violet-600 hover:bg-opacity-40"></img>
+                </button>
+            </td>
+            
         </tr>
     )
 }
 
 function Members({ members } : { members : TeamMemberInfo[] }) {
+    const displayNum = 10;
     return (
         <td className="flex">
+            <ul className="flex gap-1">
             {
-                members.map((member) => {
+                members.slice(0, displayNum).map((member, index) => {
+                    let img = "/avatar.svg"
+                    if (member.image) {
+                        img = `/uploads/user/${member.image}`
+                    }
                     return (
-                        <></>
+                        <li><Image title={`${member.name} ${member.surname}`} src={img} height={30} width={30} alt="member" className="rounded-full w-6 h-6"/></li>
                     )
                 })
             }
+            </ul>
         </td>
     )
 }
 
-function AddDialog({ projectId, handleCloseDialog } : { projectId : string,  handleCloseDialog : () => void}) {
+// TODO: Messages
+function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId : string,  handleCloseDialog : () => void, updateTeams : () => void}) {
     const [ correct, setCorrect ] = useState<boolean>(true);
     const [ members, setMembers ] = useState<MemberInfo[]>([]);
     const [ selected, setSelected ] = useState<MemberInfo[]>([]);
@@ -151,6 +219,7 @@ function AddDialog({ projectId, handleCloseDialog } : { projectId : string,  han
                 return
             }
             fetchMembers();
+            updateTeams();
             setMsg(data.msg);
         }
         catch (error) {
@@ -257,5 +326,19 @@ function ProjectMember({ member, active, onClick } : { member : MemberInfo, acti
             <p>{member.name} {member.surname}</p>
             { member.teamName && <TeamBadge name={member.teamName} color={""}/>}
         </li>
+    )
+}
+
+
+function TeamDialog({ team, closeSettings } : { team : TeamInfo, closeSettings : () => void}) {
+    const [projectMembers, setProjectMembers] = useState<MemberInfo[]>([]);
+    const [teamTasks, setTeamTasks] = useState<TaskInfo[]>([]); 
+    return (
+        <Dialog>
+            <div className="bg-neutral-950 w-50 h-50 rounded p-8  relative">
+                <DialogClose handleClose={closeSettings}/>
+                <h2 className="text-xl font-bold">{team.name}</h2>
+            </div>
+        </Dialog>
     )
 }

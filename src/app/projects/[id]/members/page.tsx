@@ -18,6 +18,7 @@ type MemberInfo = {
     memberId: string,
     name: string,
     position: string | null,
+    teamId: string | null
     teamName: string | null,
     surname: string,
     tasksLoad: number
@@ -53,6 +54,32 @@ export default function Members({ params } : { params : { id : string }}) {
         }
     }
 
+    async function removeMember(memberId : string) {
+        try {
+            const res = await fetch(`/api/projects/${params.id}/members/delete`, {
+                method: "POST",
+                body: JSON.stringify({
+                    memberId: memberId
+                })
+            })
+
+            const data = await res.json();
+            if (res.ok) {
+                const newMembres : MemberInfo[] = [];
+                for (const member of members) {
+                    if (memberId != member.memberId) {
+                        newMembres.push(member);
+                    }
+                }
+                setMembers(newMembres);
+            }
+            console.error(data.error);
+        }
+        catch(error) {
+            console.error(error);
+        }
+    }
+
     function handleAddButton() {
         toggleDialog(!isAddDialog);
     }
@@ -66,9 +93,8 @@ export default function Members({ params } : { params : { id : string }}) {
                     throw new Error('Function not implemented.')
                 } }/>
                 <AddMemberButton handleClick={handleAddButton}/>
-                <ButtonWithImg image='' alt='teams' title='edit teams' onClick={toggleTeamDialog}/>
             </div>
-            <TableMembers members={members}/>
+            <TableMembers members={members} handleRemove={removeMember}/>
             { isAddDialog && <AddDialog onClose={handleAddButton} id={params.id} />}
         </main>
     )
@@ -84,14 +110,16 @@ function AddMemberButton({ handleClick } : { handleClick : () => void}) {
     )
 }
 
-function TableMembers({ members } : { members : MemberInfo[] }) {
+function TableMembers({ members, handleRemove } : { members : MemberInfo[], handleRemove : (memberId : string) => void}) {
+    function openSettings(id : string) {
+
+    }
     return (
         <table className="bg-neutral-950 rounded flex flex-col">
             <thead className="">
                 <tr className='py-2 px-3 grid grid-cols-5 justify-items-left items-center'>
                     <th className='w-fit'>Image</th>
                     <th className='w-fit'>Name</th>
-                    <th className='w-fit'>Position</th>
                     <th className='w-fit'>Team</th>
                     <th className='w-fit'>Tasks Load</th>
                 </tr>
@@ -99,7 +127,7 @@ function TableMembers({ members } : { members : MemberInfo[] }) {
             <tbody className='flex flex-col gap-1 p-1'>
                 {
                     members.map((member) => (
-                        <MemberRow memberInfo={member}/>
+                        <MemberRow memberInfo={member} handleRemove={() => handleRemove(member.memberId)} openSettings={() => openSettings(member.memberId)}/>
                     ))
                 }
             </tbody>
@@ -107,7 +135,7 @@ function TableMembers({ members } : { members : MemberInfo[] }) {
     )
 }
 
-function MemberRow({ memberInfo } : { memberInfo : MemberInfo }) {
+function MemberRow({ memberInfo, handleRemove, openSettings } : { memberInfo : MemberInfo, handleRemove : () => void, openSettings : () => void }) {
     let imgSrc = "/avatar.svg"; 
     if (memberInfo.image) {
         imgSrc = `/uploads/user/${memberInfo.image}`;
@@ -116,9 +144,16 @@ function MemberRow({ memberInfo } : { memberInfo : MemberInfo }) {
         <tr key={memberInfo.memberId} className='bg-neutral-900 rounded grid grid-cols-5 p-2 justify-items-left items-center'>
             <td><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-300'/></td>
             <td>{memberInfo.name} {memberInfo.surname}</td>
-            <td>{memberInfo.position}</td>
             <td>{memberInfo.teamName}</td>
             <MemberLoad load={memberInfo.tasksLoad}/>
+            <td className='flex gap-1 justify-end'>
+                <button onClick={handleRemove} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
+                        <img src="/x.svg" title="Remove User" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
+                </button>
+                <button onClick={openSettings} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-violet-600">
+                    <img src="/settings.svg" title="Edit Team" className="w-8 h-8 p-2 rounde hover:bg-violet-600 hover:bg-opacity-40"></img>
+                </button>
+            </td>
         </tr>
     )
 }
