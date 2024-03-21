@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useReducer, useState } from "react"
 import { Dialog, DialogClose } from "@/app/components/dialog"
 import { FormItem } from "@/app/components/form"
 import Image from "next/image"
+import { TeamDialog } from "./team-info"
 
 type TeamInfo = {
     id : string,
@@ -30,7 +31,6 @@ type MemberInfo = {
     surname: string,
     teamId: string | null,
     teamName: string | null,
-    position: string | null,
     image: string | null,
 }
 
@@ -43,7 +43,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     const [isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false); 
     const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); 
     const [team, setTeam] = useState<TeamInfo  | null>(null);
-
+    
     async function fetchTeams() {
         try {
             const res = await fetch(`/api/projects/${projectId}/team`, {
@@ -55,6 +55,7 @@ export default function Teams({ projectId } : { projectId : string}) {
                 return;
             }
             setTeams(data.teams);
+            console.log(data.teams);
         }
         catch (error) {
             console.error(error);
@@ -104,9 +105,11 @@ export default function Teams({ projectId } : { projectId : string}) {
 
     useEffect(() => { fetchTeams() }, []);
 
+    
+
     return (
         <>
-            { isSettings && team && <TeamDialog team={team} closeSettings={closeSettings}/>}
+            { isSettings && team && <TeamDialog team={team} projectId={projectId} closeSettings={closeSettings}/>}
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             <Head text="Teams" />
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
@@ -273,7 +276,6 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
 }
 
 function SelectMembers({ members, selected, updateSelected } : { members : MemberInfo[], selected : MemberInfo[], updateSelected : (membres : MemberInfo[]) => void}) {
-    //console.log(members);
     function handleSelect(selectedMember : MemberInfo, active : boolean) {
         if (active) {
             const index = selected.findIndex(member => member.id === selectedMember.id);
@@ -307,7 +309,7 @@ function SelectMembers({ members, selected, updateSelected } : { members : Membe
     )
 }
 
-function ProjectMember({ member, active, onClick } : { member : MemberInfo, active : boolean, onClick : () => void }) {
+export function ProjectMember({ member, active, onClick } : { member : MemberInfo, active : boolean, onClick : () => void }) {
     const [ac, setAc] = useState<boolean>(active);
     let img = "/avatar.svg";
     if (member.image) {
@@ -329,15 +331,3 @@ function ProjectMember({ member, active, onClick } : { member : MemberInfo, acti
 }
 
 
-function TeamDialog({ team, closeSettings } : { team : TeamInfo, closeSettings : () => void}) {
-    const [projectMembers, setProjectMembers] = useState<MemberInfo[]>([]);
-    const [teamTasks, setTeamTasks] = useState<TaskInfo[]>([]); 
-    return (
-        <Dialog>
-            <div className="bg-neutral-950 w-50 h-50 rounded p-8  relative">
-                <DialogClose handleClose={closeSettings}/>
-                <h2 className="text-xl font-bold">{team.name}</h2>
-            </div>
-        </Dialog>
-    )
-}
