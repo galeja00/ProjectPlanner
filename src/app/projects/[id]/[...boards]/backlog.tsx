@@ -9,7 +9,7 @@ type Group = {
 
 export default function Backlog({ id } : { id : string }) {
     const [groups, setGroups] = useState<Group[]>([]); 
-    async function fatchGroups() {
+    async function fetchGroups() {
         try {
             const res = await fetch(`/api/projects/${id}/`, {
                 method: "GET"
@@ -25,7 +25,7 @@ export default function Backlog({ id } : { id : string }) {
             <Head text="Backlog"/>
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                 <SearchInput/>
-                <FilterButton/>
+                <FilterButton onClick={() => fetchGroups}/>
             </section>
             <ListOfGroups groups={groups}/>
         </div>

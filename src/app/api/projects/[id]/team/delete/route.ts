@@ -34,7 +34,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
             }
         })
 
-        return Response.json({ message: "Invite succesed" }, { status: 200 });
+        return Response.json({ message: "Team delete succesed" }, { status: 200 });
 
     } catch (error) {
         return Response.json({ error: "Somthing went wrong :(" }, { status: 400 });

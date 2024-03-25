@@ -58,10 +58,9 @@ export async function GET(req : Request ,{ params } : { params: { id: string } }
                         image: true
                     }
                 })
-                if (!info) {
-                    continue;
+                if (info) {
+                    members.push({ id: info.id, memberId: member.id, name: info.name, surname: info.surname, image: info.image });
                 }
-                members.push({ id: info.id, memberId: member.id, name: info.name, surname: info.surname, image: info.image });
             }
             teamsInfo.push({ id: team.id, name: team.name, members: members});
         }

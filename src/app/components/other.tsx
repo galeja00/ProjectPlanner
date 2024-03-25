@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { VoidFunctionComponent } from 'react'
+
 
 
 export function ButtonWithImg({ image, onClick, alt, title } : { image : string, onClick : () => void, alt : string, title : string }) {
@@ -27,11 +27,7 @@ export function SearchInput() {
     )
 }
 
-export function DialogClose({ handleClose } : { handleClose : () => void}) {
-    return (
-        <button onClick={handleClose} className='absolute right-0 top-0 mt-2 mr-2'><Image src={'/x.svg'} alt={'close'} width={20} height={20}></Image></button>
-    )
-}
+
 
 export type ButtonItems = {
     name: string,

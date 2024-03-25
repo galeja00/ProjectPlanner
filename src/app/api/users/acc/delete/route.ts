@@ -16,7 +16,7 @@ export async function POST(req : Request) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
 
-        return Response.json({ user: user }, { status: 200 });
+        return Response.json({ mess: "Succesfully deleted profile" }, { status: 200 });
     }
     catch (error) {
         return Response.json({ error: error }, { status: 500 })

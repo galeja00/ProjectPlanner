@@ -29,7 +29,7 @@ export async function POST(request : Request) {
         }
     }
     catch (e) {
-        console.log({ e });
+        console.error({ e });
         return NextResponse.json({ massage: "fail"}, { status: 400 });
     }
 }

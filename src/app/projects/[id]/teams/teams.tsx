@@ -34,10 +34,6 @@ type MemberInfo = {
     image: string | null,
 }
 
-type TaskInfo = {
-
-}
-
 export default function Teams({ projectId } : { projectId : string}) {
     const [teams, setTeams] = useState<TeamInfo[]>([]);
     const [isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false); 
@@ -109,7 +105,7 @@ export default function Teams({ projectId } : { projectId : string}) {
 
     return (
         <>
-            { isSettings && team && <TeamDialog team={team} projectId={projectId} closeSettings={closeSettings}/>}
+            { isSettings && team && <TeamDialog team={team} projectId={projectId} updateTeams={fetchTeams} closeSettings={closeSettings}/>}
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             <Head text="Teams" />
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
@@ -186,7 +182,7 @@ function Members({ members } : { members : TeamMemberInfo[] }) {
     )
 }
 
-// TODO: Messages
+
 function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId : string,  handleCloseDialog : () => void, updateTeams : () => void}) {
     const [ correct, setCorrect ] = useState<boolean>(true);
     const [ members, setMembers ] = useState<MemberInfo[]>([]);
@@ -309,7 +305,7 @@ function SelectMembers({ members, selected, updateSelected } : { members : Membe
     )
 }
 
-export function ProjectMember({ member, active, onClick } : { member : MemberInfo, active : boolean, onClick : () => void }) {
+function ProjectMember({ member, active, onClick } : { member : MemberInfo, active : boolean, onClick : () => void }) {
     const [ac, setAc] = useState<boolean>(active);
     let img = "/avatar.svg";
     if (member.image) {

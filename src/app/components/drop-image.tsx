@@ -1,5 +1,6 @@
 import { useReducer, useState, DragEvent, useRef, ChangeEvent } from "react"
-import { DialogClose } from "./other";
+import { DialogClose } from "./dialog";
+
 
 // TODO: add some arg for better use
 export default function DropImage({ closeDrop, updateImg } : { closeDrop : () => void, updateImg : (file : File) => void }) {

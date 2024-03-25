@@ -1,6 +1,7 @@
-import { DialogClose } from '@/app/components/other'
+
 import Image from 'next/image'
 import { Ranking, Task} from '@prisma/client'
+import { DialogClose } from '@/app/components/dialog'
 
 export function SearchInput() {
     return (

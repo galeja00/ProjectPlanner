@@ -94,7 +94,7 @@ export default function Settings({ params } : { params : { id : string }}) {
     formattedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
     
     const state = project.done ? Status.Done : Status.InWork;
-    const icon = project.icon ? `/uploads/project/${project.icon}` : "/project.svg"
+    const icon = project.icon ? `/uploads/project/${project.icon}` : "/project.svg";
 
     return (
         <>

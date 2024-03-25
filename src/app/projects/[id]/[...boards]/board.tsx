@@ -410,9 +410,10 @@ function TaskComponent(
     //TODO: del api
     async function delSolver(memberId : string) {
         try {
-            const res = await fetch(``, {
+            const res = await fetch(`/api/projects/${projectId}/board/task/remove`, {
                 method: "POST",
                 body: JSON.stringify({
+                    task: task,
                     memberId: memberId
                 })
             }) 
@@ -616,11 +617,7 @@ function AddTaskColumn() {
 
 function Name({ name, submitName } : { name : string, submitName : (name : string) => void }) {
     const [ edit, toggleEdit ] = useReducer(edit => !edit, false);
-
-    function editInput() {
-        toggleEdit();
-    }
-
+    
     function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
         const inputValue = event.currentTarget.value;
         if (event.key === 'Enter') {
@@ -630,8 +627,6 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
             }
         }
     }
-
-
     return (
         <div className='flex gap-2'>
             {
@@ -640,7 +635,7 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
                     :
                     <h3 className='w-fit'>{name}</h3>
             }
-            <button onClick={editInput} className='w-fit h-fit rounded hover:bg-neutral-950 p-1' title="edit name" style={ {backgroundColor: edit ? "#0a0a0a" : ""}}>
+            <button onClick={toggleEdit} className='w-fit h-fit rounded hover:bg-neutral-950 p-1' title="edit name" style={ {backgroundColor: edit ? "#0a0a0a" : ""}}>
                 <Image src="/pencil.svg" alt="more" width={2} height={2} className='w-5 h-5 rounded-full cursor-pointer'></Image>
             </button>
         </div>
