@@ -3,7 +3,6 @@ import { Head } from "../components/other";
 import Board from "./board";
 import Backlog from "./backlog";
 import TimeTable from "./timetable";
-import Dashboard from "./dashboard";
 import { useEffect, useState } from "react";
 
 export default function Boards({ params } :  { params: { id : string, boards : string[]}}) {
@@ -13,7 +12,7 @@ export default function Boards({ params } :  { params: { id : string, boards : s
     } else {
         nameOfBoard = params.boards[1];
     }
-    const [board, setBoard] = useState<JSX.Element>(<Dashboard/>);
+    const [board, setBoard] = useState<JSX.Element>(<Board id={params.id}/>);
 
     useEffect(() => {
         switch (nameOfBoard) {

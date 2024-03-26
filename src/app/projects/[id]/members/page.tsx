@@ -117,11 +117,12 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
     return (
         <table className="bg-neutral-950 rounded flex flex-col">
             <thead className="">
-                <tr className='py-2 px-3 grid grid-cols-5 justify-items-left items-center'>
-                    <th className='w-fit'>Image</th>
-                    <th className='w-fit'>Name</th>
-                    <th className='w-fit'>Team</th>
-                    <th className='w-fit'>Tasks Load</th>
+                <tr className='py-2 px-3 grid grid-cols-9 justify-items-left items-center'>
+                    <th className='w-fit col-span-2'>Image</th>
+                    <th className='w-fit col-span-2'>Name</th>
+                    <th className='w-fit col-span-2'>Team</th>
+                    <th className='w-fit col-span-2'>Tasks Load</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody className='flex flex-col gap-1 p-1'>
@@ -141,12 +142,12 @@ function MemberRow({ memberInfo, handleRemove, openSettings } : { memberInfo : M
         imgSrc = `/uploads/user/${memberInfo.image}`;
     }
     return (
-        <tr key={memberInfo.memberId} className='bg-neutral-900 rounded grid grid-cols-5 p-2 justify-items-left items-center'>
-            <td><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-300'/></td>
-            <td>{memberInfo.name} {memberInfo.surname}</td>
-            <td>{memberInfo.teamName}</td>
+        <tr key={memberInfo.memberId} className='bg-neutral-900 rounded grid grid-cols-9 p-2 gap-2 justify-items-left items-center'>
+            <td className='col-span-2'><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-300'/></td>
+            <td className='col-span-2'>{memberInfo.name} {memberInfo.surname}</td>
+            <td className='col-span-2'>{memberInfo.teamName}</td>
             <MemberLoad load={memberInfo.tasksLoad}/>
-            <td className='flex gap-1 justify-end'>
+            <td className='flex gap-1 justify-end col-span-1'>
                 <button onClick={handleRemove} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
                         <img src="/x.svg" title="Remove User" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
                 </button>
@@ -212,7 +213,7 @@ function convertLoadNumToDysplay(num : number) : LoadDysplay {
 function MemberLoad({ load } : { load : number }) {
     const res = convertLoadNumToDysplay(load);
     return (
-        <td>
+        <td className='col-span-2'>
             <div className='' style={{ color: res.color }}>{res.text}</div>
             <div className='flex gap-1'>
                 {

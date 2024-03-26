@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { Issue, Tag, Task, Ranking } from "@prisma/client";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
+import { Name } from "./other-client";
+import { TagList } from "./tags";
 
 
 // TODO: Error handeling + loading screen
@@ -82,158 +84,12 @@ function HeaderContainer({task, tags, handleClose, updateTask } : {task : Task, 
 
     return (
         <section className='px-6 py-4 border-b border-neutral-400 relative '>
-            <Name taskName={task.name} updateName={updateName}/>
-            <TagList taskTags={tags}/>
+            <Name name={task.name} updateName={updateName}/>
+            <TagList tags={tags}/>
             <DialogClose handleClose={handleClose}/>
         </section>
     )
 }
-// TODO: submit name to upper component
-function Name({taskName, updateName} : {taskName : string, updateName : (name : string) => void}) {
-    const [name, setName] = useState<string>(taskName);
-    const [isEditing, toggleEdit] = useReducer((isEditing) => !isEditing, false);
-
-    function submitName(val : string) {
-        setName(val);
-        updateName(val);
-    }
-
-    function changeEdit() {
-        toggleEdit();
-    }
-    
-    function handleKeyDown(event : KeyboardEvent<HTMLInputElement>) {
-        //event.preventDefault();
-        const inputValue = event.currentTarget.value;
-        if (event.key === 'Enter') {
-            if (inputValue.length > 0) {
-                submitName(inputValue);
-                toggleEdit();
-            }
-        }
-    }
-    return (
-        <div className="flex mb-4 gap-4">
-            {
-                isEditing ? 
-                    <>
-                        <input type="text" defaultValue={name} onKeyDown={handleKeyDown} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
-                    </>
-                    :
-                    <>
-                        <h3 className='text-xl font-bold'>{name}</h3>
-                    </>
-            }
-            <button onClick={changeEdit} title="Edit Name">
-                <Image src={"/pencil.svg"} alt={"custom name"} height={20} width={20}/>
-            </button>
-        </div>
-    )
-}
-
-function TagList({taskTags} : {taskTags : Tag[]}) {
-    const [tags, setTags] = useState<Tag[]>([]);
-    const [creating, toggle] = useReducer(creating => !creating, false);
-   
-
-    async function handleDeleteTag(delTag : Tag) {
-        try {
-            /*const res = await fetch("/api/[]/task/tag/delete", {
-                method: "POST",
-                body: JSON.stringify({
-                    name: name,
-                    color: color
-                })
-            })*/
-            const newTags : Tag[] = [];
-            for (const tag of tags) {
-                if (tag.id != delTag.id) {
-                    newTags.push(tag);
-                }
-            }
-            setTags(newTags);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-
-    async function handleCreateTag(name : string, color : string) {
-        try {
-            /*const res = await fetch("/api/[]/task/tag/create", {
-                method: "POST",
-                body: JSON.stringify({
-                    name: name,
-                    color: color
-                })
-            })*/
-            const id = Math.random().toString();
-            const newTags : Tag[] = tags;
-            newTags.push({id: id, taskId: "asdads", name: name, color: color});
-            setTags(newTags);
-            toggle();
-        }
-        catch {
-
-        }
-    }
-
-    return (
-        <div className="flex gap-1 h-8">
-            <ul className='flex gap-2 rounded-lg '>
-                {
-                    tags.map((tag) => (
-                        <TagElement tag={tag} handleDeleteTag={handleDeleteTag}/>
-                    ))
-                }
-            </ul>
-            {creating && <TagCreator handleCreateTag={handleCreateTag}/>}
-            <button title="Create Tag" onClick={toggle}>
-                <Image src={"/plus.svg"} alt={"create tag"} height={20} width={20}/>
-            </button>
-        </div>
-        
-    )
-}
-
-function TagCreator({ handleCreateTag } : { handleCreateTag : (name : string, color : string) => void}) {
-    const [color, setColor] = useState<string>("#FFFFFF");
-    const [name, setName] = useState<string>("");
-
-    function handleColorChange(event: ChangeEvent<HTMLInputElement>) {
-        setColor(event.currentTarget.value);
-    }
-
-    function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
-        setName(event.currentTarget.value);
-    }
-
-    return ( 
-        <div className="flex gap-2 items-center px-3 py-1 bg-neutral-900 rounded">
-            <input type="text" className="bg-neutral-900 outline-none border-b w-32 text-sm h-5 " id="tagName" onChange={handleInputChange}></input>
-            <input type="color" value={color} onChange={handleColorChange} className="w-5 h-5 bg-neutral-950 rounded outline-none cursor-pointer"></input>
-            <button onClick={() => handleCreateTag(name, color)} className="w-fit h-fit"><Image src={"/check.svg"} alt="submit" height={40} width={40} className="w-5 h-5 rounded bg-neutral-950"></Image></button>
-        </div>
-    )
-}
-
-function TagElement({ tag, handleDeleteTag } : { tag : Tag, handleDeleteTag : (tag : Tag) => void }) {
-    const opacity = 0.6; // Průhlednost v rozmezí 0 až 1 (0 - 100%)
-    const rgbaColor = `${tag.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`; //Vytvoří hexadecimal zápis pro RGBA
-
-    return (
-        <li className='rounded-full border px-3 py-1 flex gap-3 text-sm'
-            style={{ backgroundColor: rgbaColor, borderColor: tag.color}}
-        >
-            {tag.name}
-            <button onClick={() => handleDeleteTag(tag)}>
-                <Image src={"/x.svg"} alt={"close"} height={5} width={5} className="w-full h-full"/>            
-            </button>
-        </li>
-    )
-}
-
-
 
 // MAIN INFRMATIONS
 
@@ -548,7 +404,6 @@ function Solvers({ task, projectId } : { task : Task, projectId : string }) {
                         <li key={solver.id} className='bg-neutral-900 p-2 rounded w-full flex flex-row gap-1 relative items-center'>
                             <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-300 mr-2 text-color cursor-pointer'></Image>
                             <div>{solver.name} {solver.surname}</div>
-                            <div>{solver.teamId}</div>
                         </li>
                     )
                 })}

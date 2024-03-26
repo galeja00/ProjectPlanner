@@ -11,7 +11,6 @@ export default function ProjectMenu({ id } : { id : string }) {
             <section>
                 <h3 className="text-sm text-neutral-400 mb-2">Planning</h3>
                 <ul className="flex flex-col gap-2">
-                    <BoardLink name="dashboard" id={id} text="Dashboard" />
                     <BoardLink name="board" id={id} text="Board"/>
                     <BoardLink name="timetable" id={id} text="Time Table"/>
                     <BoardLink name="backlog" id={id} text="Backlog"/>

@@ -12,7 +12,7 @@ type BoardTasksColumn = {
     tasks : Task[]
 }
 
-type GroupOfTasks = {
+export type GroupOfTasks = {
     id : string,
     backlogId : string,
     name : string,
@@ -52,7 +52,7 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
     } 
     catch (error) {
         console.log(error);
-        return Response.json({ error : "Error on server try again"}, { status: 400});
+        return Response.json({ error : "Error: Server error"}, { status: 500});
     }
 }
 
@@ -92,13 +92,25 @@ async function getBoard(projectId : string) : Promise<BoardTasksColumn[] | null>
 }
 
 async function getBacklog(projectId : string) : Promise<GroupOfTasks[] | null> {
-    const backlog : Backlog | null = await prisma.backlog.findFirst({
+    let backlog : Backlog | null = await prisma.backlog.findFirst({
         where: {
             projectId: projectId
         }
     }) 
     if (!backlog) {
-        return null;
+        backlog = await prisma.backlog.create({
+            data: {
+                projectId: projectId
+            }
+        })
+        await prisma.kanban.update({
+            where: {
+                projectId: projectId
+            },
+            data: {
+                backlogId: backlog.id
+            }
+        })
     }
 
     const taskGroups : TasksGroup[] = await prisma.tasksGroup.findMany({

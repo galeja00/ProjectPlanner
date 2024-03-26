@@ -10,9 +10,11 @@ import { FormItem } from "@/app/components/form"
 import Image from "next/image"
 import { TeamDialog } from "./team-info"
 
+// TODO: better work with types for little error
 type TeamInfo = {
     id : string,
     name: string,
+    taskLoad: number,
     members: TeamMemberInfo[]
 }
 
@@ -123,11 +125,12 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
     return (
         <table className="bg-neutral-950 rounded flex flex-col">
             <thead className="">
-                <tr className='py-2 px-3 grid grid-cols-5 justify-items-left items-center'>
-                    <th className='w-fit'>Name</th>
-                    <th className="w-fit">Members</th>
-                    <th className='w-fit'>Num Of Members</th>
-                    <th className='w-fit'>Tasks Load</th>
+                <tr className='py-2 px-3 grid grid-cols-9 gap-2 justify-items-left items-center'>
+                    <th className='w-fit col-span-2'>Name</th>
+                    <th className="w-fit col-span-2">Members</th>
+                    <th className='w-fit col-span-2'>Count Of Members</th>
+                    <th className='w-fit col-sapn-2'>Tasks Load</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody className='flex flex-col gap-1 p-1'>
@@ -142,12 +145,13 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
 }
 
 function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInfo, handleDelete : () => void, openSettings : () => void}) {
+    const count = teamInfo.members.length;
     return (
-        <tr key={teamInfo.id} className='bg-neutral-900 rounded py-2 px-3 grid grid-cols-5 justify-items-left items-center'>
-            <td>{teamInfo.name}</td>
+        <tr key={teamInfo.id} className='bg-neutral-900 rounded py-2 px-3 grid grid-cols-9 gap-2 justify-items-left items-center'>
+            <td className="col-span-2">{teamInfo.name}</td>
             <Members members={teamInfo.members}/>
-            <td>0</td>
-            <td>0</td>
+            <td className="col-span-2">{count}</td>
+            <td className="col-span-2">0</td>
             <td className="h-fit flex gap-2 items-center justify-end">
                 <button onClick={handleDelete} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
                     <img src="/x.svg" title="Delete Group" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
@@ -164,7 +168,7 @@ function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInf
 function Members({ members } : { members : TeamMemberInfo[] }) {
     const displayNum = 10;
     return (
-        <td className="flex">
+        <td className="flex col-span-2">
             <ul className="flex gap-1">
             {
                 members.slice(0, displayNum).map((member, index) => {

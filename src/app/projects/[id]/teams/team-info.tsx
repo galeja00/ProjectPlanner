@@ -1,16 +1,19 @@
 "use client"
 
-import { Task, Team } from "@prisma/client"
+import { Tag, Task, Team } from "@prisma/client"
 import { Component, useEffect, useReducer, useState } from "react"
 import { Dialog, DialogClose } from "@/app/components/dialog"
 import { FormItem } from "@/app/components/form"
 import Image from "next/image"
 
 import { TeamBadge } from "../components/other"
+import { Name } from "../components/other-client"
+import { TagList } from "../components/tags"
 
 type TeamInfo = {
     id : string,
     name: string,
+    taskLoad: number,
     members: TeamMemberInfo[]
 }
 
@@ -37,40 +40,56 @@ type TaskInfo = {
 }
 
 export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { team : TeamInfo, projectId : string, closeSettings : () => void, updateTeams : () => void}) {
-    const [infteam, setInfTeam] = useState<TeamInfo | null>(team);
+    const [infteam, setInfTeam] = useState<TeamInfo>(team);
 
     function close() {
         updateTeams();
         closeSettings();
     }
     
-    function updateTeam() {
+    async function updateTeam(team : TeamInfo) {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/team/${team.id}/update`, {
+                method: "POST",
+                body: JSON.stringify({
+                    name: team.name,
+                })
+            })
+
+            if (res.ok) {
+                setInfTeam(team);  
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    function updateMembers(members : MemberInfo[]) {
         
     }
 
-    async function fetchTeam() {
-        try {
-
-        }
-        catch (error) {
-
-        }
-    }
     return (
         <Dialog>
             <div className="bg-neutral-950 w-fit rounded relative">
-                <TeamHead team={team} closeSettings={close} />
-                <Container team={team} updateTeam={updateTeam} projectId={projectId}/>
+                <TeamHead team={infteam} closeSettings={close} updateTeam={updateTeam}/>
+                <Container team={infteam} projectId={projectId}/>
             </div>
         </Dialog>
     )
 }
 
-function TeamHead({ team, closeSettings } : { team : TeamInfo, closeSettings : () => void}) {
+function TeamHead({ team, closeSettings, updateTeam } : { team : TeamInfo, closeSettings : () => void, updateTeam : (team : TeamInfo) => void}) {
+    const tags : Tag[] = [];
+    function updateName(name : string) {
+        team.name = name;
+        updateTeam(team); 
+    }
     return (
         <div className="p-4 relative w-full border-b">
             <DialogClose handleClose={closeSettings}/>
-            <h2 className="text-xl font-bold">{team.name}</h2>
+            <Name name={team.name} updateName={updateName}/>
+            <TagList tags={tags}/>
         </div>
     )
 }
@@ -80,7 +99,7 @@ enum TypeOfInfo {
     tasks = "Tasks",
 }
 
-function Container({ team, projectId, updateTeam } : { team : TeamInfo, projectId : string, updateTeam : (team : TeamInfo) => void }) {
+function Container({ team, projectId} : { team : TeamInfo, projectId : string}) {
     const menuItems : TypeOfInfo[] = [TypeOfInfo.members, TypeOfInfo.tasks];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.members);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Members team={team} projectId={projectId}/>);
@@ -124,7 +143,7 @@ function MenuItem({ name, actualType, onClick } : { name : string, actualType : 
     )
 }
 
-function Members({ team, projectId } : { team : TeamInfo, projectId : string}) {
+function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
     const [ teamMembers, setTeamMembers ] = useState<MemberInfo[]>([]);
     const [ members, setMembers ] = useState<MemberInfo[]>([]);
 
@@ -168,6 +187,8 @@ function Members({ team, projectId } : { team : TeamInfo, projectId : string}) {
                 member.teamName = team.name;
                 newTeamMembers.push(member);
                 setTeamMembers(newTeamMembers);
+                //team.members = newTeamMembers;
+                //updateTeam(team);
                 return;
             }
 
@@ -198,6 +219,8 @@ function Members({ team, projectId } : { team : TeamInfo, projectId : string}) {
                     }
                 }
                 setTeamMembers(newTeamMembers); 
+                //team.members = newTeamMembers;
+                //updateTeam(team);
                 return;
             }
 
@@ -238,11 +261,7 @@ function Members({ team, projectId } : { team : TeamInfo, projectId : string}) {
     )
 }
 
-function Tasks() {
-    return (
-        <></>
-    )
-}
+
 
 enum ColumnType {
     team = "Team",
@@ -288,7 +307,7 @@ function MembersColumn({ type, members, handleMove } : { type : ColumnType, memb
             onDragExit={handleOnLeave}
             >
             <h3>{type} Members</h3>
-            <ul className={` rounded p-1 flex flex-col gap-1 flex-1 h-[28rem] w-[16rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-900"}`}>
+            <ul className={` rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-900"}`}>
                 {
                     members.map((member) => {
                         return ( 
@@ -328,4 +347,27 @@ function convertTeamToMembers(team : TeamInfo ) {
         }
     ))
     return conv
+}
+
+function Tasks() {
+    const [ tasks, setTasks ] = useState<Task[]>([]);
+    return (
+        <section>
+            <ul>
+                {
+                    tasks.map((task) => (
+                        <TaskComp task={task}/>
+                    ))
+                }
+            </ul>
+        </section>
+    )
+}
+
+function TaskComp({ task } : { task : Task }) {
+    return (
+        <li key={task.id}>
+
+        </li>
+    )
 }

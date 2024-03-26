@@ -125,20 +125,25 @@ export async function POST(req : Request) {
             }
         })
 
-
         const board = await prisma.board.create( {
             data: {
                 projectId: project.id,
             }
         })
 
+        const backlog = await prisma.backlog.create({
+            data: {
+                projectId: project.id
+            }
+        })
         
         await prisma.kanban.update( {
             where: {
                 projectId: project.id
             },
             data: {
-                boardId: board.id
+                boardId: board.id,
+                backlogId: backlog.id 
             }
         })
         

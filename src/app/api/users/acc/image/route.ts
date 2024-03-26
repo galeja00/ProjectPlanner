@@ -1,6 +1,6 @@
 import { authorize } from "@/app/api/static";
 import { randomUUID } from "crypto";
-import { Result } from "postcss";
+
 import fs from 'fs';
 import sharp, { Sharp } from 'sharp';
 import { pathToImages } from "@/config";

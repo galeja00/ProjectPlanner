@@ -1,5 +1,5 @@
 'use client'
-import { ProjectMember, Ranking, Tag, Task, User } from '@prisma/client'
+import { ProjectMember, Ranking, Tag, Task, Team, User } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterButton, FilterDialog, SearchInput } from '../components/filter-tables'
@@ -7,6 +7,7 @@ import { TaskInfo } from '../components/task-info'
 import { Head, CreateTaskButton } from '../components/other'
 import { useRouter } from 'next/router';
 import { pathToImages } from '@/config'
+import { PriorityImg } from './components/priority'
 
 type BoardTasksColumn = {
     id : string,
@@ -85,7 +86,7 @@ export default function Board({ id } : { id : string }) {
             const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
             const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
             await fetchColumns(id);
-            // Moving task on client side for better optimalization
+            // Moving task on client side for better optimalization now have bugs dont work
             /*
             if (toCol && fromCol) {
                 let add : boolean = true;
@@ -443,22 +444,7 @@ function TaskComponent(
         { name: "Remove", handler: removeTask },
         { name: "Delete", handler: deleteTask },
     ];
-    let priorityImg : string = "";
-    let priorityClasses : string = "";
-    switch (task.priority) {
-        case Ranking.low:
-            priorityImg = "/dash.svg";
-            priorityClasses = "bg-green-500 border-green-500";
-            break;
-        case Ranking.medium:
-            priorityImg = "/chevron-up.svg"; 
-            priorityClasses = "bg-yellow-500 border-yellow-500";
-            break
-        case Ranking.high:
-            priorityImg = "/chevron-double-up.svg";
-            priorityClasses= "bg-red-500 border-red-600";
-            break;
-    }
+    
     return (
         <>
             <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} data-task-id={task.id}>
@@ -470,13 +456,10 @@ function TaskComponent(
                     }
                 </div>
                 <div className={`flex justify-between ${task.priority ? "" : "flex-row-reverse"}`}>
-                    {
-                        task.priority &&
-                            <div className='flex items-center'>
-                                <img src={priorityImg} alt={task.priority.toString()} title={`priority: ${task.priority.toString()}`} className={`stroke-2 p-1 border rounded bg-opacity-20 ${priorityClasses}`}/>
-                            </div>
-                    }
-                    <div className='relative'>
+                    { task.priority && <PriorityImg priority={task.priority}/> }
+                    
+                    <div className='relative flex gap-1'>
+                        { task.teamId && <TeamInf teamId={task.teamId} projectId={projectId}/>}
                         <Solver handleSolversMenu={toggleSolversMenu} solvers={solvers}/>
                         {
                             isSolversMenu 
@@ -497,6 +480,44 @@ function TaskComponent(
 }
 
 
+
+function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string }) {
+    const [ team, setTeam ] = useState<Team | null>(null); 
+
+    async function fetchTeam(teamId : string ) {
+        try {
+            const res = await fetch(`/api/pojects/${projectId}/team/${teamId}/info`, {
+                method: "GET"
+            })
+
+            const data = await res.json(); 
+            if (!res.ok) {
+                console.error(data.error);
+            }
+
+            setTeam(data.team);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => { 
+        fetchTeam(teamId);
+    }, []);
+
+    if (!team) {
+        return (
+            <div className='text-sm'>Loading ...</div>
+        )
+    } 
+    
+    return (
+        <div title={"Current Team"} className=' bg-violet-600 bg-opacity-60 border-violet-600 rounded text-sm flex justify-center'>
+            {team.name}
+        </div>
+    )
+}
 
 function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string) => void, endCreate : () => void }) {
     function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
@@ -571,7 +592,7 @@ function SolversMenu({ projectId, solvers, addSolver, delSolver } : { projectId 
     }
 
     return (
-        <div className='w-fit bg-neutral-950  absolute right-0 z-50 p-0 rounded shadow-neutral-900 shadow'>
+        <div className='w-fit bg-neutral-950  absolute right-0 top-8 z-50 p-0 rounded shadow-neutral-900 shadow'>
             <input className='w-fit bg-neutral-900 rounded m-1 outline-none border-none py-1 px-2'></input>
             <ul>
             {users.map((user) => {
