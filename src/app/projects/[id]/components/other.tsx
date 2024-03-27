@@ -34,3 +34,11 @@ export function TeamBadge({ name, color} : { name : string, color : string }) {
         </div>
     ) 
 }
+
+
+
+export function ButtonArray() {
+    return (
+        <></>
+    )
+}

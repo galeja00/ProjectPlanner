@@ -9,6 +9,7 @@ type BoardTasksColumn = {
     id : string,
     boardId: string,
     name : string,
+    position : number,
     tasks : Task[]
 }
 
@@ -16,6 +17,7 @@ export type GroupOfTasks = {
     id : string,
     backlogId : string,
     name : string,
+    position : number | null,
     tasks : Task[]
 }
 
@@ -85,7 +87,7 @@ async function getBoard(projectId : string) : Promise<BoardTasksColumn[] | null>
                 colIndex: "asc"
             }
         })
-        boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, tasks: tasks });
+        boardTasksColumns.push({ id: col.id, name: col.name, boardId: col.boardId, tasks: tasks, position : col.position });
     }
 
     return boardTasksColumns;
@@ -129,7 +131,7 @@ async function getBacklog(projectId : string) : Promise<GroupOfTasks[] | null> {
                 tasksGroupId: group.id 
             }
         })
-        groups.push({ id: group.id, name: group.name, backlogId: group.backlogId, tasks: tasks });
+        groups.push({ id: group.id, name: group.name, backlogId: group.backlogId, tasks: tasks, position: group.position });
     }
     var tasks : Task[] = await prisma.task.findMany({
         where: {
@@ -137,7 +139,7 @@ async function getBacklog(projectId : string) : Promise<GroupOfTasks[] | null> {
             projectId: projectId
         }
     })
-    groups.push({ id: "unassigned", name: "unassigned", backlogId: backlog.id, tasks : tasks });
+    groups.push({ id: "unassigned", name: "unassigned", backlogId: backlog.id, tasks : tasks, position: null });
 
     return groups;
 }

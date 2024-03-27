@@ -1,5 +1,5 @@
 'use client'
-import { ProjectMember, Ranking, Tag, Task, Team, User } from '@prisma/client'
+import { Tag, Task, Team } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterButton, FilterDialog, SearchInput } from '../components/filter-tables'
@@ -8,6 +8,7 @@ import { Head, CreateTaskButton } from '../components/other'
 import { useRouter } from 'next/router';
 import { pathToImages } from '@/config'
 import { PriorityImg } from './components/priority'
+import { Creator } from './components/creator'
 
 type BoardTasksColumn = {
     id : string,
@@ -140,6 +141,9 @@ export default function Board({ id } : { id : string }) {
         }
     }
 
+    function createColumn(name : string) {
+
+    }
 
 
     return (
@@ -162,7 +166,7 @@ export default function Board({ id } : { id : string }) {
                         
                     ))
                 }
-                <AddTaskColumn/>
+                <Creator what={"Create new column"} handleCreate={createColumn}/>
             </section>
         </TasksColumnsContext.Provider>
     )
@@ -330,12 +334,7 @@ function TasksColumn(
                             />
                     ))
                     }
-                    {   
-                        creating ? 
-                            <CreatorOfTask key={"create"} createTask={createTask} endCreate={toggle}/>
-                            :
-                            <li></li>
-                    }
+                    { creating && <CreatorOfTask key={"create"} createTask={createTask} endCreate={toggle}/> }
                 </ul>
                 <CreateTaskButton createTask={() => handleCreateTaskForm()}/>
             </div>

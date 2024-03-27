@@ -75,17 +75,17 @@ async function createStartingBoard(boardId : string) {
         data: [{
             boardId: boardId,
             name: "To Do",
-            position: 1,
+            position: 0,
         },
         {
             boardId: boardId,
             name: "In Work",
-            position: 2,
+            position: 1,
         },
         {
             boardId: boardId,
             name: "Done",
-            position: 3
+            position: 2
         }]
     })
 }

@@ -1,18 +1,22 @@
 "use client"
-import { useState, useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState, KeyboardEvent, useRef, ChangeEvent } from 'react'
 import { FilterButton, SearchInput } from "../components/filter-tables";
 import { CreateTaskButton, Head } from "../components/other";
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
-import { Task } from "@prisma/client";
+import { Task, TasksGroup } from "@prisma/client";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import Image from 'next/image' 
 import { TaskInfo } from "../components/task-info";
 import { PriorityText } from "./components/priority";
+import { Creator } from './components/creator';
+import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/buttons';
 
 
 
 export default function Backlog({ id } : { id : string }) {
     const [groups, setGroups] = useState<GroupOfTasks[]>([]); 
+
+
     async function fetchGroups() {
         try {
             const res = await fetch(`/api/projects/${id}/backlog`, {
@@ -23,19 +27,45 @@ export default function Backlog({ id } : { id : string }) {
                 console.error(data.error);
                 return;
             }
-            console.log(data.data);
-            setGroups(data.data);
+            const newGroups : GroupOfTasks[] = data.data
+            newGroups.sort((a, b) => sortGroups(a, b));
+            setGroups(newGroups);
         }
         catch (error) {
             console.error(error);
         }
     }
 
-    
 
+    async function createGroup(name : string) {
+        try {
+            console.log(name);
+            const res = await fetch(`/api/projects/${id}/backlog/group/create`, {
+                method: "POST",
+                body: JSON.stringify({
+                    name: name
+                })
+            }); 
+
+            const data = await res.json();
+            if (res.ok) {
+                const newGroup : TasksGroup = data.group;
+                const newGroups : GroupOfTasks[] = groups;
+                newGroups.push({ id: newGroup.id, name: newGroup.name, backlogId: newGroup.backlogId, position: newGroup.position, tasks: []});
+                newGroups.sort((a, b) => sortGroups(a, b));
+                console.log(newGroups);
+                setGroups(newGroups);
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    
+    }
     useEffect(() => {
         fetchGroups()
-    }, [])
+    }, []);
+
     return (
         <div className="w-3/4 mx-auto">
             <Head text="Backlog"/>
@@ -43,25 +73,15 @@ export default function Backlog({ id } : { id : string }) {
                 <SearchInput/>
                 <FilterButton onClick={() => fetchGroups}/>
             </section>
-            <ListOfGroups groups={groups} />
+            <ListOfGroups groups={groups} createGroup={createGroup} />
         </div>
         
     )
 }
 
-function GroupCreate({ createGroup } : { createGroup : () => void}) {
-    return (
-        <button onClick={createGroup} className="flex gap-2 items-center mb-2 text-neutral-400">
-            <img src="/plus.svg" className="w-8 h-8 bg-neutral-950 rounded"/>
-            <div>Create new group</div>
-        </button>
-    )
-}
 
-function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
-    function createGroup() {
 
-    }
+function ListOfGroups({ groups, createGroup } : { groups : GroupOfTasks[], createGroup : (name : string) => void }) {
 
     function handleOnDragTask() {
 
@@ -71,12 +91,12 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
 
     }
     return (
-        <section className="w-full">
-            <GroupCreate createGroup={createGroup}/>
+        <section className="w-full space-y-2">
+            <Creator what="Create New Group" handleCreate={createGroup}/>
             <ul className="space-y-4 w-full" draggable onDragStart={handleOnDragGroup}>
                 {
                     groups.map((group) => (
-                        <GroupList group={group} handleOnDrag={handleOnDragTask}/>
+                        <GroupList key={group.id} group={group} handleOnDrag={handleOnDragTask}/>
                     ))
                 }
             </ul>
@@ -84,15 +104,31 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
     )
 }
 
+
 function GroupList({ group, handleOnDrag } : { group : GroupOfTasks, handleOnDrag : (task : Task , group : GroupOfTasks) => void}) {
     function createTask() {
 
     }
+    // zmanší zkupinu na uzivatelkse obrazovce (zakryje ukoly)
+    function toSmallGroup() {
 
+    }
 
+    function deleteGroup() {
+
+    }
+
+    const buttons : Button[] = [
+        { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.bright, title: "Hide Tasks" },
+        { onClick: deleteGroup, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" },
+    ]
     return (
-        <li className="bg-neutral-950 w-full rounded p-2 space-y-2">
+        <li key={group.id} className="bg-neutral-950 w-full rounded p-2 space-y-2 relative">
             <h2>{group.name}</h2>
+            <div className='absolute right-2 top-0 '>
+                <ArrayButtons buttons={buttons} gap={1}/>
+            </div>
+            
             <ul className="space-y-2">
                 {
                     group.tasks.map((task) => (
@@ -104,6 +140,8 @@ function GroupList({ group, handleOnDrag } : { group : GroupOfTasks, handleOnDra
         </li> 
     )
 }
+
+
 
 type ColumnInfo = {
     id: string,
@@ -159,7 +197,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : () => v
                 <ul className="flex gap-1 h-full items-center col-span-2">
                     {
                         solvers.map((solver) => (
-                            <SolverComp solver={solver}/>
+                            <SolverComp key={solver.id} solver={solver}/>
                         ))
                     }
                 </ul>
@@ -200,4 +238,11 @@ function ColInfo({ col } : { col : ColumnInfo | null }) {
     return (
         <div className="flex items-center col-span-2">{text}</div>
     )
+}
+// Array.sort(sort) - 
+function sortGroups(a : GroupOfTasks, b : GroupOfTasks) : number {
+    if (a.position === null) return 1;
+    if (b.position === null) return -1;
+    
+    return a.position - b.position;
 }
