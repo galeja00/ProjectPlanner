@@ -22,7 +22,7 @@ export function CreateTaskButton({ createTask } : { createTask : () => void }) {
             <button onClick={createTask}>
                 <Image src="/plus.svg" alt="add task" width={2} height={2} className='w-7 h-7 rounded bg-neutral-900 cursor-pointer hover:bg-violet-800'></Image>
             </button>
-            <p className='text-neutral-400 text-sm'>Create new task</p>
+            <p className='text-neutral-400 text-sm'>Create New Task</p>
         </div>
     )
 }
@@ -36,9 +36,3 @@ export function TeamBadge({ name, color} : { name : string, color : string }) {
 }
 
 
-
-export function ButtonArray() {
-    return (
-        <></>
-    )
-}

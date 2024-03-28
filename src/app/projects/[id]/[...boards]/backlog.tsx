@@ -8,12 +8,14 @@ import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import Image from 'next/image' 
 import { TaskInfo } from "../components/task-info";
 import { PriorityText } from "./components/priority";
-import { Creator } from './components/creator';
+import { Creator, CreatorOfTask } from './components/creator';
 import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/buttons';
 
 interface FunctionsContextType {
     createGroup: (name: string) => void;
     deleteGroup: (group: GroupOfTasks) => void;
+    fetchGroups: () => void;
+    projectId: string;
 }
 
 const FunctionsContext = createContext<FunctionsContextType | null>(null);
@@ -96,7 +98,7 @@ export default function Backlog({ id } : { id : string }) {
     }, []);
 
     return (
-        <FunctionsContext.Provider value={{ createGroup, deleteGroup }}>
+        <FunctionsContext.Provider value={{ createGroup, deleteGroup, fetchGroups,  projectId: id }}>
             <div className="w-3/4 mx-auto">
                 <Head text="Backlog"/>
                 <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
@@ -138,11 +140,30 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[] }) {
 
 function GroupList({ group, handleOnDrag } : { group : GroupOfTasks, handleOnDrag : (task : Task , group : GroupOfTasks) => void }) {
     const [ displayd, setDisplayd ] = useState<string>("block"); 
-    const { deleteGroup } = useContext(FunctionsContext)!;
+    const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false);
+    const { deleteGroup, fetchGroups, projectId } = useContext(FunctionsContext)!;
 
-    function createTask() {
-
+    async function createTask(name : string) {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/backlog/task/add`, {
+                method: "POST",
+                body: JSON.stringify({
+                    name: name,
+                    groupId: group.id
+                })
+            })
+            if (res.ok) {
+                fetchGroups();
+                return;
+            }
+            const data = await res.json();
+            console.log(data.error);
+        }
+        catch (error) {
+            console.error(error);
+        }
     }
+
     // zmanší zkupinu na uzivatelkse obrazovce (zakryje ukoly)
     function toSmallGroup() {
         setDisplayd(displayd == "block" ? "none" : "block");
@@ -164,10 +185,9 @@ function GroupList({ group, handleOnDrag } : { group : GroupOfTasks, handleOnDra
                         <GroupTask task={task} handleOnDrag={() => handleOnDrag(task, group)}/>
                     ))
                 }
+                { isCreating && <CreatorOfTask createTask={createTask} endCreate={toggleCreating} />}
             </ul>
-            { displayd == "block" && 
-                <CreateTaskButton createTask={createTask}/>
-            }
+            { displayd == "block" && <CreateTaskButton createTask={toggleCreating}/>}
         </li> 
     )
 }
