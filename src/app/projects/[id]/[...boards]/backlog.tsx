@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useReducer, useState, KeyboardEvent, useRef, ChangeEvent } from 'react'
+import { useEffect, useReducer, useState, createContext, useContext } from 'react'
 import { FilterButton, SearchInput } from "../components/filter-tables";
 import { CreateTaskButton, Head } from "../components/other";
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
@@ -11,11 +11,16 @@ import { PriorityText } from "./components/priority";
 import { Creator } from './components/creator';
 import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/buttons';
 
+interface FunctionsContextType {
+    createGroup: (name: string) => void;
+    deleteGroup: (group: GroupOfTasks) => void;
+}
 
+const FunctionsContext = createContext<FunctionsContextType | null>(null);
 
 export default function Backlog({ id } : { id : string }) {
     const [groups, setGroups] = useState<GroupOfTasks[]>([]); 
-
+    
 
     async function fetchGroups() {
         try {
@@ -29,6 +34,7 @@ export default function Backlog({ id } : { id : string }) {
             }
             const newGroups : GroupOfTasks[] = data.data
             newGroups.sort((a, b) => sortGroups(a, b));
+            console.log(newGroups);
             setGroups(newGroups);
         }
         catch (error) {
@@ -62,26 +68,51 @@ export default function Backlog({ id } : { id : string }) {
         }
     
     }
+
+    async function deleteGroup(group : GroupOfTasks) {
+        try {
+            const res = await fetch(`/api/projects/${id}/backlog/group/delete`, {
+                method: "POST",
+                body: JSON.stringify({
+                    id: group.id
+                })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                console.error(data.error);
+                return;
+            }
+            fetchGroups();
+        }   
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+
     useEffect(() => {
         fetchGroups()
     }, []);
 
     return (
-        <div className="w-3/4 mx-auto">
-            <Head text="Backlog"/>
-            <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                <SearchInput/>
-                <FilterButton onClick={() => fetchGroups}/>
-            </section>
-            <ListOfGroups groups={groups} createGroup={createGroup} />
-        </div>
-        
+        <FunctionsContext.Provider value={{ createGroup, deleteGroup }}>
+            <div className="w-3/4 mx-auto">
+                <Head text="Backlog"/>
+                <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
+                    <SearchInput/>
+                    <FilterButton onClick={() => fetchGroups}/>
+                </section>
+                <ListOfGroups groups={groups}/>
+            </div>
+        </FunctionsContext.Provider>
     )
 }
 
 
 
-function ListOfGroups({ groups, createGroup } : { groups : GroupOfTasks[], createGroup : (name : string) => void }) {
+function ListOfGroups({ groups } : { groups : GroupOfTasks[] }) {
+    const { createGroup } = useContext(FunctionsContext)!;
 
     function handleOnDragTask() {
 
@@ -105,22 +136,21 @@ function ListOfGroups({ groups, createGroup } : { groups : GroupOfTasks[], creat
 }
 
 
-function GroupList({ group, handleOnDrag } : { group : GroupOfTasks, handleOnDrag : (task : Task , group : GroupOfTasks) => void}) {
+function GroupList({ group, handleOnDrag } : { group : GroupOfTasks, handleOnDrag : (task : Task , group : GroupOfTasks) => void }) {
+    const [ displayd, setDisplayd ] = useState<string>("block"); 
+    const { deleteGroup } = useContext(FunctionsContext)!;
+
     function createTask() {
 
     }
     // zmanší zkupinu na uzivatelkse obrazovce (zakryje ukoly)
     function toSmallGroup() {
-
-    }
-
-    function deleteGroup() {
-
+        setDisplayd(displayd == "block" ? "none" : "block");
     }
 
     const buttons : Button[] = [
         { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.bright, title: "Hide Tasks" },
-        { onClick: deleteGroup, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" },
+        { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" },
     ]
     return (
         <li key={group.id} className="bg-neutral-950 w-full rounded p-2 space-y-2 relative">
@@ -128,15 +158,16 @@ function GroupList({ group, handleOnDrag } : { group : GroupOfTasks, handleOnDra
             <div className='absolute right-2 top-0 '>
                 <ArrayButtons buttons={buttons} gap={1}/>
             </div>
-            
-            <ul className="space-y-2">
+            <ul className="space-y-2" style={{ display: displayd }}>
                 {
                     group.tasks.map((task) => (
                         <GroupTask task={task} handleOnDrag={() => handleOnDrag(task, group)}/>
                     ))
                 }
             </ul>
-            <CreateTaskButton createTask={createTask}/>
+            { displayd == "block" && 
+                <CreateTaskButton createTask={createTask}/>
+            }
         </li> 
     )
 }
