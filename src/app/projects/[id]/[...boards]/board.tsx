@@ -141,8 +141,26 @@ export default function Board({ id } : { id : string }) {
         }
     }
 
-    function createColumn(name : string) {
+    async function createColumn(name : string) {
+        try {
+            const res = await fetch(`/api/projects/${id}/board/column/create`, {
+                method: "POST",
+                body: JSON.stringify({
+                    name: name
+                })
+            })
 
+            if (!res.ok) {
+                const data = await res.json();
+                console.log(data.error);
+                return; 
+            }
+
+            fetchColumns(id);
+        }
+        catch (error) {
+            console.error(error);
+        }
     }
 
 

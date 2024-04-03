@@ -11,7 +11,7 @@ datasource db {
 }
 
 
-
+// základni informace o uživateli aplikace
 model User {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
@@ -24,13 +24,11 @@ model User {
   skills    String[]
   projects  ProjectMember[]
   projectInvites   ProjectInvite[]
+  issues    Issue[]
+  comments  IssueComments[]
 }
 
-model Profile {
-  id    String   @id @default(cuid())
-  userId  String  @unique
-}
-
+// zakladní informace o projektu
 model Project {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
@@ -48,6 +46,7 @@ model Project {
   kanban    Kanban?
 }
 
+// informace o tabulich daneho projektu typu kanban(kvuli mozhnosti rozěíření na jiné typy projektového řízení)
 model Kanban {
   projectId String    @id
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -60,6 +59,7 @@ model Kanban {
   tasks     Task[]
 }
 
+// informace o kanban tabuly
 model Board {
   id          String   @id @default(cuid())   
   projectId   String   @unique
@@ -68,6 +68,7 @@ model Board {
   taskColumns TaskColumn[] 
 }
 
+// sloupce dane kanban tabule
 model TaskColumn {
   id        String  @id @default(cuid())  
   board     Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
@@ -84,6 +85,7 @@ enum Ranking {
   high
 }
 
+// informace o ukolech v projektu
 model Task {
   id            String  @id @default(cuid()) 
   taskColumn    TaskColumn? @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
@@ -108,9 +110,9 @@ model Task {
   //projectMemberId String?
   tasksGroupId  String?
   tasksGroup    TasksGroup? @relation(fields: [tasksGroupId], references: [id])
-  
 }
 
+// project member který reší úkol
 model TaskSolver {
   id      String @id @default(cuid())
   memberId  String
@@ -121,8 +123,9 @@ model TaskSolver {
   @@unique([taskId, memberId], name: "Unique_task_member")
 }
 
+// system tagu (neimplementovan aktulně)
 model Tag {
-  id      String  @id @default(cuid()) 
+  id      String   @id @default(cuid()) 
   taskId  String?  
   task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
   teamId  String?
@@ -131,22 +134,32 @@ model Tag {
   color   String
 }
 
+// problemy při řešení úkolů nebo jine
 model Issue {
   id    String @id @default(cuid())
   taskId  String?
   task   Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
   projectId String
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  priority Ranking
+  creator User @relation(fields: [creatorId], references: [id])
+  creatorId String 
   type   String
   description String
+  commends IssueComments[]
 }
 
+// komentaře k dané issue
 model IssueComments {
-  id    String @id @default(cuid())
+  id      String @id @default(cuid())
   issueId String
-
+  issue   Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  text    String
+  authorId String
+  author  User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
+// uchovava data pokud je uzivatel pozvan do projektu, pokud prijme nebo neprijme tak se tento invite smaze
 model ProjectInvite {
   id String @id @default(cuid())
   invitedUserId String
@@ -159,7 +172,7 @@ model ProjectInvite {
   @@unique([invitedUserId, projectId], name: "Unique_InvitedUser_Project")
 }
 
-
+// tabule backlog
 model Backlog {
   id          String @id @default(cuid()) 
   projectId   String   @unique
@@ -167,6 +180,7 @@ model Backlog {
   tasksGroups TasksGroup[]
 }
 
+// skupiny tasku ktere jsou v danem projektu
 model TasksGroup {
   id String @id @default(cuid()) 
   backlogId String 
@@ -180,7 +194,7 @@ model TasksGroup {
 }
 
 
-
+// 
 model ProjectMember {
   id        String    @id @default(cuid()) 
   userId    String   

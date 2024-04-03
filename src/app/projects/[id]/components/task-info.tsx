@@ -96,11 +96,12 @@ function HeaderContainer({task, tags, handleClose, updateTask } : {task : Task, 
 enum TypeOfInfo {
     description = "Description",
     issues = "Issues",
-    nodes = "Nodes"
+    nodes = "Nodes",
+    other = "Other"
 }
 
 function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
-    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes];
+    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes, TypeOfInfo.other];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task} updateTask={updateTask}/>);
 
@@ -113,6 +114,10 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
             case TypeOfInfo.nodes:
                 setActualInfo(<Nodes/>);
                 setActualInfoType(TypeOfInfo.nodes);
+                break;
+            case TypeOfInfo.other: 
+                setActualInfo(<Other/>)
+                setActualInfoType(TypeOfInfo.other);
                 break;
             default:
                 setActualInfo(<Description task={task} updateTask={updateTask}/>);
@@ -234,6 +239,13 @@ function IsssuesItem({ issue } : { issue : Issue }) {
 }
 
 function Nodes() {
+    return (
+        <>
+        </>
+    )
+}
+
+function Other() {
     return (
         <>
         </>

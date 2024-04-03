@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useReducer, useState, createContext, useContext, DragEvent } from 'react'
+import { useEffect, useReducer, useState, createContext, useContext, DragEvent, useRef, Dispatch, SetStateAction } from 'react'
 import { FilterButton, SearchInput } from "../components/filter-tables";
 import { CreateTaskButton, Head } from "../components/other";
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
@@ -10,11 +10,13 @@ import { TaskInfo } from "../components/task-info";
 import { PriorityText } from "./components/priority";
 import { Creator, CreatorOfTask } from './components/creator';
 import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/buttons';
+import { unassigned } from '@/config';
 
 interface FunctionsContextType {
     createGroup: (name: string) => void;
     deleteGroup: (group: GroupOfTasks) => void;
     fetchGroups: () => void;
+    openTaskInfo : (task : Task) => void;
     projectId: string;
     collumns: TaskColumn[]
 }
@@ -22,9 +24,10 @@ interface FunctionsContextType {
 const FunctionsContext = createContext<FunctionsContextType | null>(null);
 
 export default function Backlog({ id } : { id : string }) {
-    const [groups, setGroups] = useState<GroupOfTasks[]>([]); 
-    const [collumns, setColumns] = useState<TaskColumn[]>([]);
-
+    const [ groups, setGroups] = useState<GroupOfTasks[]>([]); 
+    const [ collumns, setColumns] = useState<TaskColumn[]>([]);
+    const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, true);
+    const [ task, setTask ] = useState<Task | null>(null);
     async function fetchGroups() {
         try {
             const res = await fetch(`/api/projects/${id}/backlog`, {
@@ -91,13 +94,36 @@ export default function Backlog({ id } : { id : string }) {
         }
     }
 
+    function openTaskInfo(task : Task) {
+        setTask(task);
+        toggleInfo();
+    }
+
+    async function updateTask(updateTask : Task) {
+        try {
+            const response = await fetch(`/api/projects/${id}/board/task/update`, {
+                method: "POST", 
+                body: JSON.stringify({
+                    task: updateTask
+                })
+            });
+            const json = await response.json();
+            if (!response.ok) {
+                throw new Error(json.error);
+            }
+            fetchGroups();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
 
     useEffect(() => {
         fetchGroups()
     }, []);
 
     return (
-        <FunctionsContext.Provider value={{ createGroup, deleteGroup, fetchGroups,  projectId: id, collumns: collumns }}>
+        <FunctionsContext.Provider value={{ createGroup, deleteGroup, fetchGroups, openTaskInfo, projectId: id, collumns: collumns }}>
             <div className="w-3/4 mx-auto">
                 <Head text="Backlog"/>
                 <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
@@ -106,14 +132,20 @@ export default function Backlog({ id } : { id : string }) {
                 </section>
                 <ListOfGroups groups={groups} />
             </div>
+            {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
         </FunctionsContext.Provider>
     )
 }
 
-
+enum DraggTypes {
+    task = "task",
+    group = "group"
+}
 
 function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
+    //const [ draggetType, setDraggetType ] = useState<DraggTypes | null>(null);
     const { createGroup, fetchGroups, projectId } = useContext(FunctionsContext)!;
+    const groupsRef = useRef<HTMLUListElement>(null);
 
     async function moveTask(groupId : string, taskId : string) {
         try {
@@ -136,11 +168,24 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
             console.error(error);
         }
     }
+    /*
+    function handleDragOver(e : React.DragEvent) {
+        e.preventDefault();
+        
+    }
 
+    function handleOnDrop(e : React.DragEvent) {
+        e.preventDefault();
+        const groupId = e.dataTransfer.getData("text/groupId");
+        console.log(groupId);
+        const mouseY : number = e.clientY;
+        console.log(mouseY);
+    }
+*/
     return (
         <section className="w-full space-y-2" > 
             <Creator what="Create New Group" handleCreate={createGroup}/>
-            <ul className="space-y-4 w-full">
+            <ul className="space-y-4 w-full" ref={groupsRef}>
                 {
                     groups.map((group) => (
                         <GroupList key={group.id} group={group} moveTask={moveTask}/>
@@ -148,6 +193,7 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
                 }
             </ul>
         </section>
+        
     )
 }
 
@@ -156,6 +202,7 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
     const [ displayd, setDisplayd ] = useState<string>("block"); 
     const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false);
     const [ isDragOver, toggleDragOver ] = useReducer(isDragOver => !isDragOver, false);
+    
     const { deleteGroup, fetchGroups, projectId } = useContext(FunctionsContext)!;
 
     async function createTask(name : string) {
@@ -182,26 +229,35 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
 
     function handleDropTask(e : React.DragEvent) {
         e.preventDefault();
+        const type = e.dataTransfer.getData("text/type");
+        if (type != "task") {
+            return;
+        }
         const taskId = e.dataTransfer.getData("text/taskId");
         const groupId = e.dataTransfer.getData("text/groupId");
+        if (!taskId || !groupId) {
+            return;
+        }
         if (group.id != groupId) {
             moveTask(group.id, taskId);
         }
         toggleDragOver();
     }
     /*
-    function handleOnDragGroup(e : DragEvent, groupId : string) {
-        console.log(groupId);
-        e.dataTransfer.setData("text/groupId", groupId);
+    function handleOnDragGroup(e : DragEvent) {
+        e.dataTransfer.setData("text/type", "group");
+        e.dataTransfer.setData("text/groupId", group.id);
     }*/
 
     function handleOnDragTask(e : React.DragEvent, task : Task) {
+        e.dataTransfer.setData("text/type", "task");
         e.dataTransfer.setData("text/taskId", task.id);
         e.dataTransfer.setData("text/groupId", group.id);
     }
 
     function handleDragOver(e : React.DragEvent) {
         e.preventDefault();
+        const type = e.dataTransfer.getData("text/type");
         if (!isDragOver) {
             toggleDragOver();
         }
@@ -209,6 +265,7 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
 
     function handleOnLeave(e : React.DragEvent) {
         e.preventDefault();
+        const type = e.dataTransfer.getData("text/type");
         if (isDragOver) {
             toggleDragOver();
         }
@@ -219,14 +276,16 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
     function toSmallGroup() {
         setDisplayd(displayd == "block" ? "none" : "block");
     }
-
+    
     const buttons : Button[] = [
-        { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.bright, title: "Hide Tasks" },
-        { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" },
+        { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.bright, title: "Hide Tasks" }
     ]
+    if (group.id != unassigned) {
+        buttons.push({ onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" });
+    }
     return (
         <li key={group.id} 
-            className={`w-full rounded p-2 space-y-2 ${isDragOver ? "bg-neutral-700" : "bg-neutral-950"}`}
+            className={`w-full rounded p-2 space-y-2 relative ${isDragOver ? "bg-neutral-700" : "bg-neutral-950"}`}
             onDrop={handleDropTask}
             onDragOver={handleDragOver} 
             onDragExit={handleOnLeave} 
@@ -262,7 +321,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
     const [ colInfo, setColInfo ] = useState<ColumnInfo | null>(null);
     
-    const { collumns, projectId, fetchGroups } = useContext(FunctionsContext)!;
+    const { collumns, projectId, fetchGroups, openTaskInfo } = useContext(FunctionsContext)!;
 
     // ziska informace o řešičích daného ůkolu
     async function fetchSolvers() {
@@ -321,9 +380,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
     }
 
-    function updateTask(task : Task) {
 
-    }
     useEffect(() => {
         fetchSolvers();
     }, []);
@@ -356,12 +413,12 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                         <img src="/x.svg" title="Remove Task" className="w-8 h-8 hover:bg-orange-600 rounded hover:bg-opacity-40"></img>
                     </button>
                     }
-                    <button onClick={toggleInfo} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-violet-600">
+                    <button onClick={() => openTaskInfo(task)} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-violet-600">
                         <img src="/info-lg.svg" title="Task Info" className="w-8 h-8 p-2 rounde hover:bg-violet-600 hover:bg-opacity-40"></img>
                     </button>
                 </div>
             </li>
-            {isInfo && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
+            
         </>
     )
 }
