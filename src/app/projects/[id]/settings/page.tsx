@@ -99,7 +99,8 @@ export default function Settings({ params } : { params : { id : string }}) {
     return (
         <>
             { isImgDrop && <DropImage closeDrop={toggleImgDrop} updateImg={updateImg}/>}
-            <main className="flex w-2/4 flex-col mx-auto py-14">
+            <main className="flex w-2/4 flex-col mx-auto py-14 ">
+            
                 <Head text="Settings"/>
                 <div className="space-y-8">
                     <section className="bg-neutral-950 p-4 rounded flex gap-8">

@@ -2,6 +2,7 @@ import { prisma } from "@/db";
 import { Backlog, Board, ProjectMember, Task, TaskColumn, TasksGroup, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
+import { unassigned } from "@/config";
 
 // TODO: defent boards need to be implement, implmenet type safe api
 
@@ -20,6 +21,8 @@ export type GroupOfTasks = {
     position : number | null,
     tasks : Task[]
 }
+
+
 
 // TODO: change querys on DB for better performace 
 // id: je id daného projektu v kterým 
@@ -43,10 +46,11 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 return Response.json({ data: board }, { status: 200 });
             case "backlog": 
                 const backlog = await getBacklog(params.id);
+                const collumns = await getBoardCollumns(params.id);
                 if (!backlog) { 
                     throw new Error(); 
                 }
-                return Response.json({ data: backlog }, { status: 200 });
+                return Response.json({ backlog: backlog, collumns: collumns }, { status: 200 });
             default:
                 return Response.json({ error: "Bad type of board in api request"}, { status: 400});
         }
@@ -139,7 +143,29 @@ async function getBacklog(projectId : string) : Promise<GroupOfTasks[] | null> {
             projectId: projectId
         }
     })
-    groups.push({ id: "unassigned", name: "unassigned", backlogId: backlog.id, tasks : tasks, position: null });
+    groups.push({ id: unassigned, name: unassigned, backlogId: backlog.id, tasks : tasks, position: null });
 
     return groups;
+}
+
+
+async function getBoardCollumns(projectId : string) : Promise<TaskColumn[]> {
+    const board : Board | null = await prisma.board.findFirst({
+        where: {
+            projectId: projectId
+        }
+    })
+
+    if (board == null) {
+        return [];
+    }
+
+    
+    const cols : TaskColumn[] =  await prisma.taskColumn.findMany({
+        where: {
+            boardId: board.id
+        }
+    })
+
+    return cols
 }

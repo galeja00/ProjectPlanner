@@ -51,7 +51,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     return (
         <Dialog>
-            <div className='bg-neutral-950 rounded w-[80rem] h-fit mx-72 my-36 overflow-hidden relative'>
+            <div className='bg-neutral-950 rounded w-[80rem] h-fit overflow-hidden relative'>
                 { task 
                     ?
                     <>

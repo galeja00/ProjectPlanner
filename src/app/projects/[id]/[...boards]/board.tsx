@@ -8,7 +8,7 @@ import { Head, CreateTaskButton } from '../components/other'
 import { useRouter } from 'next/router';
 import { pathToImages } from '@/config'
 import { PriorityImg } from './components/priority'
-import { Creator } from './components/creator'
+import { Creator, CreatorOfTask } from './components/creator'
 
 type BoardTasksColumn = {
     id : string,
@@ -82,10 +82,10 @@ export default function Board({ id } : { id : string }) {
                 throw new Error(data.error);
             }
 
-            const movedTask : Task = data.task;
-            movedTask.colIndex = taskIndex;
-            const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
-            const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
+            //const movedTask : Task = data.task;
+            //movedTask.colIndex = taskIndex;
+            //const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
+            //const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
             await fetchColumns(id);
             // Moving task on client side for better optimalization now have bugs dont work
             /*
@@ -518,24 +518,7 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
     )
 }
 
-function CreatorOfTask({ createTask, endCreate } : { createTask: (text : string) => void, endCreate : () => void }) {
-    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
-        const inputValue = event.currentTarget.value;
-        if (event.key === 'Enter') {
-            if (inputValue.length > 0) {
-                createTask(inputValue);
-            }
-        } else if (event.key === 'Escape') {
-            endCreate();
-        }
-    }
 
-    return (
-        <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 ">
-            <input type="text" className="bg-neutral-900 outline-none border-b" id="name" onKeyDown={handleKeyDown}></input>
-        </li>
-    )
-}
 
 
 

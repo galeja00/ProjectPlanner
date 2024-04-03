@@ -3,7 +3,7 @@
 
 import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "react";
 import Image from 'next/image' 
-import { Issue, Tag, Task, Ranking } from "@prisma/client";
+
 
 export function Name({name, updateName} : {name : string, updateName : (name : string) => void}) {
     const [eName, setName] = useState<string>(name);

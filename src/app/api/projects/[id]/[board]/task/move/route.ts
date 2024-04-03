@@ -1,10 +1,8 @@
-import { options } from "@/app/api/auth/[...nextauth]/options";
-import { Session, getServerSession } from "next-auth";
+
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
-import { Task } from "@prisma/client";
-import { getColumnsTasks,movAwayColumnIndexes,movInColumnIndexes, movToColumnIndexes } from "../static";
+import { movAwayColumnIndexes,movInColumnIndexes, movToColumnIndexes } from "../static";
 
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
@@ -17,25 +15,42 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         if (!member) {
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
-
-        const { taskId, fromColId, toColId,  taskIndex } : { taskId : string, fromColId : string, toColId : string, taskIndex : number } = await req.json(); 
+        //taskID: task s kterou chceme prsunout,
+        //fromColID: z jakeho sloupce presunujem task
+        //toColID: do jakeho sloupce
+        //taskIndex: na jaky index tento ukol umistime
+        const { taskId, fromColId, toColId,  taskIndex } : { taskId : string, fromColId : string | null, toColId : string, taskIndex : number | null } = await req.json(); 
         const task = await prisma.task.findFirst({
             where: {
                 id: taskId
             },
         });
+
         if (!task) {
             return Response.json({status : 400});
         }
+        
+        let index : number;
+        if (taskIndex) {
+            index = taskIndex
+        } else {
+            index = await prisma.task.count({
+                where: {
+                    taskColumnId: toColId
+                }
+            })
+        }
         if (fromColId == toColId) {
-            await movInColumnIndexes(toColId, task, taskIndex);
+            await movInColumnIndexes(toColId, task, index);
+        } 
+        else if (fromColId == null) {
+            await movInColumnIndexes(toColId, task, index);
         }
         else {
             await movAwayColumnIndexes(fromColId, task);
-            await movToColumnIndexes(toColId, task, taskIndex);
+            await movToColumnIndexes(toColId, task, index);
         }
 
-        
         const updatedTask = await prisma.task.update({
             where: {
                 id: taskId,

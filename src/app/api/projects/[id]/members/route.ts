@@ -5,13 +5,13 @@ import { prisma } from "@/db";
 import { ProjectMember, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 
-enum Load {
+export enum Load {
     low = 1,
     mid = 2,
     high = 3
 }
 
-type MemberTableInfo = {
+export type MemberTableInfo = {
     id : string,
     memberId: string,
     name: string,

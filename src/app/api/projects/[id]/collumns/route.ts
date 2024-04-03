@@ -1,6 +1,7 @@
 import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { prisma } from "@/db";
+import { Board, TaskColumn } from "@prisma/client";
 
 export async function POST(req : Request, { params } : { params: { id : string }}) {
     try {
@@ -13,15 +14,25 @@ export async function POST(req : Request, { params } : { params: { id : string }
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
-        await prisma.project.delete({
+        const board : Board | null = await prisma.board.findFirst({
             where: {
-                id: params.id
+                projectId: params.id
             }
-        });
+        })
 
-        return Response.json({ message: ""}, { status: 200 });
+        if (board == null) {
+            return Response.json({ status : 400 });
+        }
+
+        const cols : TaskColumn[] =  await prisma.taskColumn.findMany({
+            where: {
+                boardId: board.id
+            }
+        })
+
+        return Response.json({ collumns: cols }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "Something went wron on server" }, { status: 500 });
+        return Response.json({ error: "Somting wentt wrong on server" }, { status: 400 });
     }
 }

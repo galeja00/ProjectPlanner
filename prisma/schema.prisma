@@ -75,7 +75,6 @@ model TaskColumn {
   name      String  
   tasks     Task[]
   position  Int   
-
   @@unique([boardId, name], name: "Unique_ColumnInBoard_Project")     
 }
 
