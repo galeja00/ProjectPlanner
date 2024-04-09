@@ -26,6 +26,7 @@ model User {
   projectInvites   ProjectInvite[]
   issues    Issue[]
   comments  IssueComments[]
+  nodes     Node[]
 }
 
 // zakladní informace o projektu
@@ -110,6 +111,7 @@ model Task {
   //projectMemberId String?
   tasksGroupId  String?
   tasksGroup    TasksGroup? @relation(fields: [tasksGroupId], references: [id])
+  status        Boolean @default(false)
 }
 
 // project member který reší úkol
@@ -126,6 +128,7 @@ model TaskSolver {
 // system tagu (neimplementovan aktulně)
 model Tag {
   id      String   @id @default(cuid()) 
+  createdAt   DateTime @default(now())
   taskId  String?  
   task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
   teamId  String?
@@ -136,29 +139,36 @@ model Tag {
 
 // problemy při řešení úkolů nebo jine
 model Issue {
-  id    String @id @default(cuid())
-  taskId  String?
-  task   Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  projectId String
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  priority Ranking
-  creator User @relation(fields: [creatorId], references: [id])
-  creatorId String 
-  type   String
+  id          String @id @default(cuid())
+  createdAt   DateTime @default(now())
+  taskId      String?
+  task        Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  priority    Ranking
+  creator     User @relation(fields: [creatorId], references: [id])
+  creatorId   String 
+  name        String
   description String
-  commends IssueComments[]
+  commends    IssueComments[]
 }
+
 
 // komentaře k dané issue
 model IssueComments {
-  id      String @id @default(cuid())
-  issueId String
-  issue   Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
-  text    String
-  authorId String
-  author  User @relation(fields: [authorId], references: [id], onDelete: Cascade)
-}
+  id            String         @id @default(cuid())
+  createdAt     DateTime       @default(now())
+  issueId       String
+  issue         Issue          @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  isFirst       Boolean
+  text          String
+  authorId      String
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
+  answers       IssueComments[] @relation("AnswersTo")
+  prevCommentId String?
+  prevComment   IssueComments? @relation("AnswersTo", fields: [prevCommentId], references: [id], onDelete: Cascade)
+}
 // uchovava data pokud je uzivatel pozvan do projektu, pokud prijme nebo neprijme tak se tento invite smaze
 model ProjectInvite {
   id String @id @default(cuid())
@@ -193,8 +203,7 @@ model TasksGroup {
   @@unique([backlogId, name], name: "Unique_GroupsInBaclog_Project")
 }
 
-
-// 
+// urcuje jestli dany uzivatel je v danem projektu
 model ProjectMember {
   id        String    @id @default(cuid()) 
   userId    String   
@@ -202,7 +211,7 @@ model ProjectMember {
   projectId String  
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   teamId    String?
-  team      Team?      @relation(fields: [teamId], references: [id])
+  team      Team?     @relation(fields: [teamId], references: [id])
   seniority String?
   position  String?
   creator   Boolean   @default(false) 
@@ -211,7 +220,8 @@ model ProjectMember {
 
   @@unique([userId, projectId], name: "Unique_User_Project")
 }
-// add color to teams
+
+// zakladni infomace o teamu
 model Team {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
@@ -224,23 +234,19 @@ model Team {
   tags      Tag[]
 }
 
-//model TeamMember {
-  //id      String      @id @default(cuid()) 
-  //userId  String  
-  //user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  //teamId  String  
-  //team    Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  //creator   Boolean   @default(false)
-  //position  String?
+model Node {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  name      String
+  text      String
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
-  //@@unique([userId, teamId], name: "Unique_User_Team")
-//}
+
 
 // TODO //////////////////
-model ProjectPosition {
-  id    String    @id @default(cuid()) 
-  name  String
-}
+
 
 model TimeTable {
   id          String   @id @default(cuid()) 
