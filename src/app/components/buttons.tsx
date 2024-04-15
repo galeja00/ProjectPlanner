@@ -1,3 +1,5 @@
+"use client"
+
 export enum ButtonType {
     Destructive,
     MidDestructive,
@@ -51,6 +53,16 @@ function ButtonComp({ button } : { button : Button }) {
     return (
         <button className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor}`} onClick={button.onClick}>
             <img src={button.img} title={button.title} className={` hover:bg-${hoverColor} hover:bg-opacity-40 w-${button.size} h-${button.size}`}></img>
+        </button>
+    )
+}
+
+
+export function CreateButton({ text, onClick } : { text : string, onClick : () => void }) {
+    return ( 
+        <button onClick={onClick} className="flex gap-2 items-center mb-2 text-neutral-400 cursor-pointer">
+            <img src="/plus.svg" className="w-8 h-8 bg-neutral-950 rounded  hover:outline hover:outline-1 hover:outline-violet-600"/>
+            <div>{text}</div>
         </button>
     )
 }

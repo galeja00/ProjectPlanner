@@ -128,7 +128,7 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
             <tbody className='flex flex-col gap-1 p-1'>
                 {
                     members.map((member) => (
-                        <MemberRow memberInfo={member} handleRemove={() => handleRemove(member.memberId)} openSettings={() => openSettings(member.memberId)}/>
+                        <MemberRow key={member.memberId} memberInfo={member} handleRemove={() => handleRemove(member.memberId)} openSettings={() => openSettings(member.memberId)}/>
                     ))
                 }
             </tbody>

@@ -2,7 +2,8 @@ import { getServerSession } from "next-auth";
 import { options } from "../auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { authorize } from "../static";
-import { Issue, Project, Ranking, User } from "@prisma/client";
+import { Node } from "@prisma/client";
+import { NodeInfo } from "./static";
 
 
 
@@ -21,13 +22,21 @@ export async function GET(req : Request) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
 
-        const nodes = await prisma.node.findMany({
+        const nodes : Node[] = await prisma.node.findMany({
             where: {
                 userId: user.id
+            },
+            orderBy: {
+                createdAt: "asc"
             }
         })
-
-        return Response.json({ nodes: nodes }, { status: 200 });
+        const resNodes : NodeInfo[] = [];
+        nodes.forEach(node => {
+            const currentDate: Date = new Date();
+            const timeDifferenceInSec = Math.floor((currentDate.getTime() - node.createdAt.getTime()) / (1000));
+            resNodes.push({ id: node.id, name: node.name, text: node.text, createdAgo: timeDifferenceInSec});
+        });
+        return Response.json({ nodes: resNodes }, { status: 200 });
     }
     catch (error) {
         return Response.json({ error: error }, { status: 500 })

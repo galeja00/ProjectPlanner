@@ -5,6 +5,7 @@ import { FormEvent, useState } from 'react'
 import EmailValidator from 'email-validator';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { SubmitButton } from '@/app/components/form';
 
 export default function LoginForm() {
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
@@ -49,7 +50,7 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8 pb-8 border-b w-96'>
             <FormItem item="Email" type="email" name="email" correct={correctPsw}></FormItem>
             <FormItem item="Password" type="password" name="password" correct={correctEmail}></FormItem>
-            <SendButton/>
+            <SubmitButton text={"Sign in"}/>
             {faildMsg === "" ? <p>  </p> : <p className='text-red-500 w-fit m-auto'>{faildMsg}</p>}
         </form>
     )
@@ -68,11 +69,5 @@ export function FormItem({ item, type, name, correct }: { item : string, type: s
     )
 }
 
-export function SendButton() {
-    return (
-        <div className='w-fit m-auto'>
-            <button className='btn-primary' type="submit">Continue</button>
-        </div>
-    )
-}
+
 

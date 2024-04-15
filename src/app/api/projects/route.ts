@@ -136,6 +136,12 @@ export async function POST(req : Request) {
                 projectId: project.id
             }
         })
+
+        const timetable = await prisma.timeTable.create({
+            data: {
+                projectId: project.id
+            }
+        })
         
         await prisma.kanban.update( {
             where: {
@@ -143,7 +149,8 @@ export async function POST(req : Request) {
             },
             data: {
                 boardId: board.id,
-                backlogId: backlog.id 
+                backlogId: backlog.id, 
+                timetableId: project.id
             }
         })
         
@@ -168,6 +175,6 @@ export async function POST(req : Request) {
 
     } catch (error) {
         console.log(error);
-        return NextResponse.json({ error: "Comunication on server faild try again later"}, { status: 400 })
+        return NextResponse.json({ error: "Comunication on server faild try again later"}, { status: 500 })
     }
 }

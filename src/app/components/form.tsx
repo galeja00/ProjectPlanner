@@ -13,10 +13,10 @@ export function FormItem({ item, type, name, correct } : { item : string, type: 
     )
 }
 
-export function SubmitButton() {
+export function SubmitButton({ text } : { text : string}) {
     return (
         <div className='w-fit m-auto'>
-            <button className='btn-primary' type="submit">Create Account</button>
+            <button className='btn-primary' type="submit">{text}</button>
         </div>
     )
 }

@@ -253,7 +253,7 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
 
     
     return (
-        <section className="p-4  h-fit relative flex gap-4 w-full justify-around">
+        <section className="p-4 h-fit relative flex gap-4 w-full justify-around">
             <MembersColumn type={ColumnType.team} members={teamMembers} handleMove={handleMove}/>
             <MembersColumn type={ColumnType.other} members={members} handleMove={handleMove}/>
         </section>

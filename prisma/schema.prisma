@@ -49,15 +49,15 @@ model Project {
 
 // informace o tabulich daneho projektu typu kanban(kvuli mozhnosti rozěíření na jiné typy projektového řízení)
 model Kanban {
-  projectId String    @id
-  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  boardId   String?
-  board     Board?
-  timetableId String?
-  timetable TimeTable?
-  backlogId   String?
-  backlog   Backlog?
-  tasks     Task[]
+  projectId     String    @id
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  boardId       String?
+  board         Board?
+  timetableId   String?
+  timetable     TimeTable?
+  backlogId     String?
+  backlog       Backlog?
+  tasks         Task[]
 }
 
 // informace o kanban tabuly
@@ -67,6 +67,22 @@ model Board {
   Kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   name        String?
   taskColumns TaskColumn[] 
+}
+
+// tabule backlog
+model Backlog {
+  id          String @id @default(cuid()) 
+  projectId   String   @unique
+  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  tasksGroups TasksGroup[]
+}
+
+// casova tabule s ukoly
+model TimeTable {
+  id          String   @id @default(cuid()) 
+  projectId   String   @unique
+  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  tasksGroups TasksGroup[]
 }
 
 // sloupce dane kanban tabule
@@ -106,9 +122,7 @@ model Task {
   description   String?
   issues        Issue[]
   tags          Tag[]
-  //projectMembers  ProjectMember? @relation(fields: [projectMemberId], references: [id])
   taskSolvers   TaskSolver[]
-  //projectMemberId String?
   tasksGroupId  String?
   tasksGroup    TasksGroup? @relation(fields: [tasksGroupId], references: [id])
   status        Boolean @default(false)
@@ -116,25 +130,25 @@ model Task {
 
 // project member který reší úkol
 model TaskSolver {
-  id      String @id @default(cuid())
-  memberId  String
-  member   ProjectMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  taskId  String
-  task    Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  id          String @id @default(cuid())
+  memberId    String
+  member      ProjectMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  taskId      String
+  task        Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
  
   @@unique([taskId, memberId], name: "Unique_task_member")
 }
 
 // system tagu (neimplementovan aktulně)
 model Tag {
-  id      String   @id @default(cuid()) 
+  id          String   @id @default(cuid()) 
   createdAt   DateTime @default(now())
-  taskId  String?  
-  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  teamId  String?
-  team    Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  name    String
-  color   String
+  taskId      String?  
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  name        String
+  color       String
 }
 
 // problemy při řešení úkolů nebo jine
@@ -149,7 +163,7 @@ model Issue {
   creator     User @relation(fields: [creatorId], references: [id])
   creatorId   String 
   name        String
-  description String
+  description String @db.Text
   commends    IssueComments[]
 }
 
@@ -171,35 +185,32 @@ model IssueComments {
 }
 // uchovava data pokud je uzivatel pozvan do projektu, pokud prijme nebo neprijme tak se tento invite smaze
 model ProjectInvite {
-  id String @id @default(cuid())
+  id            String @id @default(cuid())
   invitedUserId String
-  invitedUser User @relation(fields: [invitedUserId], references: [id], onDelete: Cascade)
-  projectId String
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createAt DateTime @default(now())
-  displayed Boolean @default(false)
+  invitedUser   User @relation(fields: [invitedUserId], references: [id], onDelete: Cascade)
+  projectId     String
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createAt      DateTime @default(now())
+  displayed     Boolean @default(false)
 
   @@unique([invitedUserId, projectId], name: "Unique_InvitedUser_Project")
 }
 
-// tabule backlog
-model Backlog {
-  id          String @id @default(cuid()) 
-  projectId   String   @unique
-  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
-  tasksGroups TasksGroup[]
-}
+
 
 // skupiny tasku ktere jsou v danem projektu
 model TasksGroup {
-  id String @id @default(cuid()) 
-  backlogId String 
-  backlog Backlog @relation(fields: [backlogId], references: [id], onDelete: Cascade)
-  name  String
-  tasks Task[]
-  createAt DateTime @default(now())
-  position Int
-
+  id          String @id @default(cuid()) 
+  backlogId   String 
+  backlog     Backlog @relation(fields: [backlogId], references: [id], onDelete: Cascade)
+  timeTableId String?
+  timeTable   TimeTable? @relation(fields: [timeTableId], references: [id])
+  name        String
+  tasks       Task[]
+  createAt    DateTime @default(now())
+  position    Int
+  startAt     DateTime?
+  deadlineAt  DateTime?
   @@unique([backlogId, name], name: "Unique_GroupsInBaclog_Project")
 }
 
@@ -238,23 +249,7 @@ model Node {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
   name      String
-  text      String
+  text      String      @db.Text
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-
-
-// TODO //////////////////
-
-
-model TimeTable {
-  id          String   @id @default(cuid()) 
-  projectId   String   @unique
-  kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
-}
-
-
-//////////////////////////
-
-

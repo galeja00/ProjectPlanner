@@ -1,12 +1,14 @@
 "use client"
 import { Node } from "@prisma/client"
-import { useReducer, useState } from "react";
-import { Dialog } from "../components/dialog";
-
+import { ChangeEvent, FormEvent, useEffect, useReducer, useState } from "react";
+import { Dialog, DialogClose } from "../components/dialog";
+import { ArrayButtons, Button, ButtonType, CreateButton, Lighteness } from "../components/buttons";
+import { FormItem, SubmitButton } from "../components/form";
+import { NodeInfo } from "../api/nodes/static";
 
 export default function Nodes() {
     const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);
-    const [ nodes, setNodes ] = useState<Node[]>([]); 
+    const [ nodes, setNodes ] = useState<NodeInfo[]>([]); 
     async function fetchNodes() {
         try {
             const res = await fetch("/api/nodes", {
@@ -24,54 +26,142 @@ export default function Nodes() {
         }
     }
 
-    async function createNode(name : string, text : string) {
+    async function deleteNode(id : string) {
         try {
-            const res = await fetch("api/nodes/create", {
-                method: "POST",
-                body: JSON.stringify({
-                    name : name,
-                    text : text
-                })
+            const res = await fetch(`/api/nodes/${id}/delete`, {
+                method: "POST"
             })
-
-            if (res.ok) {
-                fetchNodes();
+            
+            if (!res.ok) {
+                const data = await res.json(); 
+                console.error(data.error);
                 return;
             }
-            const data = await res.json();
-            console.error(data.error);
+            const newNodes : NodeInfo[] = [];
+            for (let node of nodes) {
+                if (node.id != id) {
+                    newNodes.push(node);
+                }
+            }
+            setNodes(newNodes);
         }
         catch (error) {
             console.error(error);
         }
     }
 
-    return (
-        <section>
-            <CreateButton text="Create new Node" onClick={toggleCreator} />
-            <ul className="">
+    async function onCreate() {
+        fetchNodes();
+        toggleCreator();
+    }
 
+    useEffect(() => { fetchNodes() }, []);
+
+    return (
+        <>
+        
+        <section>
+        { isCreator && <NodeCreatetor onClose={toggleCreator} onCreate={onCreate}/>}
+            <CreateButton text="Create new node" onClick={toggleCreator} />
+            <ul className="grid grid-cols-2 gap-2">
+                {
+                    nodes.map((node) => (
+                        <NodeComponent key={node.id} node={node} deleteNode={deleteNode} />
+                    ))
+                }
             </ul>
         </section>
+        </>
+        
     )
 }
 
-function NodeCreatetor({ onCreate, onClose } : { onCreate : (name :string, text : string)  => void, onClose : () => void }) {
+function NodeCreatetor({ onCreate, onClose } : { onCreate : () => void, onClose : () => void }) {
+    const [ desc, setDesc ] = useState<string>("");
+
+    function handleChange(event : ChangeEvent<HTMLTextAreaElement>) {
+        setDesc(event.target.value);
+    }
+    // TODO : optimalizate (not refetch again just update)
+    async function handleSubmit(event : FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget); 
+        const header = formData.get("header");
+        if (header == "") {
+
+        }
+        try {
+            const res = await fetch("/api/nodes/create", {
+                method: "POST",
+                body: JSON.stringify({
+                    header: header,
+                    desc: desc
+                })
+            })
+            const data = await res.json(); 
+            if (!res.ok) {
+                console.error(data.error);
+                return;
+            }
+            onCreate();
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+    
+
     return (
         <Dialog>
-            <div className="">
-                <input></input>
-                <input></input>
-                <button></button>
+            <div className="bg-neutral-950 rounded p-4 h-fit relative w-1/3">
+                <DialogClose handleClose={onClose}/>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <h2 className=" font-bold text-xl mb-4">Create new node</h2>
+                    <FormItem item={"Header"} type={"text"} name={"header"} correct={true}/>
+                    <div className="flex flex-col">
+                        <label>Description</label>
+                        <textarea className="input-primary h-32" onChange={handleChange} />
+                    </div>
+                    <SubmitButton text={"Create node"}/>
+                </form>
             </div>
         </Dialog>
     )
 }
 
-function CreateButton({ text, onClick } : { text : string, onClick : () => void }) {
+
+
+function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (id : string) => void }) {
+    const ago: number = node.createdAgo;
+    const agoText: string = formatAgo(ago);
+
+    const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.bright}];
     return ( 
-        <button>   
-            <img src="plus.svg"></img>
-        </button>
+        <li key={node.id} className="bg-neutral-950 rounded min-h-[8rem]">
+            <div className="flex justify-between border-b p-4 items-center">
+                <h3>{node.name}</h3>
+                <div className="flex gap-4">
+                    <div className="text-neutral-400">
+                        {agoText}
+                    </div>
+                    <ArrayButtons buttons={buttons} gap={1}/>
+                </div>
+                
+            </div>
+            <p className="p-4">{node.text}</p>
+        </li>
     )
+}
+
+
+function formatAgo(time: number): string {
+    const units = ['sec', 'min', 'h', 'd'];
+    let unitIndex = 0;
+
+    while (time >= 60 && unitIndex < units.length - 1) {
+        time /= 60;
+        unitIndex++;
+    }
+    time = Math.round(time);
+    return `${time} ${units[unitIndex]}`;
 }

@@ -3,6 +3,7 @@
 import { FormEvent, useState } from 'react';
 import EmailValidator from 'email-validator';
 import { useRouter } from 'next/navigation';
+import { SubmitButton } from '@/app/components/form';
 //import { FormItem, SubmitButton } from '@/app/components/form';
 
 type Msg = {
@@ -77,7 +78,7 @@ export default function RegisterForm() {
             </div>
             <FormItem item="Password" name="password" type="password" correct={correctPsw}/>
             <FormItem item="Repeat Password" name="repeatpassword" type="password" correct={correctPsw}/>
-            <SubmitButton/>
+            <SubmitButton text={"Sign up"}/>
             {Msg.message === "" ? <p>  </p> : <p className={`${Msg.type ? "text-green-500" : "text-red-500"} w-fit m-auto`}>{Msg.message}</p>}
         </form>
     )
@@ -92,14 +93,6 @@ function FormItem({ item, type, name, correct }: { item : string, type: string, 
         <div className='flex flex-col'>
             <label>{item}</label>
             <input type={type} name={name} className={inputClass}></input>
-        </div>
-    )
-}
-
-function SubmitButton() {
-    return (
-        <div className='w-fit m-auto'>
-            <button className='btn-primary' type="submit">Create Account</button>
         </div>
     )
 }

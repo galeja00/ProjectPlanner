@@ -1,5 +1,6 @@
 "use client"
 
+import { CreateButton } from '@/app/components/buttons';
 import { useReducer, useState, KeyboardEvent,  ChangeEvent } from 'react'
 
 export function Creator({ what, handleCreate } : {what : string, handleCreate : (name : string) => void}) {
@@ -44,10 +45,7 @@ export function Creator({ what, handleCreate } : {what : string, handleCreate : 
                     
                 </div>
                 :
-                <button onClick={toggleCreating} className="flex gap-2 items-center mb-2 text-neutral-400 cursor-pointer">
-                    <img src="/plus.svg" className="w-8 h-8 bg-neutral-950 rounded  hover:outline hover:outline-1 hover:outline-violet-600"/>
-                    <div>{what}</div>
-                </button>
+                <CreateButton text={what} onClick={toggleCreating}/>
             }
         </div>
     )
