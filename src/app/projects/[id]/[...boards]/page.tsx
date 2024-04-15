@@ -20,7 +20,7 @@ export default function Boards({ params } :  { params: { id : string, boards : s
                 setBoard(<Board id={params.id}/>);
                 break;
             case "timetable":
-                setBoard(<TimeTable/>);
+                setBoard(<TimeTable id={params.id}/>);
                 break;
             case "backlog":
                 setBoard(<Backlog id={params.id}/>);
@@ -30,7 +30,7 @@ export default function Boards({ params } :  { params: { id : string, boards : s
     
     
     return (
-        <main className="px-14 py-14 relative w-full">
+        <main className="px-14 py-14 relative w-full overflow-x-hidden">
             {board}
         </main>
         

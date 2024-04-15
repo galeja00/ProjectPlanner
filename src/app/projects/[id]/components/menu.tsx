@@ -21,7 +21,7 @@ export default function ProjectMenu({ id } : { id : string }) {
                 <ul className="flex flex-col gap-2">
                     <SideMenuLink id={id} name="Members" to="members" img="/members.svg"/>
                     <SideMenuLink id={id} name="Teams" to="teams" img="/members.svg"/>
-                    <SideMenuLink id={id} name="Code" to="code" img="/code.svg"/>
+                    <SideMenuLink id={id} name="Issues" to="issues" img="/code.svg"/>
                     <SideMenuLink id={id} name="Settings" to="settings" img="/settings.svg"/>
                 </ul>
             </section>  
