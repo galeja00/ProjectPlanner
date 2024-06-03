@@ -10,24 +10,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 
 // základni informace o uživateli aplikace
 model User {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
   email     String      @unique
-  emailVerified DateTime?
   name      String
   surname   String
   password  String
   image     String?
-  skills    String[]
   projects  ProjectMember[]
   projectInvites   ProjectInvite[]
   issues    Issue[]
   comments  IssueComments[]
   nodes     Node[]
 }
+
+model Node {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  name      String
+  text      String      @db.Text
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 
 // zakladní informace o projektu
 model Project {
@@ -47,6 +58,37 @@ model Project {
   kanban    Kanban?
 }
 
+// urcuje jestli dany uzivatel je v danem projektu
+model ProjectMember {
+  id        String    @id @default(cuid()) 
+  userId    String   
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String  
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  teamId    String?
+  team      Team?     @relation(fields: [teamId], references: [id])
+  creator   Boolean   @default(false) 
+  isAdmin   Boolean   @default(false)
+  tasks     TaskSolver[]
+
+  @@unique([userId, projectId], name: "Unique_User_Project")
+}
+
+// uchovava data pokud je uzivatel pozvan do projektu, pokud prijme nebo neprijme tak se tento invite smaze
+
+model ProjectInvite {
+  id            String @id @default(cuid())
+  invitedUserId String
+  invitedUser   User @relation(fields: [invitedUserId], references: [id], onDelete: Cascade)
+  projectId     String
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createAt      DateTime @default(now())
+  displayed     Boolean @default(false)
+
+  @@unique([invitedUserId, projectId], name: "Unique_InvitedUser_Project")
+}
+
+
 // informace o tabulich daneho projektu typu kanban(kvuli mozhnosti rozěíření na jiné typy projektového řízení)
 model Kanban {
   projectId     String    @id
@@ -65,7 +107,6 @@ model Board {
   id          String   @id @default(cuid())   
   projectId   String   @unique
   Kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
-  name        String?
   taskColumns TaskColumn[] 
 }
 
@@ -110,7 +151,6 @@ model Task {
   projectId     String 
   kanban        Kanban @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   createAt      DateTime @default(now())
-  deadlineAt    DateTime?
   name          String
   type          String
   colIndex      Int?
@@ -139,7 +179,7 @@ model TaskSolver {
   @@unique([taskId, memberId], name: "Unique_task_member")
 }
 
-// system tagu (neimplementovan aktulně)
+// systém tagu pro týmy a úkoly
 model Tag {
   id          String   @id @default(cuid()) 
   createdAt   DateTime @default(now())
@@ -183,18 +223,6 @@ model IssueComments {
   prevCommentId String?
   prevComment   IssueComments? @relation("AnswersTo", fields: [prevCommentId], references: [id], onDelete: Cascade)
 }
-// uchovava data pokud je uzivatel pozvan do projektu, pokud prijme nebo neprijme tak se tento invite smaze
-model ProjectInvite {
-  id            String @id @default(cuid())
-  invitedUserId String
-  invitedUser   User @relation(fields: [invitedUserId], references: [id], onDelete: Cascade)
-  projectId     String
-  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createAt      DateTime @default(now())
-  displayed     Boolean @default(false)
-
-  @@unique([invitedUserId, projectId], name: "Unique_InvitedUser_Project")
-}
 
 
 
@@ -214,23 +242,7 @@ model TasksGroup {
   @@unique([backlogId, name], name: "Unique_GroupsInBaclog_Project")
 }
 
-// urcuje jestli dany uzivatel je v danem projektu
-model ProjectMember {
-  id        String    @id @default(cuid()) 
-  userId    String   
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId String  
-  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  teamId    String?
-  team      Team?     @relation(fields: [teamId], references: [id])
-  seniority String?
-  position  String?
-  creator   Boolean   @default(false) 
-  isAdmin   Boolean   @default(false)
-  tasks     TaskSolver[]
 
-  @@unique([userId, projectId], name: "Unique_User_Project")
-}
 
 // zakladni infomace o teamu
 model Team {
@@ -245,11 +257,3 @@ model Team {
   tags      Tag[]
 }
 
-model Node {
-  id        String      @id @default(cuid())
-  createdAt DateTime    @default(now())
-  name      String
-  text      String      @db.Text
-  userId    String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-}

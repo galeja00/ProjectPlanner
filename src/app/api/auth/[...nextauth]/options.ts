@@ -39,13 +39,16 @@ export const options: NextAuthOptions = {
                     return null;
                 }
 
+                credentials.email.toLocaleLowerCase();
                 if(!EmailValidator.validate(credentials.email)) {
                     return null; 
                 }
                 
                 const res = await prisma.user.findFirst({ where: { email: credentials.email } });
+                
                 if (res) {
                     const correctPsw = await compare(credentials.password || "", res.password);
+                    
                     if (correctPsw) {
                         return { id: res.id, name: res.name, email: res.email };
                     }

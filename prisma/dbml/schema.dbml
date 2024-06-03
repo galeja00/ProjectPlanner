@@ -1,0 +1,292 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  email String [unique, not null]
+  name String [not null]
+  surname String [not null]
+  password String [not null]
+  image String
+  projects ProjectMember [not null]
+  projectInvites ProjectInvite [not null]
+  issues Issue [not null]
+  comments IssueComments [not null]
+  nodes Node [not null]
+}
+
+Table Node {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  name String [not null]
+  text String [not null]
+  userId String [not null]
+  user User [not null]
+}
+
+Table Project {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  name String [not null]
+  category String
+  icon String
+  color String [not null]
+  done Boolean [not null, default: false]
+  doneAt DateTime
+  members ProjectMember [not null]
+  teams Team [not null]
+  issues Issue [not null]
+  invites ProjectInvite [not null]
+  kanban Kanban
+}
+
+Table ProjectMember {
+  id String [pk]
+  userId String [not null]
+  user User [not null]
+  projectId String [not null]
+  project Project [not null]
+  teamId String
+  team Team
+  seniority String
+  position String
+  creator Boolean [not null, default: false]
+  isAdmin Boolean [not null, default: false]
+  tasks TaskSolver [not null]
+
+  indexes {
+    (userId, projectId) [unique]
+  }
+}
+
+Table ProjectInvite {
+  id String [pk]
+  invitedUserId String [not null]
+  invitedUser User [not null]
+  projectId String [not null]
+  project Project [not null]
+  createAt DateTime [default: `now()`, not null]
+  displayed Boolean [not null, default: false]
+
+  indexes {
+    (invitedUserId, projectId) [unique]
+  }
+}
+
+Table Kanban {
+  projectId String [pk]
+  project Project [not null]
+  boardId String
+  board Board
+  timetableId String
+  timetable TimeTable
+  backlogId String
+  backlog Backlog
+  tasks Task [not null]
+}
+
+Table Board {
+  id String [pk]
+  projectId String [unique, not null]
+  Kanban Kanban [not null]
+  name String
+  taskColumns TaskColumn [not null]
+}
+
+Table Backlog {
+  id String [pk]
+  projectId String [unique, not null]
+  kanban Kanban [not null]
+  tasksGroups TasksGroup [not null]
+}
+
+Table TimeTable {
+  id String [pk]
+  projectId String [unique, not null]
+  kanban Kanban [not null]
+  tasksGroups TasksGroup [not null]
+}
+
+Table TaskColumn {
+  id String [pk]
+  board Board [not null]
+  boardId String [not null]
+  name String [not null]
+  tasks Task [not null]
+  position Int [not null]
+
+  indexes {
+    (boardId, name) [unique]
+  }
+}
+
+Table Task {
+  id String [pk]
+  taskColumn TaskColumn
+  taskColumnId String
+  projectId String [not null]
+  kanban Kanban [not null]
+  createAt DateTime [default: `now()`, not null]
+  deadlineAt DateTime
+  name String [not null]
+  type String [not null]
+  colIndex Int
+  priority Ranking
+  teamId String
+  team Team
+  estimatedHours Int
+  complexity Ranking
+  description String
+  issues Issue [not null]
+  tags Tag [not null]
+  taskSolvers TaskSolver [not null]
+  tasksGroupId String
+  tasksGroup TasksGroup
+  status Boolean [not null, default: false]
+}
+
+Table TaskSolver {
+  id String [pk]
+  memberId String [not null]
+  member ProjectMember [not null]
+  taskId String [not null]
+  task Task [not null]
+
+  indexes {
+    (taskId, memberId) [unique]
+  }
+}
+
+Table Tag {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  taskId String
+  task Task
+  teamId String
+  team Team
+  name String [not null]
+  color String [not null]
+}
+
+Table Issue {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  taskId String
+  task Task
+  projectId String [not null]
+  project Project [not null]
+  priority Ranking [not null]
+  creator User [not null]
+  creatorId String [not null]
+  name String [not null]
+  description String [not null]
+  commends IssueComments [not null]
+}
+
+Table IssueComments {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  issueId String [not null]
+  issue Issue [not null]
+  isFirst Boolean [not null]
+  text String [not null]
+  authorId String [not null]
+  author User [not null]
+  answers IssueComments [not null]
+  prevCommentId String
+  prevComment IssueComments
+}
+
+Table TasksGroup {
+  id String [pk]
+  backlogId String [not null]
+  backlog Backlog [not null]
+  timeTableId String
+  timeTable TimeTable
+  name String [not null]
+  tasks Task [not null]
+  createAt DateTime [default: `now()`, not null]
+  position Int [not null]
+  startAt DateTime
+  deadlineAt DateTime
+
+  indexes {
+    (backlogId, name) [unique]
+  }
+}
+
+Table Team {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  name String [not null]
+  color String
+  projectId String [not null]
+  project Project [not null]
+  members ProjectMember [not null]
+  tasks Task [not null]
+  tags Tag [not null]
+}
+
+Enum Ranking {
+  low
+  medium
+  high
+}
+
+Ref: Node.userId > User.id [delete: Cascade]
+
+Ref: ProjectMember.userId > User.id [delete: Cascade]
+
+Ref: ProjectMember.projectId > Project.id [delete: Cascade]
+
+Ref: ProjectMember.teamId > Team.id
+
+Ref: ProjectInvite.invitedUserId > User.id [delete: Cascade]
+
+Ref: ProjectInvite.projectId > Project.id [delete: Cascade]
+
+Ref: Kanban.projectId - Project.id [delete: Cascade]
+
+Ref: Board.projectId - Kanban.projectId [delete: Cascade]
+
+Ref: Backlog.projectId - Kanban.projectId [delete: Cascade]
+
+Ref: TimeTable.projectId - Kanban.projectId [delete: Cascade]
+
+Ref: TaskColumn.boardId > Board.id [delete: Cascade]
+
+Ref: Task.taskColumnId > TaskColumn.id [delete: Cascade]
+
+Ref: Task.projectId > Kanban.projectId [delete: Cascade]
+
+Ref: Task.teamId > Team.id
+
+Ref: Task.tasksGroupId > TasksGroup.id
+
+Ref: TaskSolver.memberId > ProjectMember.id [delete: Cascade]
+
+Ref: TaskSolver.taskId > Task.id [delete: Cascade]
+
+Ref: Tag.taskId > Task.id [delete: Cascade]
+
+Ref: Tag.teamId > Team.id [delete: Cascade]
+
+Ref: Issue.taskId > Task.id [delete: Cascade]
+
+Ref: Issue.projectId > Project.id [delete: Cascade]
+
+Ref: Issue.creatorId > User.id
+
+Ref: IssueComments.issueId > Issue.id [delete: Cascade]
+
+Ref: IssueComments.authorId > User.id [delete: Cascade]
+
+Ref: IssueComments.prevCommentId > IssueComments.id
+
+Ref: TasksGroup.backlogId > Backlog.id [delete: Cascade]
+
+Ref: TasksGroup.timeTableId > TimeTable.id
+
+Ref: Team.projectId > Project.id [delete: Cascade]

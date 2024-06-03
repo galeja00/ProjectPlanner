@@ -266,7 +266,7 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
                 <form onSubmit={handleChangePassword} className="flex flex-col gap-4 m-0 w-96">
                     <FormItem item="Password" type="password" name="password" correct={isCorrect}/>
                     <FormItem item="Repeat Password" type="password" name="repeatpassword" correct={isCorrect}/>
-                    <SubmitButton/>
+                    <SubmitButton text="Submit"/>
                     <p className={`m-auto ${isCorrect ? "text-green-600" : "text-red-600"}`}>{msg}</p>
                 </form>
             </div>
