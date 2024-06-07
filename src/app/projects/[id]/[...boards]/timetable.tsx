@@ -1,7 +1,7 @@
 "use client"
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
 import { Head } from "../components/other";
-import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef } from "react";
+import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef, RefObject } from "react";
 import { Creator } from "./components/creator";
 import { CreateButton } from "@/app/components/buttons";
 import { group } from "console";
@@ -129,7 +129,7 @@ function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart
 
     return (
         <>
-            <section className="relative h-5/6 bg-neutral-950 rounded flex overflow-y-auto">
+            <section className=" h-5/6 bg-neutral-950 rounded flex overflow-y-auto">
                 <section className="relative w-1/5 h-full border-r">
                     <div className="h-16 border-b w-full"></div>
                         <Groups/>
@@ -137,7 +137,7 @@ function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart
                         <Creator what="Create new group" handleCreate={createGroup}/>
                     </div>
                 </section>
-                <section className="relative overflow-x-auto w-4/5 h-max rounded"> 
+                <section className=" overflow-x-auto w-4/5 h-max rounded"> 
                     <TimesRanges ranges={ranges}/>
                     <GroupsRanges groupsRanges={groupsRanges} updateRanges={updateRanges}/>
                 </section>
@@ -152,7 +152,7 @@ function TimesRanges({ ranges } : { ranges : number[] }) {
         <div className="w-fit flex h-16 bg-neutral-950">
             {
                 ranges.map((val, index) => (
-                    <div key={index} className={`w-[140px] border-r border-b `}>
+                    <div key={index} className={`w-[105px] border-r border-b `}>
                         {val}
                     </div> 
                 ))
@@ -229,8 +229,7 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
     const [ activelRow, setRow ] = useState<Row | null>(null);
     const [ startDay, setStartDay ] = useState<Day | null>(null);
     const days = useRef<HTMLDivElement>(null);
-    console.log(groupsRanges);
-    
+
     function handleMouseDown(event: MouseEvent) {
         event.preventDefault()
     }
@@ -273,8 +272,8 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
     }
 
     return (
-        <div>
-            <div className="border-b w-max h-max border-neutral-400 "
+        <div className="">
+            <div className="border-b relative  w-max h-max border-neutral-400 "
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onContextMenu={handleContext}
@@ -283,14 +282,11 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
                 {groupsRanges.map((groupRange, row) => (
                     <GroupRow groupRange={groupRange} row={row} />
                 ))}
-            </div>
-            <div>
-
-            </div>
+            {days && <WorkRanges days={days} ranges={groupsRanges} />}</div>
         </div>
-        
     );
 }
+
 
 
 function GroupRow({ groupRange , row } : { groupRange : Range, row  : number }) {
@@ -317,9 +313,50 @@ function DisplayRange({ col, value } : { col : number, value : boolean }) {
         <div 
             key={col} 
             data-col-id={col} 
-            className={`min-w-[20px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} cursor-pointer`}
+            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} cursor-pointer`}
         >
-            {value ? <div className=" w-full h-3/6 bg-violet-500"></div> : <div></div>}
+           
         </div>
+    )
+}
+
+
+function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges : Range[]}) {
+    if(!days.current) {
+        return (
+            <></>
+        )
+    }
+    const rows : Element[] = Array.from(days.current.children);
+    const parent = days.current.getBoundingClientRect();
+    return (
+        <>
+        {
+            ranges.map((range, i) => {
+                console.log(range);
+                console.log(i);
+                if (range == null) {
+                    return <></>
+                }
+                let boxs : Element[] = Array.from(rows[i].children);
+                const row = rows[i].getBoundingClientRect();
+                const startbox = boxs[range.start].getBoundingClientRect();
+                const endbox = boxs[range.end].getBoundingClientRect();
+                console.log("top:" + startbox.top);
+                return (
+                    <div 
+                        className="bg-violet-700 absolute z-50 rounded border bg-opacity-80"
+                        style={{ 
+                            height: startbox.height / (3 / 2),
+                            left: startbox.left - row.left,
+                            top: startbox.top - parent.top + startbox.height / 6,
+                            width: endbox.right - startbox.left  
+                        }}
+                    >
+                    </div>
+                )
+            })
+        }
+        </>
     )
 }
