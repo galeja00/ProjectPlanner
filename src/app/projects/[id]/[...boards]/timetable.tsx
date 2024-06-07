@@ -322,6 +322,7 @@ function DisplayRange({ col, value } : { col : number, value : boolean }) {
 
 
 function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges : Range[]}) {
+    const range = useRef<HTMLDivElement>(null);
     if(!days.current) {
         return (
             <></>
@@ -330,11 +331,9 @@ function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges 
     const rows : Element[] = Array.from(days.current.children);
     const parent = days.current.getBoundingClientRect();
     return (
-        <>
+        <div className="w-fit h-fit">
         {
             ranges.map((range, i) => {
-                console.log(range);
-                console.log(i);
                 if (range == null) {
                     return <></>
                 }
@@ -342,7 +341,6 @@ function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges 
                 const row = rows[i].getBoundingClientRect();
                 const startbox = boxs[range.start].getBoundingClientRect();
                 const endbox = boxs[range.end].getBoundingClientRect();
-                console.log("top:" + startbox.top);
                 return (
                     <div 
                         className="bg-violet-700 absolute z-50 rounded border bg-opacity-80"
@@ -357,6 +355,6 @@ function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges 
                 )
             })
         }
-        </>
+        </div>
     )
 }
