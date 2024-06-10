@@ -10,13 +10,14 @@ interface TimeTableContextTypes {
     createGroup: (name: string) => void;
     updateGroups: (ranges : Range[]) => void;
     groups : GroupOfTasks[];
-    mode : Mode
+    mode : Mode;
 }
 
 interface RangesContextTypes {
-    updateRanges : (ranges : number[][]) => void;
-    ranges: number[][];
+    changeMode: (mode : UserMode) => void;
+    userMode: UserMode;
 }
+
 enum Mode {
     Week = 7,
     Month = 31
@@ -191,6 +192,12 @@ type Day = {
     element: Element
 }
 
+enum UserMode {
+    Creating = 1,
+    Moving = 2,
+    Connecting = 3
+}
+
 
 function getRow(pos : Position, rows : Element[] ) : Row | null {
     for (let i = 0; i < rows.length; i++) {
@@ -224,11 +231,18 @@ function getDay(pos : Position, cols : Element[] ) : Day | null {
     return null;
 }
 
+
+
 function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], updateRanges : (ranges : Range[]) => void }) {
+    const [ userMode, setUserMode ] = useState<UserMode>(UserMode.Creating);
     const [ active, toggleActive ] = useReducer(active => !active, false);
     const [ activelRow, setRow ] = useState<Row | null>(null);
     const [ startDay, setStartDay ] = useState<Day | null>(null);
     const days = useRef<HTMLDivElement>(null);
+
+    function changeMode(mode : UserMode) {
+        setUserMode(mode);
+    }
 
     function handleMouseDown(event: MouseEvent) {
         event.preventDefault()
@@ -236,8 +250,7 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
 
     function handleMouseUp(event: MouseEvent) {
         event.preventDefault();
-        if (event.button != 0) return;
-        
+        if (event.button != 0 || userMode != UserMode.Creating) return;
         const clickPos : Position = { x: event.clientX, y: event.clientY };
         if (!days.current) return;
         const row : Row | null = getRow(clickPos, Array.from(days.current.children));
@@ -268,22 +281,23 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
 
     function handleContext(event : MouseEvent) {
         event.preventDefault();
-        //console.log("aha");
     }
 
     return (
-        <div className="">
-            <div className="border-b relative  w-max h-max border-neutral-400 "
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onContextMenu={handleContext}
-            ref={days}
-            >
-                {groupsRanges.map((groupRange, row) => (
-                    <GroupRow groupRange={groupRange} row={row} />
-                ))}
-            {days && <WorkRanges days={days} ranges={groupsRanges} />}</div>
-        </div>
+        <RangesContext.Provider value={{ changeMode, userMode}}>
+            <div className="">
+                <div className="border-b relative  w-max h-max border-neutral-400 "
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onContextMenu={handleContext}
+                ref={days}
+                >
+                    {groupsRanges.map((groupRange, row) => (
+                        <GroupRow groupRange={groupRange} row={row} />
+                    ))}
+                {days && <WorkRanges days={days} ranges={groupsRanges} />}</div>
+            </div>
+        </RangesContext.Provider>
     );
 }
 
@@ -322,7 +336,7 @@ function DisplayRange({ col, value } : { col : number, value : boolean }) {
 
 
 function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges : Range[]}) {
-    const range = useRef<HTMLDivElement>(null);
+    
     if(!days.current) {
         return (
             <></>
@@ -337,24 +351,57 @@ function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges 
                 if (range == null) {
                     return <></>
                 }
-                let boxs : Element[] = Array.from(rows[i].children);
-                const row = rows[i].getBoundingClientRect();
-                const startbox = boxs[range.start].getBoundingClientRect();
-                const endbox = boxs[range.end].getBoundingClientRect();
                 return (
-                    <div 
-                        className="bg-violet-700 absolute z-50 rounded border bg-opacity-80"
-                        style={{ 
-                            height: startbox.height / (3 / 2),
-                            left: startbox.left - row.left,
-                            top: startbox.top - parent.top + startbox.height / 6,
-                            width: endbox.right - startbox.left  
-                        }}
-                    >
-                    </div>
+                    <WorkRange parent={parent} range={range} index={i} rows={rows}/>
                 )
             })
         }
         </div>
+    )
+}
+
+enum ConnectType {
+    from = 1,
+    to = 2
+}
+
+function WorkRange({ parent, range, index, rows} : { parent : DOMRect, range : Range, index : number, rows: Element[]}) {
+    const [ isGrabed, toggleGrab ] = useReducer(isGraped => !isGraped, false);
+    const rangeRef = useRef<HTMLDivElement>(null);
+    const { changeMode } = useContext(RangesContext)!;
+
+    function HandleStartConnect(type : ConnectType) {
+        changeMode(UserMode.Connecting)
+    }
+
+
+    let boxs : Element[] = Array.from(rows[index].children);
+    const row = rows[index].getBoundingClientRect();
+    const startbox = boxs[range.start].getBoundingClientRect();
+    const endbox = boxs[range.end].getBoundingClientRect();
+    return (
+        <div 
+            className={`bg-violet-500 absolute z-50 rounded border bg-opacity-70 flex justify-between`}
+            onMouseDown={toggleGrab}
+            onMouseUp={toggleGrab}
+
+            style={{ 
+                height: startbox.height / (3 / 2),
+                left: startbox.left - row.left,
+                top: startbox.top - parent.top + startbox.height / 6,
+                width: endbox.right - startbox.left  
+            }}
+        >
+            <ConnectRangeButton active={false} type={ConnectType.to} onClick={() => HandleStartConnect(ConnectType.to)}/>
+            <ConnectRangeButton active={false} type={ConnectType.from} onClick={() => HandleStartConnect(ConnectType.from)}/>
+        </div>
+    )
+}
+
+
+
+function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : () => void}) {
+    return (
+        <div className={`hover:bg-opacity-100 w-6 h-full bg-violet-700 ${active ? "bg-opacity-100" : "bg-opacity-80"} border-${type == ConnectType.to ? "r" : "l"} cursor-pointer`} onClick={onClick}></div>
     )
 }
