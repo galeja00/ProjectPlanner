@@ -6,18 +6,6 @@ import { Creator } from "./components/creator";
 import { CreateButton } from "@/app/components/buttons";
 import { group } from "console";
 
-interface TimeTableContextTypes {
-    createGroup: (name: string) => void;
-    updateGroups: (ranges : Range[]) => void;
-    groups : GroupOfTasks[];
-    mode : Mode;
-}
-
-interface RangesContextTypes {
-    changeMode: (mode : UserMode) => void;
-    userMode: UserMode;
-}
-
 enum Mode {
     Week = 7,
     Month = 31
@@ -27,6 +15,53 @@ type Range = {
     start: number,
     end: number
 }
+
+type GroupRange = {
+    range : Range,
+    next : GroupRange[],
+    prev : GroupRange[]
+}
+
+type Position = {
+    x : number,
+    y : number
+}
+
+type Row = {
+    index : number,
+    element: Element 
+}
+
+type Day = {
+    index: number,
+    element: Element
+}
+
+enum UserMode {
+    Creating = 1,
+    Moving = 2,
+    Connecting = 3
+}
+
+enum ConnectType {
+    from = 1,
+    to = 2
+}
+
+interface TimeTableContextTypes {
+    createGroup: (name: string) => void;
+    updateGroups: (ranges : GroupRange[]) => void;
+    groups : GroupOfTasks[];
+    mode : Mode;
+}
+
+interface RangesContextTypes {
+    changeMode: (mode : UserMode) => void;
+    updateRanges: (ranges : GroupRange[]) => void;
+    userMode: UserMode;
+    ranges: GroupRange[];
+}
+
 
 const TimeTableContext = createContext<TimeTableContextTypes | null>(null);
 const RangesContext = createContext<RangesContextTypes | null>(null);
@@ -59,7 +94,7 @@ export default function TimeTable({ id } : { id : string }) {
         setGroups(newGroups);
     }
     //TODO
-    async function updateGroups(groups : Range[]) {
+    async function updateGroups(groups : GroupRange[]) {
         
     }
 
@@ -86,7 +121,7 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
 
 function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart : Date}) {
     const [ currentTime, setCurrentTime ] = useState<Date>(new Date()); 
-    const [ groupsRanges, setGroupsRanges ] = useState<Range[]>(new Array(groups.length).fill(null));
+    const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(new Array(groups.length).fill(null));
     const [ creator, toggleCreator ] = useReducer(creator => !creator, false);
     const { createGroup, updateGroups, mode} = useContext(TimeTableContext)!;
     // count is number of weeks
@@ -95,19 +130,17 @@ function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart
     for (let i = 0; i < count; i++) {
         ranges[i] = i; 
     }
-    //TODO: z kazde groupy vzit kdy zacina a kdy konci
-    
+    //TODO
     /* 
     function createRanges() {
         const newGroupsRanges = new Array(groups.length).fill(null).map(() => new Array(count * mode).fill(0));
         setGroupsRanges(newGroupsRanges);
     }
     */
-    function updateRanges(ranges : Range[]) {
-        console.log(ranges);
+    function updateRanges(ranges : GroupRange[]) {
         setGroupsRanges([...ranges]);
     }
-/*
+    /*
     useEffect(() => {
         const interval = setInterval(() => {
           setCurrentTime(new Date());
@@ -120,7 +153,7 @@ function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart
     
     useEffect(() => {
         if (groups.length > groupsRanges.length) {
-            const newRanges : Range[] = new Array(groups.length);
+            const newRanges : GroupRange[] = new Array(groups.length);
             for (let i = 0; i < groupsRanges.length; i++) {
                 newRanges[i] = groupsRanges[i];
             }
@@ -177,26 +210,6 @@ function Groups() {
     )
 }
 
-type Position = {
-    x : number,
-    y : number
-}
-
-type Row = {
-    index : number,
-    element: Element 
-}
-
-type Day = {
-    index: number,
-    element: Element
-}
-
-enum UserMode {
-    Creating = 1,
-    Moving = 2,
-    Connecting = 3
-}
 
 
 function getRow(pos : Position, rows : Element[] ) : Row | null {
@@ -233,7 +246,7 @@ function getDay(pos : Position, cols : Element[] ) : Day | null {
 
 
 
-function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], updateRanges : (ranges : Range[]) => void }) {
+function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRange[], updateRanges : (ranges : GroupRange[]) => void }) {
     const [ userMode, setUserMode ] = useState<UserMode>(UserMode.Creating);
     const [ active, toggleActive ] = useReducer(active => !active, false);
     const [ activelRow, setRow ] = useState<Row | null>(null);
@@ -241,20 +254,21 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
     const days = useRef<HTMLDivElement>(null);
 
     function changeMode(mode : UserMode) {
-        setUserMode(mode);
+        if (mode != userMode) {
+            setUserMode(mode);
+            return;
+        }
     }
 
-    function handleMouseDown(event: MouseEvent) {
-        event.preventDefault()
-    }
-
-    function handleMouseUp(event: MouseEvent) {
+    function handleClick(event: MouseEvent) {
         event.preventDefault();
-        if (event.button != 0 || userMode != UserMode.Creating) return;
+        
+        if (event.button != 0) return;
         const clickPos : Position = { x: event.clientX, y: event.clientY };
         if (!days.current) return;
         const row : Row | null = getRow(clickPos, Array.from(days.current.children));
-        if (!row) return;  
+        if (!row) return;
+        if (groupsRanges[row.index] != null) return;  
         const day : Day | null = getDay(clickPos, Array.from(row.element.children));
         if (!day) return;
         let pos = day.element.getBoundingClientRect();
@@ -269,7 +283,8 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
         else {
             if (row.index == activelRow?.index && startDay && startDay.index <= day.index) {
                 const newRanges = groupsRanges;
-                newRanges[row.index] = { start: startDay.index, end: day.index };
+                const range : Range = {start: startDay.index, end: day.index}
+                newRanges[row.index] = { range: range, next: [], prev: []};
                 updateRanges(newRanges);
             } 
             startDay?.element.classList.remove("border-purple-600");
@@ -284,18 +299,17 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
     }
 
     return (
-        <RangesContext.Provider value={{ changeMode, userMode}}>
+        <RangesContext.Provider value={{ changeMode, updateRanges, userMode, ranges: groupsRanges }}>
             <div className="">
                 <div className="border-b relative  w-max h-max border-neutral-400 "
-                onMouseDown={handleMouseDown}
-                onMouseUp={handleMouseUp}
+                onClick={handleClick}
                 onContextMenu={handleContext}
                 ref={days}
                 >
                     {groupsRanges.map((groupRange, row) => (
-                        <GroupRow groupRange={groupRange} row={row} />
+                        <GroupRow row={row} />
                     ))}
-                {days && <WorkRanges days={days} ranges={groupsRanges} />}</div>
+                {days && <WorkRanges days={days} groupsRange={groupsRanges} />}</div>
             </div>
         </RangesContext.Provider>
     );
@@ -303,14 +317,9 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: Range[], 
 
 
 
-function GroupRow({ groupRange , row } : { groupRange : Range, row  : number }) {
+function GroupRow({ row } : { row  : number }) {
     const count = 80 * 7;
     const arr : boolean[] = new Array(count).fill(false);
-    if (groupRange) {
-        for (let i = groupRange.start; i <= groupRange.end; i++) {
-            arr[i] = true
-        }
-    }
     return (
         <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-950` : `bg-neutral-900`} `} data-row-id={row}>
             {arr.map((value, col) => (
@@ -329,30 +338,34 @@ function DisplayRange({ col, value } : { col : number, value : boolean }) {
             data-col-id={col} 
             className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} cursor-pointer`}
         >
-           
         </div>
     )
 }
 
+type WorkRangesFuncs = {
+    handleGrap : (event: MouseEvent, range : GroupRange) => void,
+    handleMove : (event: MouseEvent) => void,
+    handleDrop : (event: MouseEvent) => void 
+}
 
-function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges : Range[]}) {
-    
+function WorkRanges({days, groupsRange} : { days : RefObject<HTMLDivElement>, groupsRange : GroupRange[]}) {
     if(!days.current) {
         return (
             <></>
         )
     }
+
     const rows : Element[] = Array.from(days.current.children);
     const parent = days.current.getBoundingClientRect();
     return (
         <div className="w-fit h-fit">
         {
-            ranges.map((range, i) => {
+            groupsRange.map((range, i) => {
                 if (range == null) {
                     return <></>
                 }
                 return (
-                    <WorkRange parent={parent} range={range} index={i} rows={rows}/>
+                    <WorkRange parent={parent} groupRange={range} index={i} rows={rows} />
                 )
             })
         }
@@ -360,20 +373,58 @@ function WorkRanges({days, ranges} : { days : RefObject<HTMLDivElement>, ranges 
     )
 }
 
-enum ConnectType {
-    from = 1,
-    to = 2
-}
 
-function WorkRange({ parent, range, index, rows} : { parent : DOMRect, range : Range, index : number, rows: Element[]}) {
+
+function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, groupRange : GroupRange, index : number, rows: Element[]}) {
     const [ isGrabed, toggleGrab ] = useReducer(isGraped => !isGraped, false);
-    const rangeRef = useRef<HTMLDivElement>(null);
-    const { changeMode } = useContext(RangesContext)!;
+    const [ range, setRange ] = useState<Range>(groupRange.range);
+    const [ movPos, setMovPos ] = useState<Position | null>(null); 
+    const { changeMode, updateRanges, userMode, ranges } = useContext(RangesContext)!;
 
-    function HandleStartConnect(type : ConnectType) {
-        changeMode(UserMode.Connecting)
+    function handleConnect(type : ConnectType) {
+        if (userMode != UserMode.Connecting) {
+            changeMode(UserMode.Connecting);
+            return;
+        }  
     }
 
+    function handleGrap(event: MouseEvent) {
+        if (!isGrabed) {
+            changeMode(UserMode.Moving);
+            toggleGrab();
+            setMovPos({ x: event.clientX, y: event.clientY });
+        }
+    }
+
+    function handleMove(event: MouseEvent) {
+        if (isGrabed && movPos) {
+            const pos : Position = { x: event.clientX, y: event.clientY };
+            const row = rows[index];
+            const widthDay = row.children[0].getBoundingClientRect().width;
+            const difference = pos.x - movPos.x;
+            if (Math.abs(difference) % widthDay == 0) {
+                if (range.start + difference / widthDay < 0) {
+                    range.start = 0;
+                    range.end = groupRange.range.end - groupRange.range.start;
+                } else {
+                    range.start += difference / widthDay;
+                    range.end += difference / widthDay;
+                }   
+                setRange(range);
+                setMovPos(pos);
+            }
+        }
+    }
+
+    function handleDrop(event: MouseEvent) {
+        if (isGrabed) {
+            ranges[index].range = range;
+            updateRanges(ranges);
+            toggleGrab();
+            setMovPos(null);
+            changeMode(UserMode.Creating);
+        }
+    }
 
     let boxs : Element[] = Array.from(rows[index].children);
     const row = rows[index].getBoundingClientRect();
@@ -381,10 +432,11 @@ function WorkRange({ parent, range, index, rows} : { parent : DOMRect, range : R
     const endbox = boxs[range.end].getBoundingClientRect();
     return (
         <div 
-            className={`bg-violet-500 absolute z-50 rounded border bg-opacity-70 flex justify-between`}
-            onMouseDown={toggleGrab}
-            onMouseUp={toggleGrab}
-
+            className={`bg-violet-500 absolute z-100 rounded border bg-opacity-70 flex justify-between  ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
+            onMouseDown={handleGrap}
+            onMouseUp={handleDrop}
+            onMouseMoveCapture={handleMove}
+            onMouseLeave={handleDrop}
             style={{ 
                 height: startbox.height / (3 / 2),
                 left: startbox.left - row.left,
@@ -392,8 +444,8 @@ function WorkRange({ parent, range, index, rows} : { parent : DOMRect, range : R
                 width: endbox.right - startbox.left  
             }}
         >
-            <ConnectRangeButton active={false} type={ConnectType.to} onClick={() => HandleStartConnect(ConnectType.to)}/>
-            <ConnectRangeButton active={false} type={ConnectType.from} onClick={() => HandleStartConnect(ConnectType.from)}/>
+            <ConnectRangeButton active={false} type={ConnectType.to} onClick={() => handleConnect(ConnectType.to)}/>
+            <ConnectRangeButton active={false} type={ConnectType.from} onClick={() => handleConnect(ConnectType.from)}/>
         </div>
     )
 }
@@ -402,6 +454,6 @@ function WorkRange({ parent, range, index, rows} : { parent : DOMRect, range : R
 
 function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : () => void}) {
     return (
-        <div className={`hover:bg-opacity-100 w-6 h-full bg-violet-700 ${active ? "bg-opacity-100" : "bg-opacity-80"} border-${type == ConnectType.to ? "r" : "l"} cursor-pointer`} onClick={onClick}></div>
+        <div className={`hover:bg-opacity-100 hover:bg-violet-400  w-6 h-full bg-violet-700 ${active ? "bg-opacity-100 bg-violet-400" : "bg-opacity-80"} border-${type == ConnectType.to ? "r" : "l"} cursor-pointer`} onClick={onClick}></div>
     )
 }
