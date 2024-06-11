@@ -5,6 +5,8 @@ import { createContext, useContext, useEffect, useReducer, useState, MouseEvent,
 import { Creator } from "./components/creator";
 import { CreateButton } from "@/app/components/buttons";
 import { group } from "console";
+import { Dialog, DialogClose } from "@/app/components/dialog";
+import { ButtonWithText } from "@/app/components/other";
 
 enum Mode {
     Week = 7,
@@ -58,6 +60,7 @@ interface TimeTableContextTypes {
 interface RangesContextTypes {
     changeMode: (mode : UserMode) => void;
     updateRanges: (ranges : GroupRange[]) => void;
+    openRangeMenu: (groupRange : GroupRange, index : number) => void;
     userMode: UserMode;
     ranges: GroupRange[];
 }
@@ -163,7 +166,7 @@ function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart
 
     return (
         <>
-            <section className=" h-5/6 bg-neutral-950 rounded flex overflow-y-auto">
+            <section className=" h-5/6 bg-neutral-950 rounded flex overflow-y-auto relative">
                 <section className="relative w-1/5 h-full border-r">
                     <div className="h-16 border-b w-full"></div>
                         <Groups/>
@@ -211,7 +214,6 @@ function Groups() {
 }
 
 
-
 function getRow(pos : Position, rows : Element[] ) : Row | null {
     for (let i = 0; i < rows.length; i++) {
         let row : DOMRect = rows[i].getBoundingClientRect();
@@ -231,7 +233,6 @@ function getDay(pos : Position, cols : Element[] ) : Day | null {
         let col : DOMRect = cols[center].getBoundingClientRect();
         
         if (col.left <= pos.x && col.right >= pos.x) {
-            console.log(center);
             return { index: center, element: cols[center] };
         }
         else if (col.left > pos.x) {
@@ -244,13 +245,19 @@ function getDay(pos : Position, cols : Element[] ) : Day | null {
     return null;
 }
 
-
+type RangeInfo = {
+    groupRange: GroupRange,
+    group: GroupOfTasks,
+    index: number
+}
 
 function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRange[], updateRanges : (ranges : GroupRange[]) => void }) {
     const [ userMode, setUserMode ] = useState<UserMode>(UserMode.Creating);
+    const [ rangeInfo, setRangeInfo ] = useState<RangeInfo | null>(null);
     const [ active, toggleActive ] = useReducer(active => !active, false);
-    const [ activelRow, setRow ] = useState<Row | null>(null);
+    const [ activeRow, setRow ] = useState<Row | null>(null);
     const [ startDay, setStartDay ] = useState<Day | null>(null);
+    const { groups } = useContext(TimeTableContext)!
     const days = useRef<HTMLDivElement>(null);
 
     function changeMode(mode : UserMode) {
@@ -281,7 +288,7 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRang
 
         }
         else {
-            if (row.index == activelRow?.index && startDay && startDay.index <= day.index) {
+            if (row.index == activeRow?.index && startDay && startDay.index <= day.index) {
                 const newRanges = groupsRanges;
                 const range : Range = {start: startDay.index, end: day.index}
                 newRanges[row.index] = { range: range, next: [], prev: []};
@@ -298,12 +305,19 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRang
         event.preventDefault();
     }
 
+    function openRangeMenu(groupRange: GroupRange, index: number) {
+        setRangeInfo({ groupRange: groupRange, group: groups[index], index: index });
+    }
+
+    function removeRange(rangeInfo : RangeInfo) {
+
+    }
+
     return (
-        <RangesContext.Provider value={{ changeMode, updateRanges, userMode, ranges: groupsRanges }}>
+        <RangesContext.Provider value={{ changeMode, updateRanges, openRangeMenu, userMode, ranges: groupsRanges }}>
             <div className="">
                 <div className="border-b relative  w-max h-max border-neutral-400 "
                 onClick={handleClick}
-                onContextMenu={handleContext}
                 ref={days}
                 >
                     {groupsRanges.map((groupRange, row) => (
@@ -311,11 +325,31 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRang
                     ))}
                 {days && <WorkRanges days={days} groupsRange={groupsRanges} />}</div>
             </div>
+            { rangeInfo && <RangeMenu rangeInfo={rangeInfo} closeMenu={() => setRangeInfo(null)} removeRange={() => removeRange(rangeInfo)}/>}
         </RangesContext.Provider>
     );
 }
 
 
+function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo, closeMenu : () => void, removeRange : () => void}) {
+    return (
+        <Dialog>
+            <div className="w-40 h-40 bg-neutral-900 rounded relative">
+                <DialogClose handleClose={closeMenu}/>
+                <h2>{rangeInfo.group.name}</h2>
+                <div className="flex">
+                    <label>start day:</label>
+                    <input type="number" id="start"></input>
+                </div>
+                <div className="flex">
+                    <label>end day:</label>
+                    <input type="number" id="start"></input>
+                </div>
+                <ButtonWithText text="Delete" type="Destructive" handle={removeRange}/>
+            </div>
+        </Dialog>
+    )
+}
 
 function GroupRow({ row } : { row  : number }) {
     const count = 80 * 7;
@@ -379,7 +413,7 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     const [ isGrabed, toggleGrab ] = useReducer(isGraped => !isGraped, false);
     const [ range, setRange ] = useState<Range>(groupRange.range);
     const [ movPos, setMovPos ] = useState<Position | null>(null); 
-    const { changeMode, updateRanges, userMode, ranges } = useContext(RangesContext)!;
+    const { changeMode, updateRanges, openRangeMenu, userMode, ranges } = useContext(RangesContext)!;
 
     function handleConnect(type : ConnectType) {
         if (userMode != UserMode.Connecting) {
@@ -389,7 +423,7 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     }
 
     function handleGrap(event: MouseEvent) {
-        if (!isGrabed) {
+        if (!isGrabed && event.button != 2) {
             changeMode(UserMode.Moving);
             toggleGrab();
             setMovPos({ x: event.clientX, y: event.clientY });
@@ -426,6 +460,11 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         }
     }
 
+    function handleMenu(event: MouseEvent) {
+        event.preventDefault();
+        openRangeMenu(groupRange, index);
+    }
+
     let boxs : Element[] = Array.from(rows[index].children);
     const row = rows[index].getBoundingClientRect();
     const startbox = boxs[range.start].getBoundingClientRect();
@@ -435,8 +474,9 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
             className={`bg-violet-500 absolute z-100 rounded border bg-opacity-70 flex justify-between  ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
             onMouseDown={handleGrap}
             onMouseUp={handleDrop}
-            onMouseMoveCapture={handleMove}
+            onMouseMove={handleMove}
             onMouseLeave={handleDrop}
+            onContextMenu={handleMenu}
             style={{ 
                 height: startbox.height / (3 / 2),
                 left: startbox.left - row.left,
