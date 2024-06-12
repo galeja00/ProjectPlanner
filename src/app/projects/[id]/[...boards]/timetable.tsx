@@ -1,7 +1,7 @@
 "use client"
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
 import { Head } from "../components/other";
-import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef, RefObject } from "react";
+import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef, RefObject, ChangeEvent } from "react";
 import { Creator } from "./components/creator";
 import { CreateButton } from "@/app/components/buttons";
 import { group } from "console";
@@ -124,7 +124,7 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
 
 function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart : Date}) {
     const [ currentTime, setCurrentTime ] = useState<Date>(new Date()); 
-    const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(new Array(groups.length).fill(null));
+    const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(new Array(groups.length));
     const [ creator, toggleCreator ] = useReducer(creator => !creator, false);
     const { createGroup, updateGroups, mode} = useContext(TimeTableContext)!;
     // count is number of weeks
@@ -310,7 +310,13 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRang
     }
 
     function removeRange(rangeInfo : RangeInfo) {
-
+        const newGroupsRanges : GroupRange[] = new Array(groupsRanges.length);
+        for (let i = 0; i < groupsRanges.length; i++) {
+            if (rangeInfo.index != i) {
+                newGroupsRanges[i] = groupsRanges[i]; 
+            }
+        }
+        updateRanges(newGroupsRanges);
     }
 
     return (
@@ -332,22 +338,64 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRang
 
 
 function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo, closeMenu : () => void, removeRange : () => void}) {
+    const [len, setLen] = useState<number>(rangeInfo.groupRange.range.end -  rangeInfo.groupRange.range.start);
+    const { ranges, updateRanges } = useContext(RangesContext)!;
+
+    function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
+        event.preventDefault();
+        let val = parseInt(event.currentTarget.value);
+        if (isNaN(val) || val < 0) {
+            return;
+        }
+        let prevEnd = rangeInfo.groupRange.range.end;
+        let prevStart = rangeInfo.groupRange.range.start;
+        if (name == "start") {
+            if (prevEnd < val)  {
+                return;
+            } 
+            rangeInfo.groupRange.range.start = val;
+        } else {
+            if (prevStart > val) {
+                return;
+            }
+            rangeInfo.groupRange.range.end = val;
+        }
+
+        ranges[rangeInfo.index] = rangeInfo.groupRange;
+        setLen(rangeInfo.groupRange.range.end - rangeInfo.groupRange.range.start)
+        updateRanges(ranges);
+    }
+
+
     return (
         <Dialog>
-            <div className="w-40 h-40 bg-neutral-900 rounded relative">
+            <div className="w-max h-max bg-neutral-950 rounded flex flex-col relative p-4 gap-4">
                 <DialogClose handleClose={closeMenu}/>
                 <h2>{rangeInfo.group.name}</h2>
-                <div className="flex">
-                    <label>start day:</label>
-                    <input type="number" id="start"></input>
-                </div>
-                <div className="flex">
-                    <label>end day:</label>
-                    <input type="number" id="start"></input>
-                </div>
-                <ButtonWithText text="Delete" type="Destructive" handle={removeRange}/>
+                <section className="space-y-2">
+                    <h3 className="text-sm text-neutral-400">range:</h3>
+                    <div  className="grid grid-cols-2 gap-2">
+                        <label htmlFor="start">start day:</label>
+                        <input type="number" id="start" name="start" min={0} defaultValue={rangeInfo.groupRange.range.start} onChange={(event) => handleChange(event, "start")} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
+                        <label htmlFor="end">end day:</label>
+                        <input type="number" id="end" name="end" min={0} defaultValue={rangeInfo.groupRange.range.end} onChange={(event) => handleChange(event, "end")} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
+                    </div>
+                    <div>length in days: {len}</div>
+                    <div className="flex justify-end">
+                        <ButtonWithText text="Delete" type="destructive" handle={removeRange}/>
+                    </div>
+                </section>
             </div>
         </Dialog>
+    )
+}
+
+function DayInput({ rangeInfo, onChange, name} : { rangeInfo : RangeInfo, onChange : () => void, name : string}) {
+    return (
+        <>
+            <label htmlFor="end">end day:</label>
+            <input type="number" id="end" name="end" defaultValue={rangeInfo.groupRange.range.end} onChange={onChange} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
+        </>
     )
 }
 
@@ -438,8 +486,8 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
             const difference = pos.x - movPos.x;
             if (Math.abs(difference) % widthDay == 0) {
                 if (range.start + difference / widthDay < 0) {
+                    range.end = range.end - range.start;
                     range.start = 0;
-                    range.end = groupRange.range.end - groupRange.range.start;
                 } else {
                     range.start += difference / widthDay;
                     range.end += difference / widthDay;
