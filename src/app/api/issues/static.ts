@@ -1,3 +1,5 @@
+import { Project, Ranking } from "@prisma/client";
+
 export type IssueInfo = {
     id : string,
     name : string,
