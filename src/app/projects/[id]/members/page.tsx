@@ -218,7 +218,7 @@ function MemberLoad({ load } : { load : number }) {
             <div className='flex gap-1'>
                 {
                     res.indicatorsColor.map((ind) => (
-                        <div id={ind} className='w-4 h-1 rounded' style={{ backgroundColor: ind }}></div>
+                        <div id={ind} key={ind} className='w-4 h-1 rounded' style={{ backgroundColor: ind }}></div>
                     ))
                 }
             </div>
@@ -291,7 +291,7 @@ function AddForm({ actualType, types, search } : { actualType : TypeOfSearh, typ
             <div className='flex'>
                 {
                     types.map((t) => (
-                        <label id={t} className="rounded-t px-4 py-1 flex content-center" style={{ backgroundColor: t == actualType ? "#171717" : "#0a0a0a"}}>{t}</label>
+                        <label id={t} key={t} className="rounded-t px-4 py-1 flex content-center" style={{ backgroundColor: t == actualType ? "#171717" : "#0a0a0a"}}>{t}</label>
                     ))
                 }
             </div>

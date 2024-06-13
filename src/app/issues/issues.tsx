@@ -48,7 +48,7 @@ export default function Issues() {
             <ul className="grid grid-cols-2">
                 {
                     issues.map((issue) => (
-                        <IssueElement issue={issue} />
+                        <IssueElement key={issue.id} issue={issue} />
                     ))
                 }
             </ul>

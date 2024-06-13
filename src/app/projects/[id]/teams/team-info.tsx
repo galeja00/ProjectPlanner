@@ -349,7 +349,7 @@ function Tasks() {
             <ul>
                 {
                     tasks.map((task) => (
-                        <TaskComp task={task}/>
+                        <TaskComp key={task.id} task={task}/>
                     ))
                 }
             </ul>

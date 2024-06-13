@@ -61,7 +61,7 @@ export function TagList({tags} : {tags : Tag[]}) {
             <ul className='flex gap-2 rounded-lg '>
                 {
                     acTags.map((tag) => (
-                        <TagElement tag={tag} handleDeleteTag={handleDeleteTag}/>
+                        <TagElement key={tag.id} tag={tag} handleDeleteTag={handleDeleteTag}/>
                     ))
                 }
             </ul>
