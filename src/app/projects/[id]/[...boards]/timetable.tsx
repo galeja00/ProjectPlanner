@@ -327,7 +327,7 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRang
                 ref={days}
                 >
                     {groupsRanges.map((groupRange, row) => (
-                        <GroupRow row={row} />
+                        <GroupRow key={row} row={row} />
                     ))}
                 {days && <WorkRanges days={days} groupsRange={groupsRanges} />}</div>
             </div>
@@ -405,7 +405,7 @@ function GroupRow({ row } : { row  : number }) {
     return (
         <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-950` : `bg-neutral-900`} `} data-row-id={row}>
             {arr.map((value, col) => (
-                <DisplayRange col={col} value={value}/>
+                <DisplayRange key={col} col={col} value={value}/>
             ))}
         </div>
     )
@@ -447,7 +447,7 @@ function WorkRanges({days, groupsRange} : { days : RefObject<HTMLDivElement>, gr
                     return <></>
                 }
                 return (
-                    <WorkRange parent={parent} groupRange={range} index={i} rows={rows} />
+                    <WorkRange key={i} parent={parent} groupRange={range} index={i} rows={rows} />
                 )
             })
         }
@@ -467,6 +467,8 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         if (userMode != UserMode.Connecting) {
             changeMode(UserMode.Connecting);
             return;
+        } else if (userMode == UserMode.Connecting) {
+            console.log("XX");
         }  
     }
 

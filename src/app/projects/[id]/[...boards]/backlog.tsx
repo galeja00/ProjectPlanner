@@ -298,7 +298,7 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
             <ul className="space-y-2" style={{ display: displayd }}>
                 {
                     group.tasks.map((task) => (
-                        <GroupTask task={task} handleOnDrag={(e) => handleOnDragTask(e, task)}/>
+                        <GroupTask key={task.id} task={task} handleOnDrag={(e) => handleOnDragTask(e, task)}/>
                     ))
                 }
                 { isCreating && <CreatorOfTask createTask={createTask} endCreate={toggleCreating} />}

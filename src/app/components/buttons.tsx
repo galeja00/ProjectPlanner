@@ -25,8 +25,8 @@ export function ArrayButtons({ buttons, gap } : {  buttons : Button[], gap : num
     return (
         <div className={`flex gap-${gap}`}>
             {
-                buttons.map((button) => (
-                    <ButtonComp button={button}/>
+                buttons.map((button, index) => (
+                    <ButtonComp key={index} button={button}/>
                 ))
             }
         </div>
@@ -51,7 +51,7 @@ function ButtonComp({ button } : { button : Button }) {
             break;
     }
     return (
-        <button className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor}`} onClick={button.onClick}>
+        <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor}`} onClick={button.onClick}>
             <img src={button.img} title={button.title} className={` hover:bg-${hoverColor} hover:bg-opacity-40 w-${button.size} h-${button.size}`}></img>
         </button>
     )

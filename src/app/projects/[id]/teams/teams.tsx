@@ -136,7 +136,7 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
             <tbody className='flex flex-col gap-1 p-1'>
                 {
                     teams.map((team) => (
-                        <TeamRow teamInfo={team} handleDelete={() => handleDelete(team.id)} openSettings={() => openSettings(team.id)}/>
+                        <TeamRow key={team.id} teamInfo={team} handleDelete={() => handleDelete(team.id)} openSettings={() => openSettings(team.id)}/>
                     ))
                 }
             </tbody>
@@ -177,7 +177,7 @@ function Members({ members } : { members : TeamMemberInfo[] }) {
                         img = `/uploads/user/${member.image}`
                     }
                     return (
-                        <li><Image title={`${member.name} ${member.surname}`} src={img} height={30} width={30} alt="member" className="rounded-full w-6 h-6"/></li>
+                        <li key={member.id}><Image title={`${member.name} ${member.surname}`} src={img} height={30} width={30} alt="member" className="rounded-full w-6 h-6"/></li>
                     )
                 })
             }
@@ -300,7 +300,7 @@ function SelectMembers({ members, selected, updateSelected } : { members : Membe
                             }
                         }
                         return ( 
-                            <ProjectMember member={member} active={active} onClick={() => handleSelect(member, active)} />
+                            <ProjectMember key={member.id} member={member} active={active} onClick={() => handleSelect(member, active)} />
                         )
                     })
                 }

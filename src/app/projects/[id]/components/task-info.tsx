@@ -131,7 +131,7 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
             <menu className='flex w-full border-b border-neutral-400'>
                 {
                     menuItems.map((type) => (
-                        <MenuItem name={type} actualType={actualTypeInfo} onClick={() => handleChangeType(type)}></MenuItem>
+                        <MenuItem key={type} name={type} actualType={actualTypeInfo} onClick={() => handleChangeType(type)}></MenuItem>
                     ))
                 }
             </menu>
@@ -222,7 +222,7 @@ function Issues({ issues } : { issues : Issue[] }) {
             <ul>
                 {
                     issues.map(issue => (
-                        <IsssuesItem issue={issue}/>
+                        <IsssuesItem key={issue.id} issue={issue}/>
                     ))
                 }
             </ul>
@@ -233,7 +233,7 @@ function Issues({ issues } : { issues : Issue[] }) {
 function IsssuesItem({ issue } : { issue : Issue }) {
     return ( 
         <li key={issue.id}>
-            {issue.type}
+            {issue.name}
         </li>
     )
 }
@@ -355,7 +355,7 @@ function SelectButtons({ items, value, changeVal } : { items : SelectType[], val
         <ul className="flex gap-1"> 
             {
                 items.map(item => (
-                    <li id={item.name}>
+                    <li key={item.name} id={item.name}>
                         <button 
                             className={`btn btn-primary ${selected  == item.name ? "bg-violet-600 text-neutral-100" : ""} text-xs px-1 py-0.5`} 
                             onClick={() => select(item.name)}

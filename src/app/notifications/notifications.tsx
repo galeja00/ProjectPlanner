@@ -52,7 +52,7 @@ export default function NotifiactionsList() {
             <ul className="rounded p-1 min-h-[40rem]">
                 {
                     notifs.map((notif) => (
-                        <NotificationsItem notif={notif} updateNotif={fetchNotifications}/>
+                        <NotificationsItem key={notif.id} notif={notif} updateNotif={fetchNotifications}/>
                     ))
                 }
             </ul>

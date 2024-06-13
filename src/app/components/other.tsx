@@ -39,8 +39,8 @@ export function ButtonList({ items } : { items : ButtonItems[]}) {
     return (
         <ul className='flex gap-2'>
             {
-                items.map((item) => (
-                    <ButtonWithText text={item.name} handle={item.onClick} type={item.type}/>
+                items.map((item, index) => (
+                    <ButtonWithText key={index} text={item.name} handle={item.onClick} type={item.type}/>
                 ))
             }
         </ul>

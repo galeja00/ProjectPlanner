@@ -44,7 +44,10 @@ export function TagList({tags} : {tags : Tag[]}) {
             })*/
             const id = Math.random().toString();
             const newTags : Tag[] = acTags;
-            newTags.push({id: id, taskId: "asdads", name: name, color: color, teamId: null});
+            newTags.push({
+                id: id, taskId: "asdads", name: name, color: color, teamId: null,
+                createdAt: new Date()
+            });
             setTags(newTags);
             toggle();
         }

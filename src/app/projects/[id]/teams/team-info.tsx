@@ -35,9 +35,6 @@ type MemberInfo = {
     image: string | null,
 }
 
-type TaskInfo = {
-
-}
 
 export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { team : TeamInfo, projectId : string, closeSettings : () => void, updateTeams : () => void}) {
     const [infteam, setInfTeam] = useState<TeamInfo>(team);
@@ -63,10 +60,6 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
         catch (error) {
             console.error(error);
         }
-    }
-
-    function updateMembers(members : MemberInfo[]) {
-        
     }
 
     return (
@@ -122,7 +115,7 @@ function Container({ team, projectId} : { team : TeamInfo, projectId : string}) 
             <menu className='flex w-full border-b'>
                 {
                     menuItems.map((type) => (
-                        <MenuItem name={type} actualType={actualTypeInfo} onClick={() => handleChangeType(type)}></MenuItem>
+                        <MenuItem key={type} name={type} actualType={actualTypeInfo} onClick={() => handleChangeType(type)}></MenuItem>
                     ))
                 }
             </menu>

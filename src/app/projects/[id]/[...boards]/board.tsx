@@ -709,7 +709,7 @@ function TagList() {
             <ul>
                 {
                     tags.map((tag) => (
-                        <li className='p-1'>{tag.name}</li>
+                        <li key={tag.id} className='p-1'>{tag.name}</li>
                     ))
                 }
             </ul>
