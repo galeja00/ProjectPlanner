@@ -40,7 +40,7 @@ export async function getUserId(email : string) : Promise<string | null> {
 
         return user.id;
     } catch (error) {
-        console.error();
+        console.error(error);
         return null;
     }
 }

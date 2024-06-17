@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Menu from './components/menu'
+import { ThemeProvider } from './context/theme'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,10 +18,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <ThemeProvider>
         <body className={inter.className}>
           <Menu></Menu>
           {children}
         </body>
+      </ThemeProvider>
     </html>
   )
 }

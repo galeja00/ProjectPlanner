@@ -10,31 +10,38 @@ export default function Projects() {
     const [doneP, setDoneP] = useState<Project[]>([]);
     
     useEffect(() => {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (prefersDark) {
+        console.log('Uživatel má nastaven tmavý režim.');
+        } else {
+        console.log('Uživatel má nastaven světlý režim.');
+        }
         getProjects();
     }, [])
 
     // TODO: lepsi zachyceni chyby
     async function getProjects() {
-    try {
-        const response = await fetch('/api/projects', {
-            method: "GET"
-        });
-        
-        if (!response.ok) {
-            throw new Error('Error: fatch failed to load data'); 
+        try {
+            const response = await fetch('/api/projects', {
+                method: "GET"
+            });
+            
+            if (!response.ok) {
+                throw new Error('Error: fatch failed to load data'); 
+            }
+            
+            const data = await response.json();
+            const projects : Project[] = data.projects;
+
+            const inWorkProjects = projects.filter((p) => !p.done);
+            const doneProjects = projects.filter((p) => p.done);
+
+            setInWorkP(inWorkProjects);
+            setDoneP(doneProjects);
+        } catch (error) {
+            console.error(error);
         }
-        
-        const data = await response.json();
-        const projects : Project[] = data.projects;
-
-        const inWorkProjects = projects.filter((p) => !p.done);
-        const doneProjects = projects.filter((p) => p.done);
-
-        setInWorkP(inWorkProjects);
-        setDoneP(doneProjects);
-    } catch (error) {
-        console.error(error);
-    }
         
     }  
     
