@@ -16,8 +16,6 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    
-    //TODO: vyuzit useSession a upravit kontet podle toho jestli uztivatel je autorizován nebo není
     <html lang="en">
         <body className={inter.className}>
           <Menu></Menu>
