@@ -30,12 +30,12 @@
 }
 
 :root {
-  /*--foreground-rgb: #171717;
-  --background-start-rgb: #fafafa;
-  --background-end-rgb: #fafafa;*/
-  --foreground-rgb: #fafafa;
+  --foreground-rgb: #171717;
+  --background-rgb: #fafafa;
+
+  /*--foreground-rgb: #fafafa;
   --background-start-rgb: #171717;
-  --background-end-rgb: #171717;
+  --background-end-rgb: #171717;*/
 }
 
 
@@ -43,14 +43,14 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: #fafafa;
-    --background-start-rgb: #171717;
-    --background-end-rgb: #171717;
+    --background-rgb: #171717;
+
   }
 }
 
 body {
   color: var(--foreground-rgb);
-  background: var(--background-end-rgb);
+  background: var(--background-rgb);
   /*background: linear-gradient(
       to bottom,
       transparent,

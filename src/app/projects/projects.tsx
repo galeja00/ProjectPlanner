@@ -10,13 +10,6 @@ export default function Projects() {
     const [doneP, setDoneP] = useState<Project[]>([]);
     
     useEffect(() => {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        if (prefersDark) {
-        console.log('Uživatel má nastaven tmavý režim.');
-        } else {
-        console.log('Uživatel má nastaven světlý režim.');
-        }
         getProjects();
     }, [])
 

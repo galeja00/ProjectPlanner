@@ -53,6 +53,8 @@ enum ConnectType {
 interface TimeTableContextTypes {
     createGroup: (name: string) => void;
     updateGroups: (ranges : GroupRange[]) => void;
+    projectStart: Date;
+    currentDate: Date;
     groups : GroupOfTasks[];
     mode : Mode;
 }
@@ -72,7 +74,8 @@ const RangesContext = createContext<RangesContextTypes | null>(null);
 export default function TimeTable({ id } : { id : string }) {
     const [ groups, setGroups] = useState<GroupOfTasks[]>([]);
     const [ mode, setMode ] = useState<Mode>(Mode.Week);
-    const [ projectStart, setProjectStart ] = useState<Date>(new Date());
+    const [ projectStart, setProjectStart ] = useState<Date | null>(null);
+    const [ currentDate, setCurrentDate ] = useState<Date>(new Date()); 
 
     async function fetchGroups() {
         try {
@@ -83,7 +86,7 @@ export default function TimeTable({ id } : { id : string }) {
             if (!res.ok) {
                 console.error(data.error);
             }
-            //setGroups(data.data);
+            setProjectStart(new Date(data.start.toString()));
         }
         catch (error) {
             console.error(error);
@@ -101,12 +104,26 @@ export default function TimeTable({ id } : { id : string }) {
         
     }
 
-    //useEffect(() => { fetchGroups() }, []);
+    useEffect(() => {
+        const interval = setInterval(() => {
+          setCurrentDate(new Date());
+        }, 1000 * 60 * 60); // Update every hour
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => { fetchGroups() }, []);
+
+    if (!projectStart) {
+        return (
+            <h1>Loading...</h1>
+        )
+    }
+
     return (
-        <TimeTableContext.Provider value={{ createGroup, updateGroups,  groups, mode }}>
+        <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
             <section className="overflow-x-hidden h-full max-h-full">
                 <Head text='Time Table'/>
-                <Table groups={groups} projectStart={projectStart}/>
+                <Table/>
                 <TimeMode mode={mode} changeMode={(mode : Mode) => setMode(mode)}/>
             </section>
         </TimeTableContext.Provider>
@@ -122,37 +139,23 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
     )
 }
 
-function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart : Date}) {
-    const [ currentTime, setCurrentTime ] = useState<Date>(new Date()); 
+function getCurrentDiffInDays(start : Date, current : Date) {
+    return Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 ))
+}
+
+function Table() {
+    const { createGroup, updateGroups, currentDate, mode, groups, projectStart } = useContext(TimeTableContext)!;
     const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(new Array(groups.length));
-    const [ creator, toggleCreator ] = useReducer(creator => !creator, false);
-    const { createGroup, updateGroups, mode} = useContext(TimeTableContext)!;
-    // count is number of weeks
-    const count = 80;
-    const ranges : number[] = new Array(count);
-    for (let i = 0; i < count; i++) {
-        ranges[i] = i; 
-    }
-    //TODO
-    /* 
-    function createRanges() {
-        const newGroupsRanges = new Array(groups.length).fill(null).map(() => new Array(count * mode).fill(0));
-        setGroupsRanges(newGroupsRanges);
-    }
-    */
+    const [ count , setCount ] = useState<number>(80); // count - number of weeks displayed on timetable
+
     function updateRanges(ranges : GroupRange[]) {
         setGroupsRanges([...ranges]);
     }
-    /*
+    
     useEffect(() => {
-        const interval = setInterval(() => {
-          setCurrentTime(new Date());
-        }, 100000); // Update every second
-        return () => clearInterval(interval);
-    }, []);*/
-    useEffect(() => {
-        updateGroups(groupsRanges);
-    }, [ranges])
+        const currentDay = getCurrentDiffInDays(projectStart, currentDate);
+        if ((currentDay * 7) * 2 > count) setCount(count * 2);
+    }, [currentDate])
     
     useEffect(() => {
         if (groups.length > groupsRanges.length) {
@@ -175,8 +178,8 @@ function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart
                     </div>
                 </section>
                 <section className=" overflow-x-auto w-4/5 h-max rounded"> 
-                    <TimesRanges ranges={ranges}/>
-                    <GroupsRanges groupsRanges={groupsRanges} updateRanges={updateRanges}/>
+                    <TimesRanges range={count}/>
+                    <GroupsRanges groupsRanges={groupsRanges} updateRanges={updateRanges} count={count}/>
                 </section>
             </section> 
         </>
@@ -184,16 +187,18 @@ function Table({groups, projectStart} : { groups : GroupOfTasks[],  projectStart
     )
 }
 
-function TimesRanges({ ranges } : { ranges : number[] }) {
+function TimesRanges({ range } : { range : number }) {
+    const elements = [];
+    for (let i = 0; i < range; i++) {
+        elements.push(
+            <div key={i} className="w-[105px] border-r border-b">
+                { i + 1 }
+            </div>
+        );
+    }
     return ( 
         <div className="w-fit flex h-16 bg-neutral-950">
-            {
-                ranges.map((val, index) => (
-                    <div key={index} className={`w-[105px] border-r border-b `}>
-                        {val}
-                    </div> 
-                ))
-            }
+            {elements}
         </div>
     )
 }
@@ -251,13 +256,13 @@ type RangeInfo = {
     index: number
 }
 
-function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRange[], updateRanges : (ranges : GroupRange[]) => void }) {
+function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: GroupRange[], updateRanges : (ranges : GroupRange[]) => void, count : number }) {
     const [ userMode, setUserMode ] = useState<UserMode>(UserMode.Creating);
     const [ rangeInfo, setRangeInfo ] = useState<RangeInfo | null>(null);
     const [ active, toggleActive ] = useReducer(active => !active, false);
     const [ activeRow, setRow ] = useState<Row | null>(null);
     const [ startDay, setStartDay ] = useState<Day | null>(null);
-    const { groups } = useContext(TimeTableContext)!
+    const { groups, projectStart, currentDate } = useContext(TimeTableContext)!
     const days = useRef<HTMLDivElement>(null);
 
     function changeMode(mode : UserMode) {
@@ -327,7 +332,7 @@ function GroupsRanges({ groupsRanges, updateRanges } : { groupsRanges: GroupRang
                 ref={days}
                 >
                     {groupsRanges.map((groupRange, row) => (
-                        <GroupRow key={row} row={row} />
+                        <GroupRow key={row} row={row} size={count} current={getCurrentDiffInDays(projectStart, currentDate)} />
                     ))}
                 {days && <WorkRanges days={days} groupsRange={groupsRanges} />}</div>
             </div>
@@ -399,26 +404,26 @@ function DayInput({ rangeInfo, onChange, name} : { rangeInfo : RangeInfo, onChan
     )
 }
 
-function GroupRow({ row } : { row  : number }) {
-    const count = 80 * 7;
+function GroupRow({ row, size, current } : { row  : number, size : number, current : number }) {
+    const count =  size * 7;
     const arr : boolean[] = new Array(count).fill(false);
     return (
         <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-950` : `bg-neutral-900`} `} data-row-id={row}>
             {arr.map((value, col) => (
-                <DisplayRange key={col} col={col} value={value}/>
+                <DisplayRange key={col} col={col} current={current == col}/>
             ))}
         </div>
     )
 }
 
 
-function DisplayRange({ col, value } : { col : number, value : boolean }) {
+function DisplayRange({ col, current } : { col : number, current : boolean }) {
     const { mode } = useContext(TimeTableContext)!;
     return (
         <div 
             key={col} 
             data-col-id={col} 
-            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} cursor-pointer`}
+            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} ${(current ? " bg-orange-400 bg-opacity-60" : "")} cursor-pointer`}
         >
         </div>
     )
@@ -467,8 +472,9 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         if (userMode != UserMode.Connecting) {
             changeMode(UserMode.Connecting);
             return;
+            //TODO
         } else if (userMode == UserMode.Connecting) {
-            console.log("XX");
+            
         }  
     }
 

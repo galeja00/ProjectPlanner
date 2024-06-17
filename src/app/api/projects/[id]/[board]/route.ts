@@ -25,6 +25,7 @@ export type GroupOfTasks = {
 
 
 // TODO: change querys on DB for better performace 
+// TODO: change error throws when query is null
 // id: je id daného projektu v kterým 
 export async function GET(req : Request, { params } : { params: { id: string, board: string } }) {
     try {
@@ -51,6 +52,19 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                     throw new Error(); 
                 }
                 return Response.json({ backlog: backlog, collumns: collumns }, { status: 200 });
+            case "timetable":
+                const start : { createdAt: Date } | null = await prisma.project.findFirst({
+                    where: {
+                        id: params.id
+                    },
+                    select: {
+                        createdAt: true
+                    }
+                })
+                if (!start) {
+                    throw new Error(); 
+                }
+                return Response.json({ start: start.createdAt }, {status: 200});
             default:
                 return Response.json({ error: "Bad type of board in api request"}, { status: 400});
         }
