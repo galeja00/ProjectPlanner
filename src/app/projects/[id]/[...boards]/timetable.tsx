@@ -7,6 +7,7 @@ import { CreateButton } from "@/app/components/buttons";
 import { group } from "console";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { ButtonWithText } from "@/app/components/other";
+import { act } from "react-dom/test-utils";
 
 enum Mode {
     Week = 7,
@@ -188,17 +189,36 @@ function Table() {
 }
 
 function TimesRanges({ range } : { range : number }) {
-    const elements = [];
-    for (let i = 0; i < range; i++) {
-        elements.push(
-            <div key={i} className="w-[105px] border-r border-b">
-                { i + 1 }
-            </div>
-        );
-    }
+    const { projectStart, currentDate } = useContext(TimeTableContext)!;
+    console.log("current:" + currentDate);
+    const renderDivs = () => {
+        const divs = [];
+        const actualDate : Date = new Date(projectStart);
+        const endDate : Date = new Date(projectStart);
+        for (let i = 0; i < range; i++) {
+            actualDate.setDate(actualDate.getDate() + 7);
+            endDate.setDate(actualDate.getDate() + 6);
+            console.log("start:" + actualDate);
+            console.log("end:" + endDate);
+            divs.push(
+                <div key={i} className="w-[105px] border-r border-b flex flex-col items-center">
+                    <div className="w-fit">
+                        {i + 1} week
+                    </div>
+                    <div className="w-fit text-sm text-neutral-400">
+                        {actualDate.getDate()}.{actualDate.getMonth()}.{actualDate.getFullYear()}
+                    </div>
+                    <div className="w-fit text-sm text-neutral-400">
+                        {endDate.getDate()}.{endDate.getMonth()}.{endDate.getFullYear()}
+                    </div>
+                </div>
+            );
+        }
+        return divs;
+    };
     return ( 
         <div className="w-fit flex h-16 bg-neutral-950">
-            {elements}
+            {renderDivs()}
         </div>
     )
 }
