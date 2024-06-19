@@ -8,6 +8,8 @@ import { group } from "console";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { ButtonWithText } from "@/app/components/other";
 import { act } from "react-dom/test-utils";
+import { getCurrentDiffInDays } from "@/date";
+
 
 enum Mode {
     Week = 7,
@@ -140,10 +142,6 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
     )
 }
 
-function getCurrentDiffInDays(start : Date, current : Date) {
-    return Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 ))
-}
-
 function Table() {
     const { createGroup, updateGroups, currentDate, mode, groups, projectStart } = useContext(TimeTableContext)!;
     const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(new Array(groups.length));
@@ -190,27 +188,24 @@ function Table() {
 
 function TimesRanges({ range } : { range : number }) {
     const { projectStart, currentDate } = useContext(TimeTableContext)!;
-    console.log("current:" + currentDate);
     const renderDivs = () => {
         const divs = [];
+       // console.log(projectStart.toString());
         const actualDate : Date = new Date(projectStart);
         const endDate : Date = new Date(projectStart);
         for (let i = 0; i < range; i++) {
-            actualDate.setDate(actualDate.getDate() + 7);
+            const actualDate : Date = new Date(projectStart);
+            actualDate.setDate(actualDate.getDate() + (i * 7));
+
+            const endDate : Date = new Date(actualDate);
             endDate.setDate(actualDate.getDate() + 6);
-            console.log("start:" + actualDate);
-            console.log("end:" + endDate);
             divs.push(
                 <div key={i} className="w-[105px] border-r border-b flex flex-col items-center">
                     <div className="w-fit">
                         {i + 1} week
                     </div>
-                    <div className="w-fit text-sm text-neutral-400">
-                        {actualDate.getDate()}.{actualDate.getMonth()}.{actualDate.getFullYear()}
-                    </div>
-                    <div className="w-fit text-sm text-neutral-400">
-                        {endDate.getDate()}.{endDate.getMonth()}.{endDate.getFullYear()}
-                    </div>
+                    <DisplayDate date={actualDate}/>
+                    <DisplayDate date={endDate}/>
                 </div>
             );
         }
@@ -219,6 +214,14 @@ function TimesRanges({ range } : { range : number }) {
     return ( 
         <div className="w-fit flex h-16 bg-neutral-950">
             {renderDivs()}
+        </div>
+    )
+}
+
+function DisplayDate({ date } : { date : Date}) {
+    return (
+        <div className="w-fit text-sm text-neutral-400">
+            {date.getDate()}.{date.getMonth()}.{date.getFullYear()}
         </div>
     )
 }
@@ -361,6 +364,32 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
     );
 }
 
+function GroupRow({ row, size, current } : { row  : number, size : number, current : number }) {
+    const count =  size * 7;
+    const arr : boolean[] = new Array(count).fill(false);
+    return (
+        <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-950` : `bg-neutral-900`} `} data-row-id={row}>
+            {arr.map((value, col) => (
+                <DisplayRange key={col} col={col} current={current == col}/>
+            ))}
+        </div>
+    )
+}
+
+
+function DisplayRange({ col, current } : { col : number, current : boolean }) {
+    const { mode } = useContext(TimeTableContext)!;
+    return (
+        <div 
+            key={col} 
+            data-col-id={col} 
+            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} ${(current ? " bg-orange-400 bg-opacity-60" : "")} cursor-pointer`}
+        >
+        </div>
+    )
+}
+
+
 
 function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo, closeMenu : () => void, removeRange : () => void}) {
     const [len, setLen] = useState<number>(rangeInfo.groupRange.range.end -  rangeInfo.groupRange.range.start);
@@ -375,14 +404,10 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
         let prevEnd = rangeInfo.groupRange.range.end;
         let prevStart = rangeInfo.groupRange.range.start;
         if (name == "start") {
-            if (prevEnd < val)  {
-                return;
-            } 
+            if (prevEnd < val) return;
             rangeInfo.groupRange.range.start = val;
         } else {
-            if (prevStart > val) {
-                return;
-            }
+            if (prevStart > val) return;
             rangeInfo.groupRange.range.end = val;
         }
 
@@ -418,34 +443,9 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
 function DayInput({ rangeInfo, onChange, name} : { rangeInfo : RangeInfo, onChange : () => void, name : string}) {
     return (
         <>
-            <label htmlFor="end">end day:</label>
-            <input type="number" id="end" name="end" defaultValue={rangeInfo.groupRange.range.end} onChange={onChange} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
+            <label htmlFor="name">name:</label>
+            <input type="number" id="name" name="name" defaultValue={rangeInfo.groupRange.range.end} onChange={onChange} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
         </>
-    )
-}
-
-function GroupRow({ row, size, current } : { row  : number, size : number, current : number }) {
-    const count =  size * 7;
-    const arr : boolean[] = new Array(count).fill(false);
-    return (
-        <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-950` : `bg-neutral-900`} `} data-row-id={row}>
-            {arr.map((value, col) => (
-                <DisplayRange key={col} col={col} current={current == col}/>
-            ))}
-        </div>
-    )
-}
-
-
-function DisplayRange({ col, current } : { col : number, current : boolean }) {
-    const { mode } = useContext(TimeTableContext)!;
-    return (
-        <div 
-            key={col} 
-            data-col-id={col} 
-            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} ${(current ? " bg-orange-400 bg-opacity-60" : "")} cursor-pointer`}
-        >
-        </div>
     )
 }
 
@@ -469,7 +469,7 @@ function WorkRanges({days, groupsRange} : { days : RefObject<HTMLDivElement>, gr
         {
             groupsRange.map((range, i) => {
                 if (range == null) {
-                    return <></>
+                    return <div key={i}></div>
                 }
                 return (
                     <WorkRange key={i} parent={parent} groupRange={range} index={i} rows={rows} />
