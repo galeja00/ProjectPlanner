@@ -35,12 +35,12 @@ export async function POST(req : Request, { params } : { params: { id : string }
             }
         })
         if (!invite) {
-            return Response.json({ error: "lol" }, { status: 400 });
+            return Response.json({ error: "Invite failed to create" }, { status: 500 });
         }
 
         return Response.json({ message: "Invite succesed" }, { status: 200 });
 
     } catch (error) {
-        return Response.json({ error: "lol2" }, { status: 400 });
+        return Response.json({ error: "Somthing went wrong" }, { status: 500 });
     }
 }

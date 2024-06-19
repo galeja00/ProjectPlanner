@@ -17,7 +17,6 @@ type MemberInfo = {
     image: string | null,
     memberId: string,
     name: string,
-    position: string | null,
     teamId: string | null
     teamName: string | null,
     surname: string,
@@ -331,7 +330,7 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
                 throw new Error(data.eror);
             }
 
-            console.log(data.message)
+            console.log(data.message);
             //TODO: Notification of succes
         } 
         catch (error) {

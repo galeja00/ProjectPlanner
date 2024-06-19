@@ -50,8 +50,6 @@ Table ProjectMember {
   project Project [not null]
   teamId String
   team Team
-  seniority String
-  position String
   creator Boolean [not null, default: false]
   isAdmin Boolean [not null, default: false]
   tasks TaskSolver [not null]
@@ -91,7 +89,6 @@ Table Board {
   id String [pk]
   projectId String [unique, not null]
   Kanban Kanban [not null]
-  name String
   taskColumns TaskColumn [not null]
 }
 
@@ -129,7 +126,6 @@ Table Task {
   projectId String [not null]
   kanban Kanban [not null]
   createAt DateTime [default: `now()`, not null]
-  deadlineAt DateTime
   name String [not null]
   type String [not null]
   colIndex Int
