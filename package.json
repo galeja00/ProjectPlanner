@@ -18,6 +18,7 @@
     "node": "^21.1.0",
     "react": "latest",
     "react-dom": "latest",
+    "react-xarrows": "^2.0.2",
     "sharp": "^0.33.2"
   },
   "devDependencies": {

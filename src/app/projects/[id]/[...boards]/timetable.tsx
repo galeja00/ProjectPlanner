@@ -219,9 +219,10 @@ function TimesRanges({ range } : { range : number }) {
 }
 
 function DisplayDate({ date } : { date : Date}) {
+    console.log(date);
     return (
         <div className="w-fit text-sm text-neutral-400">
-            {date.getDate()}.{date.getMonth()}.{date.getFullYear()}
+            {date.getDate()}.{date.getMonth() + 1}.{date.getFullYear()}
         </div>
     )
 }
