@@ -124,15 +124,15 @@ export default function Backlog({ id } : { id : string }) {
 
     return (
         <FunctionsContext.Provider value={{ createGroup, deleteGroup, fetchGroups, openTaskInfo, projectId: id, collumns: collumns }}>
-            <div className="w-3/4 mx-auto">
+            <div className="w-3/4 mx-auto relative">
                 <Head text="Backlog"/>
                 <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                     <SearchInput/>
                     <FilterButton onClick={() => fetchGroups}/>
                 </section>
                 <ListOfGroups groups={groups} />
+                {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
             </div>
-            {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
         </FunctionsContext.Provider>
     )
 }

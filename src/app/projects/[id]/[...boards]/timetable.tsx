@@ -63,7 +63,7 @@ interface TimeTableContextTypes {
 }
 
 interface RangesContextTypes {
-    changeMode: (mode : UserMode) => void;
+    changeUserMode: (mode : UserMode) => void;
     updateRanges: (ranges : GroupRange[]) => void;
     openRangeMenu: (groupRange : GroupRange, index : number) => void;
     userMode: UserMode;
@@ -190,9 +190,6 @@ function TimesRanges({ range } : { range : number }) {
     const { projectStart, currentDate } = useContext(TimeTableContext)!;
     const renderDivs = () => {
         const divs = [];
-       // console.log(projectStart.toString());
-        const actualDate : Date = new Date(projectStart);
-        const endDate : Date = new Date(projectStart);
         for (let i = 0; i < range; i++) {
             const actualDate : Date = new Date(projectStart);
             actualDate.setDate(actualDate.getDate() + (i * 7));
@@ -219,7 +216,6 @@ function TimesRanges({ range } : { range : number }) {
 }
 
 function DisplayDate({ date } : { date : Date}) {
-    console.log(date);
     return (
         <div className="w-fit text-sm text-neutral-400">
             {date.getDate()}.{date.getMonth() + 1}.{date.getFullYear()}
@@ -289,7 +285,8 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
     const { groups, projectStart, currentDate } = useContext(TimeTableContext)!
     const days = useRef<HTMLDivElement>(null);
 
-    function changeMode(mode : UserMode) {
+    function changeUserMode(mode : UserMode) {
+        console.log(mode);
         if (mode != userMode) {
             setUserMode(mode);
             return;
@@ -349,7 +346,7 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
     }
 
     return (
-        <RangesContext.Provider value={{ changeMode, updateRanges, openRangeMenu, userMode, ranges: groupsRanges }}>
+        <RangesContext.Provider value={{ changeUserMode, updateRanges, openRangeMenu, userMode, ranges: groupsRanges }}>
             <div className="">
                 <div className="border-b relative  w-max h-max border-neutral-400 "
                 onClick={handleClick}
@@ -391,14 +388,14 @@ function DisplayRange({ col, current } : { col : number, current : boolean }) {
 }
 
 
-
 function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo, closeMenu : () => void, removeRange : () => void}) {
     const [len, setLen] = useState<number>(rangeInfo.groupRange.range.end -  rangeInfo.groupRange.range.start);
     const { ranges, updateRanges } = useContext(RangesContext)!;
-
+    const { projectStart } = useContext(TimeTableContext)!;
     function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
         event.preventDefault();
-        let val = parseInt(event.currentTarget.value);
+        let date = new Date(event.currentTarget.value);
+        let val = getCurrentDiffInDays(projectStart, date);
         if (isNaN(val) || val < 0) {
             return;
         }
@@ -427,9 +424,9 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
                     <h3 className="text-sm text-neutral-400">range:</h3>
                     <div  className="grid grid-cols-2 gap-2">
                         <label htmlFor="start">start day:</label>
-                        <input type="number" id="start" name="start" min={0} defaultValue={rangeInfo.groupRange.range.start} onChange={(event) => handleChange(event, "start")} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
+                        <input type="date" id="start" name="start" min={0} defaultValue={rangeInfo.groupRange.range.start} onChange={(event) => handleChange(event, "start")} className="bg-neutral-900 rounded px-2 py-1"></input>
                         <label htmlFor="end">end day:</label>
-                        <input type="number" id="end" name="end" min={0} defaultValue={rangeInfo.groupRange.range.end} onChange={(event) => handleChange(event, "end")} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
+                        <input type="date" id="end" name="end" min={0} defaultValue={rangeInfo.groupRange.range.end} onChange={(event) => handleChange(event, "end")} className="bg-neutral-900 rounded px-2 py-1"></input>
                     </div>
                     <div>length in days: {len}</div>
                     <div className="flex justify-end">
@@ -487,33 +484,37 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     const [ isGrabed, toggleGrab ] = useReducer(isGraped => !isGraped, false);
     const [ range, setRange ] = useState<Range>(groupRange.range);
     const [ movPos, setMovPos ] = useState<Position | null>(null); 
-    const { changeMode, updateRanges, openRangeMenu, userMode, ranges } = useContext(RangesContext)!;
+    const { changeUserMode, updateRanges, openRangeMenu, userMode, ranges } = useContext(RangesContext)!;
 
-    function handleConnect(type : ConnectType) {
-        if (userMode != UserMode.Connecting) {
-            changeMode(UserMode.Connecting);
-            return;
-            //TODO
-        } else if (userMode == UserMode.Connecting) {
-            
-        }  
+    function handleConnect(event: MouseEvent, type : ConnectType) {
+        event.stopPropagation();
+        //console.log("Connect button clicked");
+        if (userMode !== UserMode.Connecting) {
+            changeUserMode(UserMode.Connecting);
+        } else if (userMode === UserMode.Connecting) {
+            changeUserMode(UserMode.Creating);
+        }
+        
     }
 
     function handleGrap(event: MouseEvent) {
-        if (!isGrabed && event.button != 2) {
-            changeMode(UserMode.Moving);
+        event.stopPropagation();
+        //console.log("Grabbing");
+        if (!isGrabed && event.button !== 2) {
+            changeUserMode(UserMode.Moving);
             toggleGrab();
             setMovPos({ x: event.clientX, y: event.clientY });
         }
     }
 
     function handleMove(event: MouseEvent) {
+        event.stopPropagation();
         if (isGrabed && movPos) {
             const pos : Position = { x: event.clientX, y: event.clientY };
             const row = rows[index];
             const widthDay = row.children[0].getBoundingClientRect().width;
             const difference = pos.x - movPos.x;
-            if (Math.abs(difference) % widthDay == 0) {
+            if (Math.abs(difference) % widthDay === 0) {
                 if (range.start + difference / widthDay < 0) {
                     range.end = range.end - range.start;
                     range.start = 0;
@@ -528,17 +529,20 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     }
 
     function handleDrop(event: MouseEvent) {
+        event.stopPropagation();
         if (isGrabed) {
+            //console.log("Dropping");
             ranges[index].range = range;
             updateRanges(ranges);
             toggleGrab();
             setMovPos(null);
-            changeMode(UserMode.Creating);
+            changeUserMode(UserMode.Creating);
         }
     }
 
     function handleMenu(event: MouseEvent) {
         event.preventDefault();
+        //console.log("Context menu opened");
         openRangeMenu(groupRange, index);
     }
 
@@ -561,15 +565,15 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
                 width: endbox.right - startbox.left  
             }}
         >
-            <ConnectRangeButton active={false} type={ConnectType.to} onClick={() => handleConnect(ConnectType.to)}/>
-            <ConnectRangeButton active={false} type={ConnectType.from} onClick={() => handleConnect(ConnectType.from)}/>
+            <ConnectRangeButton active={false} type={ConnectType.to} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.to)}/>
+            <ConnectRangeButton active={false} type={ConnectType.from} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.from)}/>
         </div>
     )
 }
 
 
 
-function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : () => void}) {
+function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : (event : MouseEvent) => void}) {
     return (
         <div className={`hover:bg-opacity-100 hover:bg-violet-400  w-6 h-full bg-violet-700 ${active ? "bg-opacity-100 bg-violet-400" : "bg-opacity-80"} border-${type == ConnectType.to ? "r" : "l"} cursor-pointer`} onClick={onClick}></div>
     )
