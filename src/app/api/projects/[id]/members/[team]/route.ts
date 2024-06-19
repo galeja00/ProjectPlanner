@@ -48,7 +48,6 @@ export async function GET(req : Request, { params } : { params: { id : string, t
                     surname: user.surname,
                     teamId: member.teamId,
                     teamName: team ? team.name : null,
-                    position: member.position,
                     tasksLoad: Load.low 
                 });
             } 

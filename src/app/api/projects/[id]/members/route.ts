@@ -18,7 +18,6 @@ export type MemberTableInfo = {
     surname: string,
     teamId: string | null,
     teamName: string | null,
-    position: string | null,
     image: string | null,
     tasksLoad: Load 
 }
@@ -68,7 +67,6 @@ export async function GET(req : Request, { params } : { params: { id : string }}
                     surname: user.surname,
                     teamId: member.teamId,
                     teamName: team ? team.name : null,
-                    position: member.position,
                     tasksLoad: Load.low 
                 });
             } 
