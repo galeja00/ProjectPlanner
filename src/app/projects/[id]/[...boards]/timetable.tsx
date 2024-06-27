@@ -1,14 +1,16 @@
 "use client"
-import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
+import { GroupOfTasks, TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
 import { Head } from "../components/other";
 import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef, RefObject, ChangeEvent } from "react";
 import { Creator } from "./components/creator";
 import { CreateButton } from "@/app/components/buttons";
 import { group } from "console";
 import { Dialog, DialogClose } from "@/app/components/dialog";
-import { ButtonWithText } from "@/app/components/other";
+import { ButtonWithImg, ButtonWithText } from "@/app/components/other";
 import { act } from "react-dom/test-utils";
 import { getCurrentDiffInDays } from "@/date";
+import { TasksGroup } from "@prisma/client";
+import { AddGroupToTimeTable } from "./components/groups";
 
 
 enum Mode {
@@ -25,6 +27,12 @@ type GroupRange = {
     range : Range,
     next : GroupRange[],
     prev : GroupRange[]
+}
+
+type RangeInfo = {
+    groupRange: GroupRange,
+    group: TimeTableGroup,
+    index: number
 }
 
 type Position = {
@@ -58,7 +66,7 @@ interface TimeTableContextTypes {
     updateGroups: (ranges : GroupRange[]) => void;
     projectStart: Date;
     currentDate: Date;
-    groups : GroupOfTasks[];
+    groups : TimeTableGroup[];
     mode : Mode;
 }
 
@@ -75,10 +83,11 @@ const TimeTableContext = createContext<TimeTableContextTypes | null>(null);
 const RangesContext = createContext<RangesContextTypes | null>(null);
 
 export default function TimeTable({ id } : { id : string }) {
-    const [ groups, setGroups] = useState<GroupOfTasks[]>([]);
+    const [ groups, setGroups] = useState<TimeTableGroup[]>([]);
     const [ mode, setMode ] = useState<Mode>(Mode.Week);
     const [ projectStart, setProjectStart ] = useState<Date | null>(null);
     const [ currentDate, setCurrentDate ] = useState<Date>(new Date()); 
+    const [ isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false);
 
     async function fetchGroups() {
         try {
@@ -89,7 +98,9 @@ export default function TimeTable({ id } : { id : string }) {
             if (!res.ok) {
                 console.error(data.error);
             }
+            console.log(data.groups);
             setProjectStart(new Date(data.start.toString()));
+            setGroups(data.groups);
         }
         catch (error) {
             console.error(error);
@@ -99,12 +110,17 @@ export default function TimeTable({ id } : { id : string }) {
     // TODO
     async function createGroup(name : string) {
         const id : string = Math.random().toString();
-        const newGroups = [...groups, { id, name, tasks: [], position: groups.length, backlogId: "" }];
+        const newGroups : TimeTableGroup[] = [...groups, { id, name, position: groups.length, timeTableId: "", startAt: null, deadlineAt: null}];
         setGroups(newGroups);
     }
     //TODO
     async function updateGroups(groups : GroupRange[]) {
         
+    }
+
+    function handleAdd() {
+        toggleAdding();
+        console.log(isAdding);
     }
 
     useEffect(() => {
@@ -114,6 +130,7 @@ export default function TimeTable({ id } : { id : string }) {
         return () => clearInterval(interval);
     }, []);
 
+
     useEffect(() => { fetchGroups() }, []);
 
     if (!projectStart) {
@@ -122,16 +139,24 @@ export default function TimeTable({ id } : { id : string }) {
         )
     }
 
+
     return (
         <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
             <section className="overflow-x-hidden h-full max-h-full">
                 <Head text='Time Table'/>
+                <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
                 <Table/>
                 <TimeMode mode={mode} changeMode={(mode : Mode) => setMode(mode)}/>
             </section>
+            { isAdding ? <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/> : <></>}
         </TimeTableContext.Provider>
     )
 }
+
+
+
+
+
 
 function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mode) => void }) {
     return (
@@ -270,11 +295,6 @@ function getDay(pos : Position, cols : Element[] ) : Day | null {
     return null;
 }
 
-type RangeInfo = {
-    groupRange: GroupRange,
-    group: GroupOfTasks,
-    index: number
-}
 
 function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: GroupRange[], updateRanges : (ranges : GroupRange[]) => void, count : number }) {
     const [ userMode, setUserMode ] = useState<UserMode>(UserMode.Creating);

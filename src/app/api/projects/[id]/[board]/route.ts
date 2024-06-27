@@ -7,7 +7,7 @@ import { Group } from "next/dist/shared/lib/router/utils/route-regex";
 
 // TODO: defent boards need to be implement, implmenet type safe api
 
-type BoardTasksColumn = {
+export type BoardTasksColumn = {
     id : string,
     boardId: string,
     name : string,
@@ -23,6 +23,14 @@ export type GroupOfTasks = {
     tasks : Task[]
 }
 
+export type TimeTableGroup = {
+    id: string,
+    timeTableId: string,
+    name: string,
+    position: number | null,
+    startAt: Date | null,
+    deadlineAt: Date | null
+}
 
 
 
@@ -61,7 +69,8 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 if (!timeTable) { 
                     throw new Error(); 
                 }
-                return Response.json({ start: timeTable.startAt }, {status: 200});
+                console.log(timeTable);
+                return Response.json({ start: timeTable.startAt, groups: timeTable.groups }, {status: 200});
             default:
                 return Response.json({ error: "Bad type of board in REST API request"}, { status: 400});
         }
@@ -92,6 +101,14 @@ async function getTimeTable(projectId: string) {
             timeTable: {
                 projectId: projectId
             }
+        },
+        select: {
+            id: true,
+            timeTableId: true,
+            name: true,
+            startAt: true,
+            position: true,
+            deadlineAt: true
         }
     });
 

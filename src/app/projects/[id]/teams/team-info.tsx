@@ -293,7 +293,7 @@ function MembersColumn({ type, members, handleMove } : { type : ColumnType, memb
 
     return (
         <section 
-            className="h-full"
+            className="h-max"
             onDrop={handleOnDrop}
             onDragOver={handleOnDragOver}
             onDragLeave={handleOnLeave}
