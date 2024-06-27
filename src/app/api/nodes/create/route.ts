@@ -22,7 +22,7 @@ export async function POST(req : Request) {
 
         const { header, desc } = await req.json();
         
-        await prisma.node.create({
+        const node = await prisma.node.create({
             data: {
                 name: header,
                 text: desc,
@@ -31,7 +31,7 @@ export async function POST(req : Request) {
         })
         
 
-        return Response.json({ message: "Succefully created node" }, { status: 200 });
+        return Response.json({ message: "Succefully created node", id: node.id }, { status: 200 });
     }
     catch (error) {
         return Response.json({ error: error }, { status: 500 })

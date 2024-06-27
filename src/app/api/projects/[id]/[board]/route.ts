@@ -1,8 +1,9 @@
 import { prisma } from "@/db";
-import { Backlog, Board, ProjectMember, Task, TaskColumn, TasksGroup, User } from "@prisma/client";
+import { Backlog, Board, ProjectMember, Task, TaskColumn, TasksGroup, TimeTable, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { unassigned } from "@/config";
+import { Group } from "next/dist/shared/lib/router/utils/route-regex";
 
 // TODO: defent boards need to be implement, implmenet type safe api
 
@@ -21,6 +22,9 @@ export type GroupOfTasks = {
     position : number | null,
     tasks : Task[]
 }
+
+
+
 
 
 
@@ -53,20 +57,13 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 }
                 return Response.json({ backlog: backlog, collumns: collumns }, { status: 200 });
             case "timetable":
-                const start : { createdAt: Date } | null = await prisma.project.findFirst({
-                    where: {
-                        id: params.id
-                    },
-                    select: {
-                        createdAt: true
-                    }
-                })
-                if (!start) {
+                const timeTable = await getTimeTable(params.id); 
+                if (!timeTable) { 
                     throw new Error(); 
                 }
-                return Response.json({ start: start.createdAt }, {status: 200});
+                return Response.json({ start: timeTable.startAt }, {status: 200});
             default:
-                return Response.json({ error: "Bad type of board in api request"}, { status: 400});
+                return Response.json({ error: "Bad type of board in REST API request"}, { status: 400});
         }
         
     } 
@@ -74,6 +71,31 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         console.log(error);
         return Response.json({ error : "Error: Server error"}, { status: 500});
     }
+}
+
+async function getTimeTable(projectId: string) {
+    const start : { createdAt: Date } | null = await prisma.project.findFirst({
+        where: {
+            id: projectId
+        },
+        select: {
+            createdAt: true
+        }
+    });
+
+    if (!start) {
+        return null;
+    }
+
+    const groups  = await prisma.tasksGroup.findMany({
+        where: {
+            timeTable: {
+                projectId: projectId
+            }
+        }
+    });
+
+    return { startAt: start.createdAt, groups }
 }
 
 async function getBoard(projectId : string) : Promise<BoardTasksColumn[] | null> {

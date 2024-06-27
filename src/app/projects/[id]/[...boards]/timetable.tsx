@@ -392,6 +392,7 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
     const [len, setLen] = useState<number>(rangeInfo.groupRange.range.end -  rangeInfo.groupRange.range.start);
     const { ranges, updateRanges } = useContext(RangesContext)!;
     const { projectStart } = useContext(TimeTableContext)!;
+    
     function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
         event.preventDefault();
         let date = new Date(event.currentTarget.value);

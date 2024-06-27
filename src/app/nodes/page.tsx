@@ -1,4 +1,4 @@
-"use client"
+
 
 import { Head } from "../projects/[id]/components/other";
 import Nodes from "./nodes";

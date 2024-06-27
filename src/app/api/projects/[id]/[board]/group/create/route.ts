@@ -25,7 +25,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         })
 
         if (!kanban || !kanban.backlogId) {
-            return Response.json({status: 400});
+            return Response.json({ error: "" }, { status: 400 });
         }
         
 
@@ -40,6 +40,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             data: {
                 name: data.name,
                 backlogId: kanban.backlogId,
+                timeTableId: kanban.timetableId ? kanban.timetableId : null,
                 position: position
             }
         })

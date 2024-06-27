@@ -32,10 +32,6 @@
 :root {
   --foreground-rgb: #171717;
   --background-rgb: #fafafa;
-
-  /*--foreground-rgb: #fafafa;
-  --background-start-rgb: #171717;
-  --background-end-rgb: #171717;*/
 }
 
 
@@ -44,7 +40,6 @@
   :root {
     --foreground-rgb: #fafafa;
     --background-rgb: #171717;
-
   }
 }
 

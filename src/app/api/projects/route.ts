@@ -94,6 +94,7 @@ async function createStartingBoard(boardId : string) {
 // TODO: uprovit misto returnu throw error a pokusit se opravit chybu a zaroven opravir error hlasky
 export async function POST(req : Request) {
     try {
+
         const session = await getServerSession(options);
 
         if (!(session && session.user)) {
@@ -102,13 +103,12 @@ export async function POST(req : Request) {
 
         const email = session.user.email ?? "";
         const user : User | null = await prisma.user.findFirst({ where: { email: email }});    
-
+        
         const { name } = await req.json();
 
         if (!user) {
             return NextResponse.json({ error: "error"}, { status: 400 });
         }
-
         const project : Project = await prisma.project.create({ data: {
             name: name,
             color: selectColor()     
