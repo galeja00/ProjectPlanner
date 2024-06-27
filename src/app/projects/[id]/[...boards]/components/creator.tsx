@@ -30,9 +30,9 @@ export function Creator({ what, handleCreate } : {what : string, handleCreate : 
 
 
     return (
-        <div className='h-fit p-2'>
+        <div className='h-fit'>
             { isCreating ? 
-                <div className='bg-neutral-950 rounded  w-fit space-x-4 flex flex-row'>
+                <div className='bg-neutral-950 p-2 rounded  w-fit space-x-4 flex flex-row'>
                     <input type="text" className="input-primary h-8 w-48" onChange={handleChange} onKeyDown={handleKeyDown}/>
                     <div className='space-x-2 h-full flex items-center'>
                         <button onClick={() => create(name)} className='bg-neutral-900 w-max rounded hover:outline hover:outline-1 hover:outline-green-600'>
