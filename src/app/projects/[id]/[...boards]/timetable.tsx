@@ -98,9 +98,9 @@ export default function TimeTable({ id } : { id : string }) {
             if (!res.ok) {
                 console.error(data.error);
             }
-            console.log(data.groups);
+            //console.log(data.groups);
             setProjectStart(new Date(data.start.toString()));
-            setGroups(data.groups);
+            setGroups([...data.groups]);
         }
         catch (error) {
             console.error(error);
@@ -111,6 +111,12 @@ export default function TimeTable({ id } : { id : string }) {
     async function createGroup(name : string) {
         const id : string = Math.random().toString();
         const newGroups : TimeTableGroup[] = [...groups, { id, name, position: groups.length, timeTableId: "", startAt: null, deadlineAt: null}];
+        try {
+
+        }
+        catch (error) {
+
+        }
         setGroups(newGroups);
     }
     //TODO
@@ -120,7 +126,6 @@ export default function TimeTable({ id } : { id : string }) {
 
     function handleAdd() {
         toggleAdding();
-        console.log(isAdding);
     }
 
     useEffect(() => {
@@ -128,7 +133,7 @@ export default function TimeTable({ id } : { id : string }) {
           setCurrentDate(new Date());
         }, 1000 * 60 * 60); // Update every hour
         return () => clearInterval(interval);
-    }, []);
+    }, [groups]);
 
 
     useEffect(() => { fetchGroups() }, []);
@@ -152,10 +157,6 @@ export default function TimeTable({ id } : { id : string }) {
         </TimeTableContext.Provider>
     )
 }
-
-
-
-
 
 
 function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mode) => void }) {
@@ -182,13 +183,12 @@ function Table() {
     }, [currentDate])
     
     useEffect(() => {
-        if (groups.length > groupsRanges.length) {
-            const newRanges : GroupRange[] = new Array(groups.length);
-            for (let i = 0; i < groupsRanges.length; i++) {
-                newRanges[i] = groupsRanges[i];
-            }
-            setGroupsRanges([...newRanges]);
+        const newRanges : GroupRange[] = new Array(groups.length);
+        for (let i = 0; i < groupsRanges.length; i++) {
+            newRanges[i] = groupsRanges[i];
         }
+        setGroupsRanges([...newRanges]);
+        
     }, [groups]);
 
     return (
@@ -212,7 +212,7 @@ function Table() {
 }
 
 function TimesRanges({ range } : { range : number }) {
-    const { projectStart, currentDate } = useContext(TimeTableContext)!;
+    const { projectStart, currentDate, groups } = useContext(TimeTableContext)!;
     const renderDivs = () => {
         const divs = [];
         for (let i = 0; i < range; i++) {
@@ -233,6 +233,7 @@ function TimesRanges({ range } : { range : number }) {
         }
         return divs;
     };
+
     return ( 
         <div className="w-fit flex h-16 bg-neutral-950">
             {renderDivs()}
@@ -306,7 +307,6 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
     const days = useRef<HTMLDivElement>(null);
 
     function changeUserMode(mode : UserMode) {
-        console.log(mode);
         if (mode != userMode) {
             setUserMode(mode);
             return;

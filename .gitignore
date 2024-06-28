@@ -43,4 +43,4 @@ dev.db*
 /public/uploads/*
 
 # paths used in program for saving files
-/src/config.ts
+src/config.ts
