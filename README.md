@@ -1,3 +1,9 @@
+Project is in heavy development, right now its not now working properly with lot of missing thinks a bugs.
+Readme will be added after it will be possible to use.
+
+Thanks.
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
