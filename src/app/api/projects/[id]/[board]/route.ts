@@ -4,6 +4,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { unassigned } from "@/config";
 import { Group } from "next/dist/shared/lib/router/utils/route-regex";
+import { BoardsTypes } from "./board";
 
 // TODO: defent boards need to be implement, implmenet type safe api
 
@@ -34,8 +35,6 @@ export type TimeTableGroup = {
 
 
 
-
-
 // TODO: change querys on DB for better performace 
 // TODO: change error throws when query is null
 // id: je id daného projektu v kterým 
@@ -51,20 +50,20 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         }
 
         switch (params.board) {
-            case "board": 
+            case BoardsTypes.Board: 
                 const board = await getBoard(params.id);
                 if (!board) {
                     throw new Error();
                 }
                 return Response.json({ data: board }, { status: 200 });
-            case "backlog": 
+            case BoardsTypes.Backlog: 
                 const backlog = await getBacklog(params.id);
                 const collumns = await getBoardCollumns(params.id);
                 if (!backlog) { 
                     throw new Error(); 
                 }
                 return Response.json({ backlog: backlog, collumns: collumns }, { status: 200 });
-            case "timetable":
+            case BoardsTypes.TimeTable:
                 const timeTable = await getTimeTable(params.id); 
                 if (!timeTable) { 
                     throw new Error(); 
@@ -95,6 +94,7 @@ async function getTimeTable(projectId: string) {
     if (!start) {
         return null;
     }
+
 
     const groups  = await prisma.tasksGroup.findMany({
         where: {

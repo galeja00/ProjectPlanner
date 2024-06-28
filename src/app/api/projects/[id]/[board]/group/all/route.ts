@@ -5,6 +5,7 @@ import { getMember } from "../../../static";
 import { GroupOfTasks } from "../../route";
 
 
+
 export async function GET(req : Request, { params } : { params: { id: string, board: string} } ) {
     try {
         
@@ -19,7 +20,9 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
 
         const groups : TasksGroup[] = await prisma.tasksGroup.findMany({
             where: {
-                id: params.id
+                backlog: {
+                    projectId: params.id
+                }
             }
         });
             

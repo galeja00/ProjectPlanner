@@ -1,17 +1,26 @@
 import { TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { TasksGroup } from "@prisma/client";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useReducer, DragEvent } from "react";
 
 type GroupBasicInfo = {
     id: string,
-    name: string
+    name: string,
+    col: ColumnType
+}
+
+enum ColumnType {
+    TimeTable = 0,
+    Other = 1
 }
 
 export function AddGroupToTimeTable({ projectId, groups, handleClose } : { projectId : string, groups : TimeTableGroup[], handleClose : () => void }) {
-    const [ unassignedGroups, setUnassignedGroups ] = useState<TasksGroup[]>([]);
-    
-    async function fetchUnassignedGroups() {
+    const [ unassignedGroups, setUnassignedGroups ] = useState<GroupBasicInfo[]>([]);
+    const [ timetableGroups, setTimetableGroups] = useState<GroupBasicInfo[]>(() =>
+        groups.map(g => ({ id: g.id, name: g.name, col: ColumnType.TimeTable }))
+    );
+
+    async function fetchGroups() {
         try {
             const res = await fetch(`/api/projects/${projectId}/timetable/group/all`, {
                 method: "GET"
@@ -20,9 +29,13 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
             if (!res.ok) {
                 throw Error(data.error);
             }
-            console.log(data);
-            const fetchedGroups = data.groups.filter((group : TasksGroup) => group.timeTableId === null);
-            setUnassignedGroups(fetchedGroups);
+
+            setUnassignedGroups(data.groups
+                .filter((group : TasksGroup) => group.timeTableId === null)
+                .map((group : TasksGroup) => ({ id: group.id, name: group.name, col: ColumnType.Other})));
+            setTimetableGroups(data.groups
+                .filter((group : TasksGroup) => group.timeTableId !== null)
+                .map((group : TasksGroup) => ({ id: group.id, name: group.name, col: ColumnType.TimeTable})));
         }
         catch (error) {
             console.error(error);
@@ -30,20 +43,56 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
         }
     }
 
-    useEffect(() => {fetchUnassignedGroups()}, []);
+    async function fetchCrudGroup(group : GroupBasicInfo, method : string) {
+        try {
+            console.log(projectId);
+            const res = await fetch(`/api/projects/${projectId}/timetable/group/${method}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    id: group.id
+                })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error); 
+            }
+            fetchGroups();
+
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    function handleMove(group : GroupBasicInfo, col : ColumnType) {
+        if (group.col == col) return;
+        if (col == ColumnType.TimeTable) fetchCrudGroup(group, "add");
+        else if (col == ColumnType.Other) fetchCrudGroup(group, "remove");
+    }
+
+    useEffect(() => {fetchGroups()}, []);
 
     return (
         <Dialog>
-            <div className="relative bg-neutral-950 rounded">
+            <div className="relative bg-neutral-950 rounded h-fit w-fit p-4">
                 <DialogClose handleClose={handleClose}/>
-                <div>
-                    <h4>Groups on time table</h4>
-                    <ListGroups groups={groups.map((group) => ({id: group.id, name: group.name}))}/>
-                </div>
-                <div>
-                    <h4>All Groups</h4>
-                    <ListGroups groups={unassignedGroups.map((group) => ({id: group.id, name: group.name}))}/>
-                </div>
+                <h2 className="font-bold text-xl mb-4">Move groups</h2>
+                <section className="h-fit relative flex gap-4 w-full justify-around">
+                    <div>
+                        <h3>Groups on Time Table</h3>
+                        <ListGroups 
+                            groups={timetableGroups} 
+                            handleMove={(group) => handleMove(group, ColumnType.TimeTable)}/>
+                    </div>
+                    <div>
+                        <h3>Other Groups</h3>
+                        <ListGroups 
+                            groups={unassignedGroups} 
+                            handleMove={(group) => handleMove(group, ColumnType.Other)}/>
+                    </div>
+                </section>
             </div>
         </Dialog>
     )
@@ -52,22 +101,39 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
 
 
 
-function ListGroups({ groups } : { groups : GroupBasicInfo[] }) {
-
-    function handleOnDrop() {
-
+function ListGroups({ groups, handleMove } : { groups : GroupBasicInfo[], handleMove : (group : GroupBasicInfo) => void }) {
+    const [ isDraged, toggleDragged ] = useReducer(isDraged => !isDraged, false);
+    
+    function handleOnDrop(event : DragEvent) {
+        event.preventDefault();
+        const jsonString = event.dataTransfer.getData("json/group");
+        const group : GroupBasicInfo = JSON.parse(jsonString);
+        handleMove(group);
+        if (isDraged) {
+            toggleDragged();
+        }
     }
 
-    function handleOnDragOver() {
-
+    function handleOnDragOver(event : DragEvent) {
+        event.preventDefault();
+        if (!isDraged) {
+            toggleDragged();
+        }
     }
 
-    function handleOnLeave() {
+    function handleOnLeave(event : DragEvent) {
+        event.preventDefault();
+        if (isDraged) {
+            toggleDragged();
+        }
+    }
 
+    function handleOnDragStart(event : DragEvent, group : GroupBasicInfo) {
+        event.dataTransfer.setData("json/group", JSON.stringify(group));
     }
 
     return(
-        <ul
+        <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-900"}`}
             onDrop={handleOnDrop}
             onDragOver={handleOnDragOver}
             onDragLeave={handleOnLeave}
@@ -75,7 +141,7 @@ function ListGroups({ groups } : { groups : GroupBasicInfo[] }) {
         >
             {
                 groups.map((group) => (
-                    <ListItem key={group.id} group={group}/>
+                    <ListItem key={group.id} group={group} handleOnDrag={(e) => handleOnDragStart(e, group)}/>
                 ))
             }
         </ul>
@@ -83,9 +149,9 @@ function ListGroups({ groups } : { groups : GroupBasicInfo[] }) {
 }
 
 
-function ListItem({ group } : { group : GroupBasicInfo}) {
+function ListItem({ group, handleOnDrag } : { group : GroupBasicInfo, handleOnDrag : (e : DragEvent) => void }) {
     return (
-        <li key={group.id} className="" draggable>
+        <li key={group.id} onDragStart={handleOnDrag} className={`box-content flex gap-4 bg-neutral-950 rounded items-center p-1 cursor-pointer`} draggable >
             {group.name}
         </li>
     )

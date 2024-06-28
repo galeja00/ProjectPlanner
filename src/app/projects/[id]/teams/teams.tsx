@@ -250,7 +250,7 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
     }
     return (
         <Dialog>
-            <div className="bg-neutral-950 w-50 h-50 rounded p-8  relative">
+            <div className="bg-neutral-950 w-50 h-fit rounded p-8 relative">
                 <DialogClose handleClose={handleCloseDialog}/>
                 <div className="flex flex-row gap-8">
                     <div className="flex flex-col gap-4">

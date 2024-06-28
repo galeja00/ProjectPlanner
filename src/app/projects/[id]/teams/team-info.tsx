@@ -64,7 +64,7 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
 
     return (
         <Dialog>
-            <div className="bg-neutral-950 w-fit rounded relative">
+            <div className="bg-neutral-950 w-fit rounded relative h-fit">
                 <TeamHead team={infteam} closeSettings={close} updateTeam={updateTeam}/>
                 <Container team={infteam} projectId={projectId}/>
             </div>

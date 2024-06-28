@@ -166,26 +166,29 @@ export default function Board({ id } : { id : string }) {
 
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
-            <Head text='Board'/>
-            <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                <SearchInput/>
-                <FilterButton onClick={toggleFilterDialog}/>
-            </section>
-            { isFilterDialog && <FilterDialog handleClose={toggleFilterDialog}/>}
-            <section className="flex gap-2 w-full">
-                {
-                    tasksColumns.map((col, index) => (
-                        <TasksColumn 
-                            key={col.id} 
-                            index={index} 
-                            projectId={id}
-                            handleMoveOfTask={handleMoveOfTask}
-                        />
-                        
-                    ))
-                }
-                <Creator what={"Create new column"} handleCreate={createColumn}/>
-            </section>
+            <div className='relative'>
+                <Head text='Board'/>
+                <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
+                    <SearchInput/>
+                    <FilterButton onClick={toggleFilterDialog}/>
+                </section>
+                { isFilterDialog && <FilterDialog handleClose={toggleFilterDialog}/>}
+                <section className="flex gap-2 w-full">
+                    {
+                        tasksColumns.map((col, index) => (
+                            <TasksColumn 
+                                key={col.id} 
+                                index={index} 
+                                projectId={id}
+                                handleMoveOfTask={handleMoveOfTask}
+                            />
+                            
+                        ))
+                    }
+                    <Creator what={"Create new column"} handleCreate={createColumn}/>
+                </section>
+
+            </div>
         </TasksColumnsContext.Provider>
     )
 }
