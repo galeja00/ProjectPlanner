@@ -33,6 +33,12 @@ export function isBetweenDates(start : Date, end : Date, between : Date) : boole
     return isEarlierDate(end, between) && isLaterDate(start, between);
 }
 
-export function getCurrentDiffInDays(start : Date, current : Date) {
-    return Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 ))
+export function getDiffInDays(start : Date, end : Date) : number {
+    return Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 ));
 }
+
+
+export function fromDayToMills(day : number) : number {
+    return day * (1000 * 60 * 60 * 24);
+}
+

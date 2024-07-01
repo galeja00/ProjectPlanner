@@ -1,15 +1,11 @@
 "use client"
-import { GroupOfTasks, TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
+import { TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
 import { Head } from "../components/other";
 import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef, RefObject, ChangeEvent } from "react";
 import { Creator } from "./components/creator";
-import { CreateButton } from "@/app/components/buttons";
-import { group } from "console";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { ButtonWithImg, ButtonWithText } from "@/app/components/other";
-import { act } from "react-dom/test-utils";
-import { getCurrentDiffInDays } from "@/date";
-import { TasksGroup } from "@prisma/client";
+import { fromDayToMills, getDiffInDays } from "@/date";
 import { AddGroupToTimeTable } from "./components/groups";
 
 
@@ -21,6 +17,11 @@ enum Mode {
 type Range = {
     start: number,
     end: number
+}
+
+type DateRange = {
+    start : Date,
+    end : Date
 }
 
 type GroupRange = {
@@ -119,9 +120,56 @@ export default function TimeTable({ id } : { id : string }) {
         }
         setGroups(newGroups);
     }
-    //TODO
-    async function updateGroups(groups : GroupRange[]) {
-        
+
+    async function submitGroupDates(group : TimeTableGroup) {
+        try {
+            const res = await fetch(`/api/projects/${id}/timetable/group/dates`, {
+                method: "POST",
+                body: JSON.stringify({
+                    id: group.id,
+                    startAt: group.startAt,
+                    endAt: group.deadlineAt
+                })
+            })
+            if (!res.ok) {
+                const data = await res.json();
+                console.error(data.error);
+            }
+        }   
+        catch (error) {
+            console.error(error);
+        } 
+    
+    }
+
+    function updateGroups(groupsRanges : GroupRange[]) {
+        if (!projectStart) return null;
+        const toUpdate : TimeTableGroup[] = [];
+        for (let i = 0; i < groups.length; i++) {
+            const group = convertGroupToRange(groups[i], projectStart);
+            if (!group || !isEqualRanges(groupsRanges[i].range, group.range)) {
+                toUpdate[i] = updateGroupDates(groups[i], groupsRanges[i].range, projectStart);
+            }
+        }
+        console.log(toUpdate);
+        for (const toUp of toUpdate) {
+            submitGroupDates(toUp);
+        }
+        const newGroups = [];
+        let isUp = false;
+        for (let i = 0; i < groups.length; i++) {
+            for (const gUp of toUpdate) {
+                if (gUp.id == groups[i].id) {
+                    newGroups.push(gUp);
+                    isUp = true;
+                    continue;
+                }
+            }
+            if (!isUp) {
+                newGroups.push(groups[i]);
+            }
+        }
+        setGroups(newGroups);
     }
 
     function handleAdd() {
@@ -174,18 +222,26 @@ function Table() {
     const [ count , setCount ] = useState<number>(80); // count - number of weeks displayed on timetable
 
     function updateRanges(ranges : GroupRange[]) {
+        updateGroups(ranges);
         setGroupsRanges([...ranges]);
     }
     
     useEffect(() => {
-        const currentDay = getCurrentDiffInDays(projectStart, currentDate);
+        const currentDay = getDiffInDays(projectStart, currentDate);
         if ((currentDay * 7) * 2 > count) setCount(count * 2);
     }, [currentDate])
     
     useEffect(() => {
+        //console.log(groups);
         const newRanges : GroupRange[] = new Array(groups.length);
-        for (let i = 0; i < groupsRanges.length; i++) {
+        let i = 0;
+        while (i < groupsRanges.length) {
             newRanges[i] = groupsRanges[i];
+            i++;
+        }
+        while (i < groups.length) {
+            const newG = convertGroupToRange(groups[i], projectStart);
+            if (newG) newRanges[i] = newG;
         }
         setGroupsRanges([...newRanges]);
         
@@ -212,7 +268,7 @@ function Table() {
 }
 
 function TimesRanges({ range } : { range : number }) {
-    const { projectStart, currentDate, groups } = useContext(TimeTableContext)!;
+    const { projectStart } = useContext(TimeTableContext)!;
     const renderDivs = () => {
         const divs = [];
         for (let i = 0; i < range; i++) {
@@ -373,7 +429,7 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
                 ref={days}
                 >
                     {groupsRanges.map((groupRange, row) => (
-                        <GroupRow key={row} row={row} size={count} current={getCurrentDiffInDays(projectStart, currentDate)} />
+                        <GroupRow key={row} row={row} size={count} current={getDiffInDays(projectStart, currentDate)} />
                     ))}
                 {days && <WorkRanges days={days} groupsRange={groupsRanges} />}</div>
             </div>
@@ -416,7 +472,7 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
     function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
         event.preventDefault();
         let date = new Date(event.currentTarget.value);
-        let val = getCurrentDiffInDays(projectStart, date);
+        let val = getDiffInDays(projectStart, date);
         if (isNaN(val) || val < 0) {
             return;
         }
@@ -456,15 +512,6 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
                 </section>
             </div>
         </Dialog>
-    )
-}
-
-function DayInput({ rangeInfo, onChange, name} : { rangeInfo : RangeInfo, onChange : () => void, name : string}) {
-    return (
-        <>
-            <label htmlFor="name">name:</label>
-            <input type="number" id="name" name="name" defaultValue={rangeInfo.groupRange.range.end} onChange={onChange} className="bg-neutral-900 rounded px-2 py-1 w-20"></input>
-        </>
     )
 }
 
@@ -596,6 +643,40 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
 
 function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : (event : MouseEvent) => void}) {
     return (
-        <div className={`hover:bg-opacity-100 hover:bg-violet-400  w-6 h-full bg-violet-700 ${active ? "bg-opacity-100 bg-violet-400" : "bg-opacity-80"} border-${type == ConnectType.to ? "r" : "l"} cursor-pointer`} onClick={onClick}></div>
+        <div 
+            className={`hover:bg-opacity-100 hover:bg-violet-400  w-6 h-full bg-violet-700 
+                ${active ? "bg-opacity-100 bg-violet-400" : "bg-opacity-80"}
+                border-${type == ConnectType.to ? "r" : "l"} cursor-pointer`} 
+            onClick={onClick}>
+
+        </div>
     )
+}
+
+
+
+
+function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange | null {
+    if (group.startAt && group.deadlineAt) {
+        const range : Range = {start: getDiffInDays(start, new Date(group.startAt)), end: getDiffInDays(start, new Date(group.deadlineAt))};
+        return {range: range, next: [], prev: []};
+    }
+    return null;
+}
+
+function updateGroupDates(group : TimeTableGroup, range : Range, start : Date) : TimeTableGroup {
+    const newDates = convertRangeToDates(range, start); 
+    const startAt = newDates.start;
+    const endAt = newDates.end;
+    return { id: group.id, timeTableId: group.timeTableId, name: group.name, startAt: startAt, deadlineAt: endAt, position: group.position };
+}
+
+function convertRangeToDates(range : Range, start : Date) : DateRange {
+    const startAt = new Date(start.getTime() + fromDayToMills(range.start));
+    const endAt = new Date(start.getTime() + fromDayToMills(range.end));
+    return { start: startAt, end: endAt };
+} 
+
+function isEqualRanges(a : Range, b : Range) {
+    return a.start == a.start && b.end == b.end;
 }
