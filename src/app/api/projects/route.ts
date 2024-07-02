@@ -150,7 +150,7 @@ export async function POST(req : Request) {
             data: {
                 boardId: board.id,
                 backlogId: backlog.id, 
-                timetableId: project.id
+                timetableId: timetable.id
             }
         })
         
