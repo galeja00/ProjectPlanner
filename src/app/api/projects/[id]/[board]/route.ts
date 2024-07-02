@@ -108,6 +108,9 @@ async function getTimeTable(projectId: string) {
             startAt: true,
             position: true,
             deadlineAt: true
+        },
+        orderBy: {
+            position: "asc"
         }
     });
 

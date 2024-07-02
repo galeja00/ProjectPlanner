@@ -109,7 +109,6 @@ export default function TimeTable({ id } : { id : string }) {
         }
     }
 
-    // TODO
     async function createGroup(name : string) {
         try {
             const res = await fetch(`/api/projects/${id}/timetable/group/create`, {
@@ -121,19 +120,17 @@ export default function TimeTable({ id } : { id : string }) {
             
             if (res.ok) {
                 const { group } : { group : TasksGroup } = await res.json();
-                const newGroup = { id: group.name, timeTableId: group.timeTableId ?? "", name: group.name, position: group.position, startAt: group.startAt, deadlineAt: group.deadlineAt };
+                const newGroup = { id: group.id, timeTableId: group.timeTableId ?? "", name: group.name, position: group.position, startAt: group.startAt, deadlineAt: group.deadlineAt };
                 const newGroups : TimeTableGroup[] = [...groups, newGroup ];
-                console.log(newGroups);
-                setGroups(newGroups);
+                setGroups([...newGroups]);
             }
         }
         catch (error) {
             console.error(error); 
-        
         } 
     }
 
-    async function submitGroupDates(group : TimeTableGroup) {
+    async function submitGroupDates(group : TimeTableGroup)  {
         try {
             const res = await fetch(`/api/projects/${id}/timetable/group/dates`, {
                 method: "POST",
@@ -146,7 +143,7 @@ export default function TimeTable({ id } : { id : string }) {
             if (!res.ok) {
                 const data = await res.json();
                 console.error(data.error);
-            }
+            } 
         }   
         catch (error) {
             console.error(error);
@@ -158,30 +155,24 @@ export default function TimeTable({ id } : { id : string }) {
         if (!projectStart) return null;
         const toUpdate : TimeTableGroup[] = [];
         for (let i = 0; i < groups.length; i++) {
-            const group = convertGroupToRange(groups[i], projectStart);
-            if (!group || !isEqualRanges(groupsRanges[i].range, group.range)) {
-                toUpdate[i] = updateGroupDates(groups[i], groupsRanges[i].range, projectStart);
+            const groupRange = convertGroupToRange(groups[i], projectStart);
+            if (groupsRanges[i]) {
+                if (!groupRange || !isEqualRanges(groupRange.range, groupsRanges[i].range)) {
+                    toUpdate.push(updateGroupDates(groups[i], groupsRanges[i].range, projectStart));
+                } 
+            } else if (groupRange && !groupsRanges[i]) {
+                toUpdate.push({ id: groups[i].id, name: groups[i].name, timeTableId: groups[i].id, startAt: null, deadlineAt: null, position: groups[i].position});
             }
         }
-        console.log(toUpdate);
         for (const toUp of toUpdate) {
             submitGroupDates(toUp);
         }
-        const newGroups = [];
-        let isUp = false;
-        for (let i = 0; i < groups.length; i++) {
-            for (const gUp of toUpdate) {
-                if (gUp.id == groups[i].id) {
-                    newGroups.push(gUp);
-                    isUp = true;
-                    continue;
-                }
-            }
-            if (!isUp) {
-                newGroups.push(groups[i]);
-            }
-        }
-        setGroups(newGroups);
+        const newGroups = groups.map(group => {
+            const updatedGroup = toUpdate.find(gUp => gUp.id === group.id);
+            return updatedGroup ? updatedGroup : group;
+        });
+        console.log(newGroups);
+        setGroups([...newGroups]);
     }
 
     function handleAdd() {
@@ -248,14 +239,15 @@ function Table() {
         const newRanges : GroupRange[] = new Array(groups.length);
         let i = 0;
         while (i < groupsRanges.length) {
-            newRanges[i] = groupsRanges[i];
-            i++;
-        }
-        while (i < groups.length) {
             const newR = convertGroupToRange(groups[i], projectStart);
-            if (newR) newRanges[i] = newR;
+            if (newR) {
+                newRanges[i] = newR;
+            } else {
+                newRanges[i] = groupsRanges[i];
+            }
             i++;
         }
+        //console.log(newRanges);
         setGroupsRanges([...newRanges]);
         
     }, [groups]);
@@ -407,6 +399,7 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
                 const newRanges = groupsRanges;
                 const range : Range = {start: startDay.index, end: day.index}
                 newRanges[row.index] = { range: range, next: [], prev: []};
+                console.log(newRanges);
                 updateRanges(newRanges);
             } 
             startDay?.element.classList.remove("border-purple-600");
@@ -626,7 +619,13 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         //console.log("Context menu opened");
         openRangeMenu(groupRange, index);
     }
-
+    
+    // Becouse of async fetches
+    if (!rows[index]) {
+        return (
+            <></>
+        )
+    }
     let boxs : Element[] = Array.from(rows[index].children);
     const row = rows[index].getBoundingClientRect();
     const startbox = boxs[range.start].getBoundingClientRect();
@@ -646,12 +645,11 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
                 width: endbox.right - startbox.left  
             }}
         >
-            <ConnectRangeButton active={false} type={ConnectType.to} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.to)}/>
-            <ConnectRangeButton active={false} type={ConnectType.from} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.from)}/>
         </div>
     )
 }
-
+/*<ConnectRangeButton active={false} type={ConnectType.to} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.to)}/>
+            <ConnectRangeButton active={false} type={ConnectType.from} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.from)}/>*/
 function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : (event : MouseEvent) => void}) {
     return (
         <div 
@@ -686,5 +684,5 @@ function convertRangeToDates(range : Range, start : Date) : DateRange {
 } 
 
 function isEqualRanges(a : Range, b : Range) {
-    return a.start == a.start && b.end == b.end;
+    return a.start == b.start && a.end == b.end;
 }

@@ -19,12 +19,13 @@ export async function POST(req : Request, { params } : { params: { id: string, b
 
         const data = await req.json();
 
-        if (!data.id || !data.startAt || !data.endAt) {
+        if (!data.id || !((!data.startAt && !data.endAt) || (data.startAt && data.endAt))) {
             return Response.json({ error: "Bad format or missing data"}, { status: 400 });
         }
 
-        const startAt = new Date(data.startAt);
-        const endAt = new Date(data.endAt);
+
+        const startAt : Date | null = data.startAt ? new Date(data.startAt) : null;
+        const endAt : Date | null = data.endAt ? new Date(data.endAt) : null;
 
         await prisma.tasksGroup.update( {
             where: {

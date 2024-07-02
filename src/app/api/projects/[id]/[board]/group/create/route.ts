@@ -50,7 +50,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         console.log(`kanban TimeTableID: ${kanban.timetableId}\n timtableID: ${timeTable?.id}`);
 
         //console.log(data.name);
-        //console.log(kanban.timetableId);
+        console.log(kanban);
         const group : TasksGroup = await prisma.tasksGroup.create({
             data: {
                 name: data.name,
