@@ -68,7 +68,6 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 if (!timeTable) { 
                     throw new Error(); 
                 }
-                console.log(timeTable);
                 return Response.json({ start: timeTable.startAt, groups: timeTable.groups }, {status: 200});
             default:
                 return Response.json({ error: "Bad type of board in REST API request"}, { status: 400});

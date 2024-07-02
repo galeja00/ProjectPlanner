@@ -2,6 +2,7 @@ import { prisma } from "@/db";
 import { Backlog, Board, Kanban, ProjectMember, Task, TaskColumn, TasksGroup, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
+import { BoardsTypes } from "../../board";
 
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {
@@ -29,18 +30,32 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
         
 
+
         const position : number = await prisma.tasksGroup.count({
             where: {
                 backlogId: kanban.backlogId 
             }
         })
-        console.log(data.name);
 
+
+        let timeTable = null;
+        if (params.board == BoardsTypes.TimeTable) {
+            timeTable = await prisma.timeTable.findFirst({
+                where: {
+                    projectId: params.id
+                }
+            })
+        }
+        
+        console.log(`kanban TimeTableID: ${kanban.timetableId}\n timtableID: ${timeTable?.id}`);
+
+        //console.log(data.name);
+        //console.log(kanban.timetableId);
         const group : TasksGroup = await prisma.tasksGroup.create({
             data: {
                 name: data.name,
                 backlogId: kanban.backlogId,
-                timeTableId: kanban.timetableId ? kanban.timetableId : null,
+                timeTableId: timeTable ? timeTable.id : null,
                 position: position
             }
         })

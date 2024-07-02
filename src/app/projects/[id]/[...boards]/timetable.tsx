@@ -7,6 +7,7 @@ import { Dialog, DialogClose } from "@/app/components/dialog";
 import { ButtonWithImg, ButtonWithText } from "@/app/components/other";
 import { fromDayToMills, getDiffInDays } from "@/date";
 import { AddGroupToTimeTable } from "./components/groups";
+import { TasksGroup } from "@prisma/client";
 
 
 enum Mode {
@@ -110,15 +111,26 @@ export default function TimeTable({ id } : { id : string }) {
 
     // TODO
     async function createGroup(name : string) {
-        const id : string = Math.random().toString();
-        const newGroups : TimeTableGroup[] = [...groups, { id, name, position: groups.length, timeTableId: "", startAt: null, deadlineAt: null}];
         try {
-
+            const res = await fetch(`/api/projects/${id}/timetable/group/create`, {
+                method: "POST",
+                body: JSON.stringify({
+                    name: name
+                })
+            })
+            
+            if (res.ok) {
+                const { group } : { group : TasksGroup } = await res.json();
+                const newGroup = { id: group.name, timeTableId: group.timeTableId ?? "", name: group.name, position: group.position, startAt: group.startAt, deadlineAt: group.deadlineAt };
+                const newGroups : TimeTableGroup[] = [...groups, newGroup ];
+                console.log(newGroups);
+                setGroups(newGroups);
+            }
         }
         catch (error) {
-
-        }
-        setGroups(newGroups);
+            console.error(error); 
+        
+        } 
     }
 
     async function submitGroupDates(group : TimeTableGroup) {
@@ -240,8 +252,9 @@ function Table() {
             i++;
         }
         while (i < groups.length) {
-            const newG = convertGroupToRange(groups[i], projectStart);
-            if (newG) newRanges[i] = newG;
+            const newR = convertGroupToRange(groups[i], projectStart);
+            if (newR) newRanges[i] = newR;
+            i++;
         }
         setGroupsRanges([...newRanges]);
         
@@ -639,8 +652,6 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     )
 }
 
-
-
 function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : (event : MouseEvent) => void}) {
     return (
         <div 
@@ -652,9 +663,6 @@ function ConnectRangeButton({active, type, onClick} : {active : boolean, type : 
         </div>
     )
 }
-
-
-
 
 function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange | null {
     if (group.startAt && group.deadlineAt) {
