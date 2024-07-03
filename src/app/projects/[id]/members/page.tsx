@@ -55,7 +55,7 @@ export default function Members({ params } : { params : { id : string }}) {
 
     async function removeMember(memberId : string) {
         try {
-            const res = await fetch(`/api/projects/${params.id}/members/delete`, {
+            const res = await fetch(`/api/projects/${params.id}/members/remove`, {
                 method: "POST",
                 body: JSON.stringify({
                     memberId: memberId
@@ -149,9 +149,6 @@ function MemberRow({ memberInfo, handleRemove, openSettings } : { memberInfo : M
             <td className='flex gap-1 justify-end col-span-1'>
                 <button onClick={handleRemove} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
                         <img src="/x.svg" title="Remove User" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
-                </button>
-                <button onClick={openSettings} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-violet-600">
-                    <img src="/settings.svg" title="Edit Team" className="w-8 h-8 p-2 rounde hover:bg-violet-600 hover:bg-opacity-40"></img>
                 </button>
             </td>
         </tr>

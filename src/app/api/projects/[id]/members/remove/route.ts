@@ -1,4 +1,3 @@
-
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../static";
 import { prisma } from "@/db";
@@ -16,11 +15,14 @@ export async function POST(req : Request, { params } : { params: { id : string }
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
 
-        const data = await req.json();
+        const { memberId } = await req.json();
+        if (!memberId) {
+            return Response.json({ error: " " }, { status: 400 });
+        }
         
         await prisma.projectMember.delete({
             where: {
-                id: data.memberId,
+                id:  memberId,
                 projectId: params.id
             }
         }) 
@@ -29,6 +31,6 @@ export async function POST(req : Request, { params } : { params: { id : string }
         return Response.json({ message: "Member was succesfuly removed" }, { status: 200 });
 
     } catch (error) {
-        return Response.json({ error: "Somthing went wrong :(" }, { status: 400 });
+        return Response.json({ error: "Somthing went wrong " }, { status: 500 });
     }
 }
