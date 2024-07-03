@@ -29,21 +29,43 @@ export async function POST(req : Request) {
 
         const data = await req.json();
 
-        const searchId : string = data.value;
-        const users : UserInfo[] = await prisma.user.findMany({
-            where: {
-                id: {
-                    contains: searchId 
+        const search : string = data.value;
+        let users : UserInfo[]  = [];
+        if (SearchTypes.Name == data.type) {
+            const names : string[] = search.split(" ");
+            let orConditions: any[] = names.flatMap(name => [
+                { name: { contains: name, mode: 'insensitive' } },
+                { surname: { contains: name, mode: 'insensitive' } }
+            ]);;
+
+            users = await prisma.user.findMany({
+                where: {
+                    OR: orConditions
+                },
+                select: {
+                    id : true,
+                    name: true,
+                    surname: true,
+                    image: true
                 }
-            },
-            select: {
-                id : true,
-                name: true,
-                surname: true,
-                image: true
-            }
-        })
-        console.log(users);
+            });
+        } else {
+            users = await prisma.user.findMany({
+                where: {
+                    id: {
+                        contains: search,
+                        mode: "insensitive"
+                    }
+                },
+                select: {
+                    id : true,
+                    name: true,
+                    surname: true,
+                    image: true
+                }
+            })
+        }
+        
         return Response.json({ users: users }, { status: 200 });
     }
     catch (error) {

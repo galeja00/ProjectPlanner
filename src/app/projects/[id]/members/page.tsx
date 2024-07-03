@@ -216,8 +216,8 @@ function MemberLoad({ load } : { load : number }) {
             <div className='' style={{ color: res.color }}>{res.text}</div>
             <div className='flex gap-1'>
                 {
-                    res.indicatorsColor.map((ind) => (
-                        <div id={ind} key={ind} className='w-4 h-1 rounded' style={{ backgroundColor: ind }}></div>
+                    res.indicatorsColor.map((ind, i) => (
+                        <div key={i} className='w-4 h-1 rounded' style={{ backgroundColor: ind }}></div>
                     ))
                 }
             </div>
@@ -261,24 +261,30 @@ function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
             setResults(data.users);
 
         } catch (error) {
-            //console.error(error);
             console.error(error);
         }
+    }
+
+    function handleChange(type : TypeOfSearh) {
+        setType(type);
     }
 
     return (
         <Dialog>
             <search className='p-4 relative h-2/3 w-1/3 bg-neutral-950 rounded flex flex-col gap-4'>
                 <DialogClose handleClose={onClose}/>
-                <AddForm actualType={type} types={typesOfSearh} search={searchUser}/>
+                <AddForm actualType={type} types={typesOfSearh} search={searchUser} handleChange={handleChange}/>
                 <ListUsers users={results} id={id}/>
             </search>
         </Dialog>
     )
 }
 
-function AddForm({ actualType, types, search } : { actualType : TypeOfSearh, types : TypeOfSearh[], search : (value : string) => void }) {
-    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
+function AddForm(
+    { actualType, types, search, handleChange } : 
+    { actualType : TypeOfSearh, types : TypeOfSearh[], search : (value : string) => void, handleChange : (t : TypeOfSearh) => void }) {
+    
+        function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
         const inputValue = event.currentTarget.value;
         if (inputValue.length > 0) {
             search(inputValue);
@@ -289,8 +295,8 @@ function AddForm({ actualType, types, search } : { actualType : TypeOfSearh, typ
         <div>
             <div className='flex'>
                 {
-                    types.map((t) => (
-                        <label id={t} key={t} className="rounded-t px-4 py-1 flex content-center" style={{ backgroundColor: t == actualType ? "#171717" : "#0a0a0a"}}>{t}</label>
+                    types.map((t, i) => (
+                        <label key={i} onClick={() => handleChange(t)} className="rounded-t px-4 py-1 flex content-center" style={{ backgroundColor: t == actualType ? "#171717" : "#0a0a0a"}}>{t}</label>
                     ))
                 }
             </div>

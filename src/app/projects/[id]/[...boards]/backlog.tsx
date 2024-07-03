@@ -431,6 +431,8 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
     useEffect(() => {
         findColumnInfo();
     }, [task]);
+
+    // TODO: Use button Array komponent insted of fix button html
     return (
         <>
             <li className="bg-neutral-900 w-full p-2 rounded grid  grid-cols-9 gap-2" draggable onDragStart={handleOnDrag}>
