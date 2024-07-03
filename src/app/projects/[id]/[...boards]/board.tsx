@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import { pathToImages } from '@/config'
 import { PriorityImg } from './components/priority'
 import { Creator, CreatorOfTask } from './components/creator'
+import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
 
 type BoardTasksColumn = {
     id : string,
@@ -217,7 +218,7 @@ function TasksColumn(
     async function createTask(name : string) {
         try {
             const colId = tasksCol.id;
-            const response = await fetch(`/api/projects/${projectId}/board/task/add`, {
+            const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/add`, {
                 method: "POST",
                 body: JSON.stringify({
                     name: name,
@@ -233,8 +234,8 @@ function TasksColumn(
             const newTask : Task = json.task;
             const newTasks : Task[] = tasksCol.tasks;
             newTasks.push(newTask);
-            toggle();
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: newTasks });
+            toggle();
         }
         catch (error) {
             console.error(error);
@@ -244,7 +245,7 @@ function TasksColumn(
     // TODO: api for delete and remove (remove delete from full project, removu only from board)
     async function deleteTask(id : string) {
         try {
-            const response = await fetch(`/api/projects/${projectId}/board/task/delete`, {
+            const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/delete`, {
                 method: "POST",
                 body: JSON.stringify({
                     taskId: id
@@ -265,7 +266,7 @@ function TasksColumn(
 
     async function updateTask(updateTask : Task) {
         try {
-            const response = await fetch(`/api/projects/${projectId}/board/task/update`, {
+            const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/update`, {
                 method: "POST", 
                 body: JSON.stringify({
                     task: updateTask
@@ -288,9 +289,19 @@ function TasksColumn(
     //TODO
     async function removeTask(id : string) {
         try {
-
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/taks/remove`, {
+                method: "POST",
+                body: JSON.stringify({
+                    taskId: id
+                })
+            });
+            const data = await res.json(); 
+            if (!res.ok) {
+                throw new Error(data.error);
+            }
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: data.tasks}); 
         } catch (error) {
-
+            console.error(); 
         }
     }
 
@@ -409,7 +420,7 @@ function TaskComponent(
     async function addSolver(memberId : string) {
         //task.projectMemberId =  memberId;
         try {
-            const res = await fetch(`/api/projects/${projectId}/board/task/solver`, {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/solver`, {
                 method: "POST",
                 body: JSON.stringify({
                     task: task,
@@ -431,7 +442,7 @@ function TaskComponent(
     //TODO: del api
     async function delSolver(memberId : string) {
         try {
-            const res = await fetch(`/api/projects/${projectId}/board/task/remove`, {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/remove`, {
                 method: "POST",
                 body: JSON.stringify({
                     task: task,

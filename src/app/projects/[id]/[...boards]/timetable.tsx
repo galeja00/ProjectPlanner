@@ -8,6 +8,7 @@ import { ButtonWithImg, ButtonWithText } from "@/app/components/other";
 import { fromDayToMills, getDiffInDays } from "@/date";
 import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
+import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 
 
 enum Mode {
@@ -111,7 +112,7 @@ export default function TimeTable({ id } : { id : string }) {
 
     async function createGroup(name : string) {
         try {
-            const res = await fetch(`/api/projects/${id}/timetable/group/create`, {
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}/group/create`, {
                 method: "POST",
                 body: JSON.stringify({
                     name: name
@@ -132,7 +133,7 @@ export default function TimeTable({ id } : { id : string }) {
 
     async function submitGroupDates(group : TimeTableGroup)  {
         try {
-            const res = await fetch(`/api/projects/${id}/timetable/group/dates`, {
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}/group/dates`, {
                 method: "POST",
                 body: JSON.stringify({
                     id: group.id,
@@ -437,7 +438,8 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
                     {groupsRanges.map((groupRange, row) => (
                         <GroupRow key={row} row={row} size={count} current={getDiffInDays(projectStart, currentDate)} />
                     ))}
-                {days && <WorkRanges days={days} groupsRange={groupsRanges} />}</div>
+                {days && <WorkRanges days={days} groupsRange={groupsRanges} />}
+                </div>
             </div>
             { rangeInfo && <RangeMenu rangeInfo={rangeInfo} closeMenu={() => setRangeInfo(null)} removeRange={() => removeRange(rangeInfo)}/>}
         </RangesContext.Provider>

@@ -3,6 +3,7 @@ import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
 import { Task } from "@prisma/client";
 import { movAwayColumnIndexes, movInColumnIndexes } from "../static";
+import { BoardsTypes } from "../../board";
 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
@@ -33,13 +34,23 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
         
 
-        const finalTasks = await prisma.task.findMany({
-            where: {
-                taskColumnId: res.taskColumnId
-            }
-        })
+        let resTasks : Task[] = [];
+        if (BoardsTypes.Board == params.board) {
+            resTasks = await prisma.task.findMany({
+                where: {
+                    taskColumnId: res.taskColumnId
+                }
+            })
+        } else{
+            resTasks = await prisma.task.findMany({
+                where: {
+                    tasksGroupId: res.tasksGroupId
+                }
+            }) 
+        }
+        
 
-        return Response.json({ tasks: finalTasks }, { status: 200 });
+        return Response.json({ tasks: resTasks }, { status: 200 });
     } 
     catch (error) {
         console.log(error);

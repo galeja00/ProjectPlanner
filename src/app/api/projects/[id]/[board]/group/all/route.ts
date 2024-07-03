@@ -23,9 +23,11 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 backlog: {
                     projectId: params.id
                 }
+            },
+            orderBy: {
+                position: "asc"
             }
         });
-            
 
         return Response.json({ groups: groups }, { status: 200 });
     }

@@ -11,6 +11,7 @@ import { PriorityText } from "./components/priority";
 import { Creator, CreatorOfTask } from './components/creator';
 import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/buttons';
 import { unassigned } from '@/config';
+import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
 
 interface FunctionsContextType {
     createGroup: (name: string) => void;
@@ -207,7 +208,7 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
 
     async function createTask(name : string) {
         try {
-            const res = await fetch(`/api/projects/${projectId}/backlog/task/add`, {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/add`, {
                 method: "POST",
                 body: JSON.stringify({
                     name: name,
@@ -343,6 +344,48 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
     }
 
+    async function removeTask(task : Task) {
+        try {
+            const res = await fetch(`/api/projects/${task.projectId}/${BoardsTypes.Backlog}/task/remove`, {
+                method: "POST",
+                body: JSON.stringify({
+                    taskId: task.id
+                })
+            })
+
+            if (!res.ok) {
+                const data = await res.json(); 
+                throw new Error(data.error);
+            } 
+
+            fetchGroups();
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function deleteTask(task: Task) {
+        try {
+            const res = await fetch(`/api/projects/${task.projectId}/${BoardsTypes.Backlog}/task/delete`, {
+                method: "POST",
+                body: JSON.stringify({
+                    taskId: task.id
+                })
+            })
+            
+            if (!res.ok) {
+                const data = await res.json(); 
+                throw new Error(data.error);
+            } 
+
+            fetchGroups();
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
     // vyhleda ve vsech sloupcích které jsou v projektu a ulozi ten ve kterem je dany ukol na tabuli board pokud neni v zadnem tak navrati
     function findColumnInfo() {
         if (task.taskColumnId == null) {
@@ -356,9 +399,9 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
     }
 
-    async function handleMoveColl(id : string) {
+    async function handleMoveCol(id : string) {
         try {
-            const res = await fetch(`/api/projects/${projectId}/board/task/move`, {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/move`, {
                 method: "POST",
                 body: JSON.stringify({
                     taskId: task.id,
@@ -394,7 +437,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                 <h3 className="col-span-3">{task.name}</h3>
                 <div className='relative'>
                     <ColInfo info={colInfo} onClick={toggleSelectColl}/>
-                    { isSelecetCol && <ColMenu info={colInfo} handleMoveCol={handleMoveColl} />}
+                    { isSelecetCol && <ColMenu info={colInfo} handleMoveCol={handleMoveCol} />}
                 </div>
                 <div className="col-span-2 flex items-center">{ task.priority && <PriorityText priority={task.priority}/>}</div>
                 <ul className="flex gap-1 h-full items-center col-span-2">
@@ -405,11 +448,11 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                     }
                 </ul>
                 <div className="flex h-full items-center justify-end gap-1 col-span-1">
-                    <button onClick={() => Error("Not Implemented")}  className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
+                    <button onClick={() => deleteTask(task)}  className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
                             <img src="/trash.svg" title="Delete Task" className="w-8 h-8 p-2 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
                     </button>
                     { task.tasksGroupId && 
-                    <button onClick={() => Error("Not Implemented")}  className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-orange-600">
+                    <button onClick={() => removeTask(task)}  className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-orange-600">
                         <img src="/x.svg" title="Remove Task" className="w-8 h-8 hover:bg-orange-600 rounded hover:bg-opacity-40"></img>
                     </button>
                     }
