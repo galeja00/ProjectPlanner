@@ -23,10 +23,6 @@ enum ItemType {
     Select = "select"
 }
 
-enum ProjProps {
-    Name = "name",
-    Category = ""
-}
 
 export default function Settings({ params } : { params : { id : string }}) {
     const router = useRouter();
@@ -116,8 +112,20 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
     }
 
-    function updateVal(val : any, prop : ProjProps) {
-
+    function updateVal(key: keyof Project, val: any) {
+        if (project) {
+            console.log(val);
+            if (key == "done") {
+                if (val as Status == Status.Done) {
+                    val = true;
+                } else {
+                    val = false;
+                }
+            }
+            const updatedProject = { ...project, [key]: val };
+            setProject(updatedProject);
+            updateProject(updatedProject);
+        }
     }
 
 
@@ -135,32 +143,29 @@ export default function Settings({ params } : { params : { id : string }}) {
 
     return (
         <>
-            { isImgDrop && <DropImage closeDrop={toggleImgDrop} updateImg={updateImg}/>}
-            <main className="flex w-2/4 flex-col mx-auto py-14 ">
-            
-                <Head text="Settings"/>
+            {isImgDrop && <DropImage closeDrop={toggleImgDrop} updateImg={updateImg} />}
+            <main className="flex w-2/4 flex-col mx-auto py-14">
+                <Head text="Settings" />
                 <div className="space-y-8">
                     <section className="bg-neutral-950 p-4 rounded flex gap-8">
-                        <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer"/>
+                        <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer" />
                         <div className="space-y-4">
-                            <Name name={project.name} update={(val : string) => updateVal(val, ProjProps.Name)}></Name>
+                            <Name name={project.name} update={(val: string) => updateVal('name', val)} />
                         </div>
                     </section>
                     <section className="bg-neutral-950 p-4 rounded">
                         <ul className="space-y-4">
-                            <SettingsItem type={ItemType.Text} text="category" value={project.category}/>
-                            <SettingsItem type={ItemType.Date} text="create at" value={formatDate(date)}/>
-                            <SettingsItem type={ItemType.Select} text="state" value={state}/>
-                            <SettingsItem type={ItemType.Color} text="color" value={project.color}/>
+                            <SettingsItem propertyKey="category" type={ItemType.Text} text="Category" value={project.category ?? ""} updateVal={updateVal} />
+                            <SettingsItem propertyKey="createdAt" type={ItemType.Date} text="Created At" value={formatDate(date)} updateVal={updateVal} />
+                            <SettingsItem propertyKey="done" type={ItemType.Select} text="State" value={state} updateVal={updateVal} options={[ Status.InWork, Status.Done ]} />
+                            <SettingsItem propertyKey="color" type={ItemType.Color} text="Color" value={project.color} updateVal={updateVal} />
                         </ul>
                     </section>
-                    <ButtonDel onClick={handleDelete}/>
+                    <ButtonDel onClick={handleDelete} />
                 </div>
-                
             </main>
         </>
-        
-    )
+    );
 }
 
 
@@ -177,43 +182,53 @@ function Name({ name, update } : { name : string, update : (val : string) => voi
     )
 }
 
-function SettingsItem({ type, text, value } : { type : ItemType, text : string, value : string | null}) {
-    const [ isEditing, toggle ] = useReducer(isEditing => !isEditing, false);
+interface SettingsItemProps {
+    propertyKey: keyof Project;
+    type: ItemType;
+    text: string;
+    value: string;
+    options?: string[];
+    updateVal: (key: keyof Project, val: any) => void;
+}
 
-    function handleSub(val : string) {
-        console.log(val);
+function SettingsItem({propertyKey, type, text, value, options, updateVal} : SettingsItemProps) {
+    const [isEditing, toggle] = useReducer((isEditing) => !isEditing, false);
+
+    function handleSub(val: string) {
+        toggle();
+        updateVal(propertyKey, val);
     }
 
-    let displayVal : JSX.Element = <div>{value}</div>;
-    let inputVal : JSX.Element;
+    let displayVal: JSX.Element = <div>{value}</div>;
+    let inputVal: JSX.Element;
     switch (type) {
         case ItemType.Color:
-            inputVal = <Editor create={handleSub} endCreate={toggle} type={InputTypes.Color}/>;
+            inputVal = <Editor val={value} create={handleSub} endCreate={toggle} type={InputTypes.Color} />;
             break;
         case ItemType.Date:
-            inputVal = <Editor create={handleSub} endCreate={toggle} type={InputTypes.Date}/>;
+            inputVal = <Editor val={value} create={handleSub} endCreate={toggle} type={InputTypes.Date} />;
             break;
         case ItemType.Select:
-            inputVal = <Selector val={value ?? ""} options={["In Work", "Done"]} select={handleSub}  endSelect={toggle}/>;
+            const val = value ? Status.Done : Status.InWork;
+            inputVal = <Selector val={val} options={options ?? []} select={handleSub} endSelect={toggle}/>
             break;
-        default: 
-            inputVal = <Editor create={handleSub} endCreate={toggle} type={InputTypes.Text}/>;
+        default:
+            inputVal = <Editor val={value} create={handleSub} endCreate={toggle} type={InputTypes.Text} />;
             break;
     }
-    
-    if (type == ItemType.Color && value) {
-       displayVal = <div className="rounded-full w-6 h-6" style={{ backgroundColor: value }}></div>
+
+    if (type === ItemType.Color && value) {
+        displayVal = <div className="rounded-full w-6 h-6" style={{ backgroundColor: value }}></div>;
     }
 
     return (
-        <li className={`grid grid-cols-3 gap-2`}>
+        <li className="grid grid-cols-3 gap-2">
             <div>{text}:</div>
-            { !isEditing ? displayVal : inputVal }
-            { !isEditing ? <EditTextButton onClick={toggle}/> : <></> }
+            { isEditing ? inputVal: displayVal }
+            {!isEditing ? <EditTextButton onClick={toggle} /> : null}
         </li>
-    )
+    );
 }
-
 
 
 

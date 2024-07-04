@@ -59,13 +59,15 @@ export function Editor({ val = "", create, endCreate, type } : { val? : string, 
     const [ value, setValue ] = useState<string>(val);
     
     function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
-        const inputValue = event.currentTarget.value;
-        if (event.key === 'Enter') {
-            if (inputValue.length > 0) {
-                create(inputValue);
+        if (type == InputTypes.Text || type == InputTypes.Date) {
+            const inputValue = event.currentTarget.value;
+            if (event.key === 'Enter') {
+                if (inputValue.length > 0) {
+                    create(inputValue);
+                }
+            } else if (event.key === 'Escape') {
+                endCreate();
             }
-        } else if (event.key === 'Escape') {
-            endCreate();
         }
     }
 
@@ -100,7 +102,7 @@ export function Selector({ val, options, select, endSelect } : { val : string ,o
 
     function handleSubmit() {
         select(value);
-        endSelect;
+        endSelect();
     }
 
     const buttons : Button[] = [
