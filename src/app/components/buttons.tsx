@@ -23,7 +23,7 @@ export type Button = {
 
 export function ArrayButtons({ buttons, gap } : {  buttons : Button[], gap : number }) {
     return (
-        <div className={`flex gap-${gap}`}>
+        <div className={`flex gap-${gap} h-full items-center`}>
             {
                 buttons.map((button, index) => (
                     <ButtonComp key={index} button={button}/>

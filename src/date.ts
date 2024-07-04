@@ -15,7 +15,7 @@ export function isEarlierDate(compDate : Date, date : Date) {
         if (compArr[i] > dateArr[i]) return true;
         else if (compArr[i] < dateArr[i]) return false;
     }
-    return true
+    return true;
 }
 
 export function isLaterDate(compDate : Date, date : Date) {
@@ -26,7 +26,7 @@ export function isLaterDate(compDate : Date, date : Date) {
         if (compArr[i] < dateArr[i]) return true;
         else if (compArr[i] > dateArr[i]) return false;
     }
-    return true
+    return true;
 }
 
 export function isBetweenDates(start : Date, end : Date, between : Date) : boolean {
@@ -40,5 +40,14 @@ export function getDiffInDays(start : Date, end : Date) : number {
 
 export function fromDayToMills(day : number) : number {
     return day * (1000 * 60 * 60 * 24);
+}
+
+export function formatDate(date : Date) : string {
+    let formatedDate = "";
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // Měsíce jsou indexovány od nuly, takže přidáme 1
+    const year = date.getFullYear();
+    formatedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
+    return formatedDate;
 }
 
