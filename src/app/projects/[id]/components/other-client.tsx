@@ -29,6 +29,11 @@ export function Name({name, updateName} : {name : string, updateName : (name : s
             }
         }
     }
+    /*
+    const buttons : Button[] = [
+        { onClick: () submitName, img: "/check.svg", type: ButtonType.Creative, size: 6, lightness: Lighteness.bright, title: "Create"},
+        { onClick: endCreate, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "End"}
+    ]*/
     return (
         <div className="flex mb-4 gap-4">
             {

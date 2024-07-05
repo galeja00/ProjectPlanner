@@ -12,6 +12,7 @@ import { Creator, CreatorOfTask } from './components/creator';
 import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/buttons';
 import { unassigned } from '@/config';
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
+import { Name } from '../components/other-client';
 
 interface FunctionsContextType {
     createGroup: (name: string) => void;
@@ -272,18 +273,25 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
         }
     }
 
+    function updateName(name : string) {
+        console.log(name);
+    }
 
     // zmanší zkupinu na uzivatelkse obrazovce (zakryje ukoly)
     function toSmallGroup() {
         setDisplayd(displayd == "block" ? "none" : "block");
     }
     
-    const buttons : Button[] = [
-        { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.bright, title: "Hide Tasks" }
-    ]
+    const buttons : Button[] = new Array(2);
+        
+    buttons[0] = { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.bright, title: "Hide Tasks" }
+    
     if (group.id != unassigned) {
-        buttons.push({ onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" });
+        //buttons[0] = { onClick: () => openSettings(group), img: "/settings.svg", type: ButtonType.Normal, size: 2, padding: 1,lightness: Lighteness.bright, title: "Open Settings" };
+        buttons[1] = { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" };
     }
+    
+
     return (
         <li key={group.id} 
             className={`w-full rounded p-2 space-y-2 relative ${isDragOver ? "bg-neutral-700" : "bg-neutral-950"}`}
@@ -292,7 +300,7 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
             onDragExit={handleOnLeave} 
             onDragLeave={handleOnLeave}
         >
-            <h2>{group.name}</h2>
+            <Name name={group.name} updateName={updateName}></Name>
             <div className='absolute right-2 top-0 '>
                 <ArrayButtons buttons={buttons} gap={1}/>
             </div>
@@ -317,7 +325,7 @@ type ColumnInfo = {
 }
 
 function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : React.DragEvent) => void }) {
-    const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, false);
+    //const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, false);
     const [ isSelecetCol, toggleSelectColl ] = useReducer(isSelecetCol => !isSelecetCol, false);
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
     const [ colInfo, setColInfo ] = useState<ColumnInfo | null>(null);

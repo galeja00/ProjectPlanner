@@ -17,6 +17,7 @@ export type Button = {
     img : string,
     type : ButtonType,
     size : number,
+    padding?: number,
     lightness: Lighteness,
     title: string
 }
@@ -51,8 +52,8 @@ function ButtonComp({ button } : { button : Button }) {
             break;
     }
     return (
-        <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor}`} onClick={button.onClick}>
-            <img src={button.img} title={button.title} className={` hover:bg-${hoverColor} hover:bg-opacity-40 w-${button.size} h-${button.size}`}></img>
+        <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor} hover:bg-${hoverColor} p-${button.padding ?? "0"} hover:bg-opacity-40`} onClick={button.onClick}>
+            <img src={button.img} title={button.title} className={`w-${button.size} h-${button.size}`}></img>
         </button>
     )
 }
