@@ -1,25 +1,27 @@
 "use client"
 
-import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "react";
+import { useReducer, useState, ChangeEvent } from "react";
 import Image from 'next/image' 
 import { Issue, Tag, Task, Ranking } from "@prisma/client";
 
 
 // TODO: submit name to upper component
-export function TagList({tags} : {tags : Tag[]}) {
+export function TagList({tags, projectId} : {tags : Tag[], projectId : string}) {
     const [acTags, setTags] = useState<Tag[]>([]);
     const [creating, toggle] = useReducer(creating => !creating, false);
    
 
     async function handleDeleteTag(delTag : Tag) {
         try {
-            /*const res = await fetch("/api/[]/task/tag/delete", {
+            const res = await fetch(`/api/${projectId}/task/tag/delete`, {
                 method: "POST",
                 body: JSON.stringify({
-                    name: name,
-                    color: color
+                    id: delTag.id
                 })
-            })*/
+            })
+
+            const date = await res.json(); 
+
             const newTags : Tag[] = [];
             for (const tag of acTags) {
                 if (tag.id != delTag.id) {
@@ -35,13 +37,13 @@ export function TagList({tags} : {tags : Tag[]}) {
 
     async function handleCreateTag(name : string, color : string) {
         try {
-            /*const res = await fetch("/api/[]/task/tag/create", {
+            const res = await fetch(`/api/${projectId}/task/tag/create`, {
                 method: "POST",
                 body: JSON.stringify({
                     name: name,
                     color: color
                 })
-            })*/
+            })
             const id = Math.random().toString();
             const newTags : Tag[] = acTags;
             newTags.push({

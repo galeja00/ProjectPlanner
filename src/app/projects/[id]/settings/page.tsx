@@ -4,11 +4,9 @@ import { Head } from "../components/other";
 import Image from "next/image";
 import { useEffect, useReducer, useState } from 'react';
 import DropImage from '@/app/components/drop-image';
-
 import { Project } from '@prisma/client';
 import { formatDate } from '@/date';
 import { EditTextButton } from '@/app/components/other';
-import { FormItem } from '@/app/components/form';
 import { Editor, InputTypes, Selector } from '../components/other-client';
 
 enum Status {
@@ -150,7 +148,7 @@ export default function Settings({ params } : { params : { id : string }}) {
                     <section className="bg-neutral-950 p-4 rounded flex gap-8">
                         <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer" />
                         <div className="space-y-4">
-                            <Name name={project.name} update={(val: string) => updateVal('name', val)} />
+                            <Name name={project.name} update={(val: string) => updateVal("name", val)} />
                         </div>
                     </section>
                     <section className="bg-neutral-950 p-4 rounded">

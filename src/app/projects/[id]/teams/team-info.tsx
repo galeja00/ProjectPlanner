@@ -65,14 +65,14 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
     return (
         <Dialog>
             <div className="bg-neutral-950 w-fit rounded relative h-fit">
-                <TeamHead team={infteam} closeSettings={close} updateTeam={updateTeam}/>
+                <TeamHead team={infteam} projectId={projectId} closeSettings={close} updateTeam={updateTeam}/>
                 <Container team={infteam} projectId={projectId}/>
             </div>
         </Dialog>
     )
 }
 
-function TeamHead({ team, closeSettings, updateTeam } : { team : TeamInfo, closeSettings : () => void, updateTeam : (team : TeamInfo) => void}) {
+function TeamHead({ team, projectId, closeSettings, updateTeam } : { team : TeamInfo, projectId : string, closeSettings : () => void, updateTeam : (team : TeamInfo) => void}) {
     const tags : Tag[] = [];
     function updateName(name : string) {
         team.name = name;
@@ -82,7 +82,7 @@ function TeamHead({ team, closeSettings, updateTeam } : { team : TeamInfo, close
         <div className="p-4 relative w-full border-b">
             <DialogClose handleClose={closeSettings}/>
             <Name name={team.name} updateName={updateName}/>
-            <TagList tags={tags}/>
+            <TagList tags={tags} projectId={projectId}/>
         </div>
     )
 }
@@ -300,7 +300,7 @@ function MembersColumn({ type, members, handleMove } : { type : ColumnType, memb
             onDragExit={handleOnLeave}
             >
             <h3>{type} Members</h3>
-            <ul className={` rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-900"}`}>
+            <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-900"}`}>
                 {
                     members.map((member) => {
                         return ( 

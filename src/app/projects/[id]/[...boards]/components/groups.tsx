@@ -1,3 +1,4 @@
+import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { TasksGroup } from "@prisma/client";
@@ -22,7 +23,7 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
 
     async function fetchGroups() {
         try {
-            const res = await fetch(`/api/projects/${projectId}/timetable/group/all`, {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.TimeTable}/group/all`, {
                 method: "GET"
             }); 
             const data = await res.json();
@@ -45,8 +46,8 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
 
     async function fetchCrudGroup(group : GroupBasicInfo, method : string) {
         try {
-            console.log(projectId);
-            const res = await fetch(`/api/projects/${projectId}/timetable/group/${method}`, {
+           
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.TimeTable}/group/${method}`, {
                 method: "POST",
                 body: JSON.stringify({
                     id: group.id

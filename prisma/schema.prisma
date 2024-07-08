@@ -112,7 +112,7 @@ model Board {
 
 // tabule backlog
 model Backlog {
-  id          String @id @default(cuid()) 
+  id          String  @id @default(cuid()) 
   projectId   String   @unique
   kanban      Kanban   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   tasksGroups TasksGroup[]
@@ -145,9 +145,7 @@ enum Ranking {
 
 // informace o ukolech v projektu
 model Task {
-  id            String  @id @default(cuid()) 
-  taskColumn    TaskColumn? @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
-  taskColumnId  String?
+  id            String  @id @default(cuid())
   projectId     String 
   kanban        Kanban @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   createAt      DateTime @default(now())
@@ -166,6 +164,9 @@ model Task {
   tasksGroupId  String?
   tasksGroup    TasksGroup? @relation(fields: [tasksGroupId], references: [id])
   status        Boolean @default(false)
+  taskColumnId  String?
+  taskColumn    TaskColumn? @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
+  
 }
 
 // project member který reší úkol

@@ -94,7 +94,7 @@ export default function TimeTable({ id } : { id : string }) {
 
     async function fetchGroups() {
         try {
-            const res = await fetch(`/api/projects/${id}/timetable`, {
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}`, {
                 method: "GET"
             })
             const data = await res.json();
@@ -236,7 +236,6 @@ function Table() {
     }, [currentDate])
     
     useEffect(() => {
-        //console.log(groups);
         const newRanges : GroupRange[] = new Array(groups.length);
         let i = 0;
         while (i < groupsRanges.length) {
@@ -248,7 +247,6 @@ function Table() {
             }
             i++;
         }
-        //console.log(newRanges);
         setGroupsRanges([...newRanges]);
         
     }, [groups]);

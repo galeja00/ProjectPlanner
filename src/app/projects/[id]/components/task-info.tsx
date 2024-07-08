@@ -55,7 +55,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                 { task 
                     ?
                     <>
-                        <HeaderContainer task={task} tags={tags} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
+                        <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
                         <div className='grid grid-cols-3 h-full'>
                             <MainInfoContainer task={task} updateTask={updateTask}/>
                             <section className='py-2 px-4  flex flex-col gap-4'>
@@ -76,7 +76,9 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 }  
 
 // HEADER PART //
-function HeaderContainer({task, tags, handleClose, updateTask } : {task : Task, tags : Tag[], handleClose : () => void, updateTask : (task : Task) => void}) { 
+function HeaderContainer(
+    {task, tags, projectId, handleClose, updateTask } : 
+    {task : Task, projectId : string,  tags : Tag[], handleClose : () => void, updateTask : (task : Task) => void}) { 
     function updateName(name : string) {
         task.name = name;
         updateTask(task);
@@ -85,7 +87,7 @@ function HeaderContainer({task, tags, handleClose, updateTask } : {task : Task, 
     return (
         <section className='px-6 py-4 border-b border-neutral-400 relative '>
             <Name name={task.name} updateName={updateName}/>
-            <TagList tags={tags}/>
+            <TagList tags={tags} projectId={projectId}/>
             <DialogClose handleClose={handleClose}/>
         </section>
     )
