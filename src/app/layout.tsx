@@ -5,7 +5,7 @@ import Menu from './components/menu'
 import { ThemeProvider } from './context/theme'
 
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], weight: [ "600", "800" ]});
 
 export const metadata: Metadata = {
   title: 'Project Planner',
