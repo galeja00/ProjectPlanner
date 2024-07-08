@@ -53,7 +53,6 @@ export default function Teams({ projectId } : { projectId : string}) {
                 return;
             }
             setTeams(data.teams);
-            console.log(data.teams);
         }
         catch (error) {
             console.error(error);
@@ -78,7 +77,7 @@ export default function Teams({ projectId } : { projectId : string}) {
                 setTeams(newTeams);
                 return;
             }
-           const data = await res.json(); 
+            const data = await res.json(); 
             console.error(data.error);
         }
         catch (error) {
@@ -123,7 +122,7 @@ export default function Teams({ projectId } : { projectId : string}) {
 
 function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[], handleDelete : (id : string) => void, openSettings : (id : string) => void }) {
     return (
-        <table className="bg-neutral-950 rounded flex flex-col">
+        <table className="bg-neutral-200 rounded flex flex-col">
             <thead className="">
                 <tr className='py-2 px-3 grid grid-cols-9 gap-2 justify-items-left items-center'>
                     <th className='w-fit col-span-2'>Name</th>
@@ -147,16 +146,16 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
 function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInfo, handleDelete : () => void, openSettings : () => void}) {
     const count = teamInfo.members.length;
     return (
-        <tr key={teamInfo.id} className='bg-neutral-900 rounded py-2 px-3 grid grid-cols-9 gap-2 justify-items-left items-center'>
+        <tr key={teamInfo.id} className='bg-neutral-100 rounded py-2 px-3 grid grid-cols-9 gap-2 justify-items-left items-center'>
             <td className="col-span-2">{teamInfo.name}</td>
             <Members members={teamInfo.members}/>
             <td className="col-span-2">{count}</td>
             <td className="col-span-2">0</td>
             <td className="h-fit flex gap-2 items-center justify-end">
-                <button onClick={handleDelete} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
+                <button onClick={handleDelete} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">
                     <img src="/x.svg" title="Delete Group" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
                 </button>
-                <button onClick={openSettings} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-violet-600">
+                <button onClick={openSettings} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-violet-600">
                     <img src="/settings.svg" title="Edit Team" className="w-8 h-8 p-2 rounde hover:bg-violet-600 hover:bg-opacity-40"></img>
                 </button>
             </td>
@@ -250,7 +249,7 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
     }
     return (
         <Dialog>
-            <div className="bg-neutral-950 w-50 h-fit rounded p-8 relative">
+            <div className="bg-neutral-200 w-50 h-fit rounded p-8 relative">
                 <DialogClose handleClose={handleCloseDialog}/>
                 <div className="flex flex-row gap-8">
                     <div className="flex flex-col gap-4">
@@ -259,7 +258,7 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
                             <FormItem item="Name" type="text" name="name" correct={correct}/>
                             <div className="flex gap-2">
                                 <label>Set Color</label>
-                                <input type="color" name="color" className="bg-neutral-900 rounded p-1"></input>
+                                <input type="color" name="color" className="bg-neutral-100 rounded p-1"></input>
                             </div>
                             <div className="w-full flex flex-row-reverse">
                                 <button className="btn-primary">Create</button>
@@ -289,7 +288,7 @@ function SelectMembers({ members, selected, updateSelected } : { members : Membe
     }   
     return (
         <section>
-            <ul className="bg-neutral-900 rounded p-1 flex flex-col gap-1 w-72 h-96 overflow-y-auto">
+            <ul className="bg-neutral-100 rounded p-1 flex flex-col gap-1 w-72 h-96 overflow-y-auto">
                 {
                     members && members.map((member) => {
                         let active = false;
@@ -322,7 +321,7 @@ function ProjectMember({ member, active, onClick } : { member : MemberInfo, acti
     }
     console.log(member);
     return (
-        <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-950 rounded items-center p-1 ${ac && " outline outline-1 outline-green-500"} cursor-pointer`}>
+        <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 ${ac && " outline outline-1 outline-green-500"} cursor-pointer`}>
             <Image src={img} alt="" height={15} width={15} className="rounded-full w-5 h-5"></Image>
             <p>{member.name} {member.surname}</p>
             { member.teamName && <TeamBadge name={member.teamName} color={""}/>}

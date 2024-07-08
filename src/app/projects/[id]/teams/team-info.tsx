@@ -64,7 +64,7 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
 
     return (
         <Dialog>
-            <div className="bg-neutral-950 w-fit rounded relative h-fit">
+            <div className="bg-neutral-200 w-fit rounded relative h-fit">
                 <TeamHead team={infteam} projectId={projectId} closeSettings={close} updateTeam={updateTeam}/>
                 <Container team={infteam} projectId={projectId}/>
             </div>
@@ -125,9 +125,9 @@ function Container({ team, projectId} : { team : TeamInfo, projectId : string}) 
 }
 
 function MenuItem({ name, actualType, onClick } : { name : string, actualType : TypeOfInfo, onClick : () => void}) {
-    var bg : string = "bg-neutral-950";
+    var bg : string = "bg-neutral-200";
     if (actualType == name) {
-        bg = "bg-neutral-900";
+        bg = "bg-neutral-100";
     }
     return (
         <li className={`relative  ${bg}`}>
@@ -300,7 +300,7 @@ function MembersColumn({ type, members, handleMove } : { type : ColumnType, memb
             onDragExit={handleOnLeave}
             >
             <h3>{type} Members</h3>
-            <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-900"}`}>
+            <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-100"}`}>
                 {
                     members.map((member) => {
                         return ( 
@@ -319,7 +319,7 @@ function ProjectMember({ member, handleOnDrag } : { member : MemberInfo, handleO
         img = `/uploads/user/${member.image}`;
     }
     return (
-        <li key={member.memberId} draggable onDragStart={handleOnDrag} className={`box-content flex gap-4 bg-neutral-950 rounded items-center p-1 cursor-pointer`}>
+        <li key={member.memberId} draggable onDragStart={handleOnDrag} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 cursor-pointer`}>
             <Image src={img} alt="Picture" height={15} width={15} className="rounded-full w-5 h-5"></Image>
             <p>{member.name} {member.surname}</p>
             { member.teamName && <TeamBadge name={member.teamName} color={""}/>}

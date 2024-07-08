@@ -23,7 +23,7 @@ export default function Add() {
 
 function TypeChoose({ handleTypeChouce } : { handleTypeChouce : (type : ProjectType) => void}) {
     return (
-        <section className="bg-neutral-950 p-8 rounded">
+        <section className="bg-neutral-200 p-8 rounded">
             <h2 className="mb-8 text-xl">Choose type of project planning</h2> 
             <div className="flex gap-4">
                 <div onClick={() => handleTypeChouce(ProjectType.Kanban)} className="p-40 bg-neutral-800 rounded cursor-pointer hover:bg-neutral-700">Kanban</div>
@@ -76,7 +76,7 @@ function CreateProject() {
         inputClass = "input-faild";
     }
     return (
-        <section className="bg-neutral-950 p-4 rounded flex">
+        <section className="bg-neutral-200 p-4 rounded flex">
             <section className="">
                 <form className="flex flex-col gap-4 " onSubmit={handleSubmit}>
                     <div className="flex flex-col">

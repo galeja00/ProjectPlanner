@@ -90,9 +90,9 @@ function TagCreator({ handleCreateTag } : { handleCreateTag : (name : string, co
     }
 
     return ( 
-        <div className="flex gap-2 items-center px-3 py-1 bg-neutral-900 rounded">
-            <input type="text" className="bg-neutral-900 outline-none border-b w-32 text-sm h-5 " id="tagName" onChange={handleInputChange}></input>
-            <input type="color" value={color} onChange={handleColorChange} className="w-5 h-5 bg-neutral-950 rounded outline-none cursor-pointer"></input>
+        <div className="flex gap-2 items-center px-3 py-1 bg-neutral-100 rounded">
+            <input type="text" className="bg-neutral-100 outline-none border-b w-32 text-sm h-5 " id="tagName" onChange={handleInputChange}></input>
+            <input type="color" value={color} onChange={handleColorChange} className="w-5 h-5 bg-neutral-200 rounded outline-none cursor-pointer"></input>
             <button onClick={() => handleCreateTag(name, color)} className="w-fit h-fit"><Image src={"/check.svg"} alt="submit" height={40} width={40} className="w-5 h-5 rounded bg-neutral-950"></Image></button>
         </div>
     )

@@ -37,7 +37,7 @@ export function ProjectInfo( { id } : { id : string }) {
 
     return (
         <div className="flex gap-4">
-            <Image src={icon} alt="Project Icon" width={50} height={50} className="bg-neutral-50 rounded w-10 h-fit block mt-auto mb-auto"></Image>
+            <Image src={icon} alt="Project Icon" width={50} height={50} className="bg-neutral-950 rounded w-10 h-fit block mt-auto mb-auto"></Image>
             <div className=''>
                 <h2>{info?.name ? info.name : ""}</h2>
                 <p className=" text-sm text-neutral-400">{info?.category ? info.category : "undefined"}</p>

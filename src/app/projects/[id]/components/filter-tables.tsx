@@ -7,7 +7,7 @@ export function SearchInput() {
     return (
         <search className='flex flex-col'>
             <label className='text-sm text-neutral-400'>Search</label>
-            <input className='rounded bg-neutral-950 px-2 py-1 focus:outline focus:outline-2 focus:outline-violet-500'></input>
+            <input className='rounded bg-neutral-200 px-2 py-1 focus:outline focus:outline-2 focus:outline-violet-500'></input>
         </search>
     )
 }
@@ -24,8 +24,8 @@ export function FilterButton({ onClick } : { onClick : () => void }) {
 
 export function FilterDialog({ handleClose } : { handleClose : () => void}) {
     return ( 
-        <dialog className="dialog className='absolute z-50 flex bg-neutral-950 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100">
-            <div className='bg-neutral-950 rounded w-[80rem] h-fit mx-72 my-36 overflow-hidden relative'>
+        <dialog className="dialog className='absolute z-50 flex bg-neutral-200 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-200">
+            <div className='bg-neutral-200 rounded w-[80rem] h-fit mx-72 my-36 overflow-hidden relative'>
                 <h2>Filters</h2>
                 <DialogClose handleClose={handleClose}/>
                 <section>

@@ -68,7 +68,7 @@ function ModeSwap({ actual, handleSwap } : { actual : boolean, handleSwap : () =
 
 function IssueElement({ issue } : { issue : Issue }) {
     return  (
-        <li key={issue.id} className="bg-neutral-950 rounded">
+        <li key={issue.id} className="bg-neutral-50 rounded">
             <div>
                 <h3>{issue.name}</h3>
             </div> 

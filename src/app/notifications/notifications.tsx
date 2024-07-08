@@ -98,8 +98,8 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
     }
 
     return (
-        <li className='bg-neutral-950 rounded p-2 w-full flex gap-4 relative'>
-            <Image src={'/project.svg'} alt={''} width={30} height={30} className="bg-neutral-50 rounded w-20 h-fit block mt-auto mb-auto"></Image>
+        <li className='bg-neutral-200 rounded p-2 w-full flex gap-4 relative'>
+            <Image src={'/project.svg'} alt={''} width={30} height={30} className="bg-neutral-950 rounded w-20 h-fit block mt-auto mb-auto"></Image>
             <div className="flex flex-col gap-1 w-max h-fit justify-between">
                 <h3 className="w-max">{text}</h3>
                 <p className="w-max">{notif.name}</p>

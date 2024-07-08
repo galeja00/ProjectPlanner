@@ -342,7 +342,7 @@ function TasksColumn(
 
     return (
         <section 
-            className={`rounded w-80 h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-950"}`} 
+            className={`rounded w-80 h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-200"}`} 
             onDrop={handleOnDrop} 
             onDragOver={handleDragOver} 
             onDragExit={handleOnLeave} 
@@ -376,6 +376,8 @@ function TasksColumn(
 
 type MoreMenuItem = {
     name: string,
+    img: string,
+    p: number,
     handler: () => void
 }
 
@@ -392,7 +394,7 @@ type Solver = {
 // TODO: to much argumentsa need to be better solved
 function TaskComponent(
         { task, projectId, removeTask, deleteTask, handleOnDrag, updateTask } : 
-        { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void , updateTask : (task : Task) => void},) {
+        { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void , updateTask : (task : Task) => void}) {
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isInfo, toggleInfo ] = useReducer((isInfo) => !isInfo, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
@@ -471,14 +473,14 @@ function TaskComponent(
 
 
     const MoreMenuItems : MoreMenuItem[] = [
-        { name: "Info", handler: toggleInfo },
-        { name: "Remove", handler: removeTask },
-        { name: "Delete", handler: deleteTask },
+        { name: "Info", img: "/info.svg", p: 0, handler: toggleInfo },
+        { name: "Remove", img: "/x.svg", p: 0, handler: removeTask },
+        { name: "Delete", img: "/trash.svg", p: 1,handler: deleteTask },
     ];
     
     return (
         <>
-            <li className="rounded bg-neutral-900 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} data-task-id={task.id}>
+            <li className="rounded bg-neutral-100 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} data-task-id={task.id}>
                 <div className='flex w-full justify-between gap-1'>
                     <Name name={task.name} submitName={changeName}/>
                     <MoreButton handleClick={toggleMenu}/>
@@ -490,7 +492,7 @@ function TaskComponent(
                     { task.priority && <PriorityImg priority={task.priority}/> }
                     
                     <div className='relative flex gap-1'>
-                        { task.teamId && <TeamInf teamId={task.teamId} projectId={projectId}/>}
+                        { task.teamId && <TeamInf teamId={task.teamId} projectId={projectId}/> }
                         <Solver handleSolversMenu={toggleSolversMenu} solvers={solvers}/>
                         {
                             isSolversMenu 
@@ -563,8 +565,8 @@ function Solver({ handleSolversMenu, solvers} : { handleSolversMenu : () => void
     }
     
     return (
-        <button className='w-fit h-fit rounded-full hover:bg-neutral-950 p-1' title={solver ? `${solver.name} ${solver.surname}` : "add solver"} onClick={handleSolversMenu}>
-            <Image src={"/avatar.svg"} alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-300 cursor-pointer'></Image>
+        <button className='w-fit h-fit rounded-full hover:bg-neutral-200 p-1' title={solver ? `${solver.name} ${solver.surname}` : "add solver"} onClick={handleSolversMenu}>
+            <Image src={"/avatar.svg"} alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-400 cursor-pointer'></Image>
         </button>    
     )
 }
@@ -606,8 +608,7 @@ function SolversMenu({ projectId, solvers, addSolver, delSolver } : { projectId 
     }
 
     return (
-        <div className='w-fit bg-neutral-950  absolute right-0 top-8 z-50 p-0 rounded shadow-neutral-900 shadow'>
-            <input className='w-fit bg-neutral-900 rounded m-1 outline-none border-none py-1 px-2'></input>
+        <div className='w-max bg-neutral-200 absolute right-0 top-8 z-50 p-0 rounded shadow-neutral-100 shadow'>
             <ul>
             {users.map((user) => {
                 const isSolver = solvers.some((solver) => solver.memberId === user.memberId);
@@ -617,7 +618,7 @@ function SolversMenu({ projectId, solvers, addSolver, delSolver } : { projectId 
                 }
                 return (
                     <li key={user.memberId} 
-                        className={`flex gap-2 m-1 p-1 hover:bg-neutral-800 cursor-pointer rounded relative`} 
+                        className={`flex gap-2 m-1 p-1 w-fit hover:bg-neutral-400 cursor-pointer rounded relative`} 
                         onClick={() => addSolver(user.memberId)}>
                         <Image src={imgSrc} alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
                         <h5>{user.name} {user.surname}</h5>
@@ -631,24 +632,15 @@ function SolversMenu({ projectId, solvers, addSolver, delSolver } : { projectId 
 }
 
 function CurrentSolver({ delSolver } : { delSolver : () => void}) {
+    //<button onClick={delSolver}><img src="/x.svg" className='w-4 h-4'></img></button>
     return (
         <div className=' border border-green-600 rounded-full  px-1 flex text-green-600 bg-green-600 bg-opacity-20'>
             <p className='text-sm'>current</p>
-            <button onClick={delSolver}><img src="/x.svg" className='w-4 h-4'></img></button>
         </div>
         
     )
 }
 
-
-
-function AddTaskColumn() {
-    return (
-        <button className='w-fit h-fit'>
-            <Image src="/plus.svg" alt="avatar" width={2} height={2} className='w-7 h-7 rounded bg-neutral-950 cursor-pointer'></Image>
-        </button>
-    )
-}
 
 function Name({ name, submitName } : { name : string, submitName : (name : string) => void }) {
     const [ edit, toggleEdit ] = useReducer(edit => !edit, false);
@@ -666,11 +658,11 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
         <div className='flex gap-2'>
             {
                 edit ? 
-                    <input defaultValue={name} type="text" className='w-fit bg-neutral-900 border-b outline-none' onKeyDown={handleKeyDown}></input>
+                    <input defaultValue={name} type="text" className='w-fit bg-neutral-100 border-b outline-none' onKeyDown={handleKeyDown}></input>
                     :
                     <h3 className='w-fit'>{name}</h3>
             }
-            <button onClick={toggleEdit} className='w-fit h-fit rounded hover:bg-neutral-950 p-1' title="edit name" style={ {backgroundColor: edit ? "#0a0a0a" : ""}}>
+            <button onClick={toggleEdit} className='w-fit h-fit rounded hover:bg-neutral-200 p-1' title="edit name" style={ {backgroundColor: edit ? "#0a0a0a" : ""}}>
                 <Image src="/pencil.svg" alt="more" width={2} height={2} className='w-5 h-5 rounded-full cursor-pointer'></Image>
             </button>
         </div>
@@ -679,7 +671,7 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
 
 function MoreButton({ handleClick } : { handleClick : () => void}) {
     return (
-        <button className='h-fit rounded hover:bg-neutral-950 p-1'>
+        <button className='h-fit rounded hover:bg-neutral-200 p-1'>
             <Image src="/more.svg" alt="more" width={2} height={2} onClick={handleClick} className='w-5 h-5 rounded-full cursor-pointer'></Image>
         </button>
     )
@@ -688,20 +680,21 @@ function MoreButton({ handleClick } : { handleClick : () => void}) {
 
 function MoreMenu({ items } : { items : MoreMenuItem[] }) {
     return (
-        <ul className='absolute w-28 bg-neutral-950 rounded p-2 right-0 top-10 z-50 shadow shadow-neutral-900'>
+        <ul className='absolute w-28 bg-neutral-200 rounded p-2 right-0 top-10 z-50 shadow shadow-neutral-100 space-y-1'>
             {
                 items.map((item) => (
-                    <MoreMenuItems key={item.name} name={item.name} handleClick={item.handler}/>
+                    <MoreMenuItems key={item.name} item={item}/>
                 ))
             }
         </ul>
     )
 }
 
-function MoreMenuItems({ name, handleClick } : { name : string, handleClick : () => void }) {
+function MoreMenuItems({ item } : { item : MoreMenuItem}) {
     return (
-        <li>
-            <button className='link-secundary h-6' onClick={handleClick}>{name}</button>
+        <li className='flex gap-2'>
+            <Image src={item.img} width={15} height={15} alt="" className={`w-6 p-${item.p}`}></Image>
+            <button className='link-secundary h-6' onClick={item.handler}>{item.name}</button>
         </li>
     )
 }

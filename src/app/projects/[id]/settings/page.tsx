@@ -145,13 +145,13 @@ export default function Settings({ params } : { params : { id : string }}) {
             <main className="flex w-2/4 flex-col mx-auto py-14">
                 <Head text="Settings" />
                 <div className="space-y-8">
-                    <section className="bg-neutral-950 p-4 rounded flex gap-8">
+                    <section className="bg-neutral-200 p-4 rounded flex gap-8">
                         <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer" />
                         <div className="space-y-4">
                             <Name name={project.name} update={(val: string) => updateVal("name", val)} />
                         </div>
                     </section>
-                    <section className="bg-neutral-950 p-4 rounded">
+                    <section className="bg-neutral-200 p-4 rounded">
                         <ul className="space-y-4">
                             <SettingsItem propertyKey="category" type={ItemType.Text} text="Category" value={project.category ?? ""} updateVal={updateVal} />
                             <SettingsItem propertyKey="createdAt" type={ItemType.Date} text="Created At" value={formatDate(date)} updateVal={updateVal} />

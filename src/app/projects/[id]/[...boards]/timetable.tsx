@@ -199,9 +199,11 @@ export default function TimeTable({ id } : { id : string }) {
 
     return (
         <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
-            <section className="overflow-x-hidden h-full max-h-full">
+            <section className="overflow-x-hidden h-full max-h-full ">
                 <Head text='Time Table'/>
-                <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
+                <div className="mb-2">
+                    <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
+                </div>
                 <Table/>
                 <TimeMode mode={mode} changeMode={(mode : Mode) => setMode(mode)}/>
             </section>
@@ -213,7 +215,7 @@ export default function TimeTable({ id } : { id : string }) {
 
 function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mode) => void }) {
     return (
-        <div className="fixed m-4 z-50 right-0 bottom-0 bg-neutral-950 rounded w-50 flex">
+        <div className="fixed m-4 z-50 right-0 bottom-0 bg-neutral-200 rounded w-50 flex">
             <button onClick={() => changeMode(Mode.Week)} className={`py-2 w-16 hover:bg-violet-600 rounded ${mode == Mode.Week ? "border border-violet-600" : ""}`}>Week</button>
             <button onClick={() => changeMode(Mode.Month)} className={`py-2 w-16 hover:bg-violet-600 rounded ${mode == Mode.Month ? "border border-violet-600" : ""}`}>Month</button>
         </div>
@@ -253,9 +255,9 @@ function Table() {
 
     return (
         <>
-            <section className=" h-5/6 bg-neutral-950 rounded flex overflow-y-auto relative">
-                <section className="relative w-1/5 h-full border-r">
-                    <div className="h-16 border-b w-full"></div>
+            <section className=" h-5/6 bg-neutral-200 rounded flex overflow-y-auto relative">
+                <section className="relative w-1/5 h-full border-r border-neutral-600">
+                    <div className="h-16 border-b border-neutral-600 w-full"></div>
                         <Groups/>
                     <div className="pl-2 pt-4">
                         <Creator what="Create new group" handleCreate={createGroup}/>
@@ -282,7 +284,7 @@ function TimesRanges({ range } : { range : number }) {
             const endDate : Date = new Date(actualDate);
             endDate.setDate(actualDate.getDate() + 6);
             divs.push(
-                <div key={i} className="w-[105px] border-r border-b flex flex-col items-center">
+                <div key={i} className="w-[105px] border-r border-b border-neutral-600 flex flex-col items-center">
                     <div className="w-fit">
                         {i + 1} week
                     </div>
@@ -295,7 +297,7 @@ function TimesRanges({ range } : { range : number }) {
     };
 
     return ( 
-        <div className="w-fit flex h-16 bg-neutral-950">
+        <div className="w-fit flex h-16 bg-neutral-200">
             {renderDivs()}
         </div>
     )
@@ -303,7 +305,7 @@ function TimesRanges({ range } : { range : number }) {
 
 function DisplayDate({ date } : { date : Date}) {
     return (
-        <div className="w-fit text-sm text-neutral-400">
+        <div className="w-fit text-sm text-neutral-600">
             {date.getDate()}.{date.getMonth() + 1}.{date.getFullYear()}
         </div>
     )
@@ -312,10 +314,10 @@ function DisplayDate({ date } : { date : Date}) {
 function Groups() {
     const { groups } = useContext(TimeTableContext)!;
     return (
-        <div className="border-b border-neutral-400">
+        <div className="border-b border-neutral-600">
             {
                 groups.map((group, row) => (
-                    <div key={group.id} className={`h-10 w-full pl-4 py-2 ${row % 2 == 0 ? `bg-neutral-950` : `bg-neutral-900`}`}>
+                    <div key={group.id} className={`h-10 w-full pl-4 py-2 ${row % 2 == 0 ? `bg-neutral-200` : `bg-neutral-100`}`}>
                         {group.name}
                     </div>
                 ))
@@ -398,7 +400,6 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
                 const newRanges = groupsRanges;
                 const range : Range = {start: startDay.index, end: day.index}
                 newRanges[row.index] = { range: range, next: [], prev: []};
-                console.log(newRanges);
                 updateRanges(newRanges);
             } 
             startDay?.element.classList.remove("border-purple-600");
@@ -429,7 +430,7 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
     return (
         <RangesContext.Provider value={{ changeUserMode, updateRanges, openRangeMenu, userMode, ranges: groupsRanges }}>
             <div className="">
-                <div className="border-b relative  w-max h-max border-neutral-400 "
+                <div className="border-b relative  w-max h-max border-neutral-600 "
                 onClick={handleClick}
                 ref={days}
                 >
@@ -448,7 +449,7 @@ function GroupRow({ row, size, current } : { row  : number, size : number, curre
     const count =  size * 7;
     const arr : boolean[] = new Array(count).fill(false);
     return (
-        <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-950` : `bg-neutral-900`} `} data-row-id={row}>
+        <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-200` : `bg-neutral-100`} `} data-row-id={row}>
             {arr.map((value, col) => (
                 <DisplayRange key={col} col={col} current={current == col}/>
             ))}
@@ -463,7 +464,7 @@ function DisplayRange({ col, current } : { col : number, current : boolean }) {
         <div 
             key={col} 
             data-col-id={col} 
-            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-400' : 'border-neutral-700'} ${(current ? " bg-orange-400 bg-opacity-60" : "")} cursor-pointer`}
+            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-950' : 'border-neutral-400'} ${(current ? " bg-orange-400 bg-opacity-60" : "")} cursor-pointer`}
         >
         </div>
     )
@@ -500,16 +501,16 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
 
     return (
         <Dialog>
-            <div className="w-max h-max bg-neutral-950 rounded flex flex-col relative p-4 gap-4">
+            <div className="w-max h-max bg-neutral-200 rounded flex flex-col relative p-4 gap-4">
                 <DialogClose handleClose={closeMenu}/>
                 <h2>{rangeInfo.group.name}</h2>
                 <section className="space-y-2">
                     <h3 className="text-sm text-neutral-400">range:</h3>
                     <div  className="grid grid-cols-2 gap-2">
                         <label htmlFor="start">start day:</label>
-                        <input type="date" id="start" name="start" min={0} defaultValue={rangeInfo.groupRange.range.start} onChange={(event) => handleChange(event, "start")} className="bg-neutral-900 rounded px-2 py-1"></input>
+                        <input type="date" id="start" name="start" min={0} defaultValue={rangeInfo.groupRange.range.start} onChange={(event) => handleChange(event, "start")} className="bg-neutral-100 rounded px-2 py-1"></input>
                         <label htmlFor="end">end day:</label>
-                        <input type="date" id="end" name="end" min={0} defaultValue={rangeInfo.groupRange.range.end} onChange={(event) => handleChange(event, "end")} className="bg-neutral-900 rounded px-2 py-1"></input>
+                        <input type="date" id="end" name="end" min={0} defaultValue={rangeInfo.groupRange.range.end} onChange={(event) => handleChange(event, "end")} className="bg-neutral-100 rounded px-2 py-1"></input>
                     </div>
                     <div>length in days: {len}</div>
                     <div className="flex justify-end">
@@ -632,7 +633,7 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     const endbox = boxs[range.end].getBoundingClientRect();
     return (
         <div 
-            className={`bg-violet-500 absolute z-100 rounded border bg-opacity-70 flex justify-between  ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
+            className={`bg-violet-500 absolute z-100 rounded border border-neutral-600 bg-opacity-70 flex justify-between  ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
             onMouseDown={handleGrap}
             onMouseUp={handleDrop}
             onMouseMove={handleMove}

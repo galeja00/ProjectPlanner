@@ -44,7 +44,6 @@ export default function Backlog({ id } : { id : string }) {
             }
             const newGroups : GroupOfTasks[] = data.backlog
             newGroups.sort((a, b) => sortGroups(a, b));
-            console.log(newGroups);
             setGroups(newGroups);
             setColumns(data.collumns);
         }
@@ -323,7 +322,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
 
     return (
         <li key={group.id} 
-            className={`w-full rounded p-2 space-y-2 relative ${isDragOver ? "bg-neutral-700" : "bg-neutral-950"}`}
+            className={`w-full rounded p-2 space-y-2 relative ${isDragOver ? "bg-neutral-400" : "bg-neutral-200"}`}
             onDrop={handleDropTask}
             onDragOver={handleDragOver} 
             onDragExit={handleOnLeave} 
@@ -480,7 +479,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
    
     return (
         <>
-            <li className="bg-neutral-900 w-full p-2 rounded grid  grid-cols-9 gap-2" draggable onDragStart={handleOnDrag}>
+            <li className="bg-neutral-100 w-full p-2 rounded grid  grid-cols-9 gap-2" draggable onDragStart={handleOnDrag}>
                 <h3 className="col-span-3">{task.name}</h3>
                 <div className='relative'>
                     <ColInfo info={colInfo} onClick={toggleSelectColl}/>
@@ -553,11 +552,11 @@ function ColMenu({ info, handleMoveCol } : { info : ColumnInfo | null, handleMov
     }
     
     return (
-        <ul className='absolute z-10 bg-neutral-950 shadow-sm shadow-neutral-950 rounded space-y-2 p-2 left-0'>
+        <ul className='absolute z-10 bg-neutral-200 shadow-sm shadow-neutral-200 rounded space-y-2 p-2 left-0'>
             {
                 toSelect.map((col) => {
                     return (
-                        <li key={col.id} onClick={() => handleMoveCol(col.id)} className='w-fit hover:text-violet-600 cursor-pointer hover:border-b hover:border-violet-600'>
+                        <li key={col.id} onClick={() => handleMoveCol(col.id)} className='w-fit hover:text-violet-600 cursor-pointer hover:border-b border-neutral-600 hover:border-violet-600'>
                             {col.name}
                         </li>
                     )

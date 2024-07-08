@@ -77,7 +77,7 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
 
     return (
         <Dialog>
-            <div className="relative bg-neutral-950 rounded h-fit w-fit p-4">
+            <div className="relative bg-neutral-200 rounded h-fit w-fit p-4">
                 <DialogClose handleClose={handleClose}/>
                 <h2 className="font-bold text-xl mb-4">Move groups</h2>
                 <section className="h-fit relative flex gap-4 w-full justify-around">
@@ -134,7 +134,7 @@ function ListGroups({ groups, handleMove } : { groups : GroupBasicInfo[], handle
     }
 
     return(
-        <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-900"}`}
+        <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-200"}`}
             onDrop={handleOnDrop}
             onDragOver={handleOnDragOver}
             onDragLeave={handleOnLeave}
@@ -152,7 +152,7 @@ function ListGroups({ groups, handleMove } : { groups : GroupBasicInfo[], handle
 
 function ListItem({ group, handleOnDrag } : { group : GroupBasicInfo, handleOnDrag : (e : DragEvent) => void }) {
     return (
-        <li key={group.id} onDragStart={handleOnDrag} className={`box-content flex gap-4 bg-neutral-950 rounded items-center p-1 cursor-pointer`} draggable >
+        <li key={group.id} onDragStart={handleOnDrag} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 cursor-pointer`} draggable >
             {group.name}
         </li>
     )

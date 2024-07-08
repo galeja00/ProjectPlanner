@@ -133,7 +133,7 @@ export default function Profile() {
             { isDell && <DeleleteDialog message="Do you realy wont to delete your account?" onClose={toggleDell} onConfirm={handleDelete}/>}
             { isPassw && <PasswordChange onClose={togglePassw}/> }
             <div className="flex w-2/4 flex-col m-auto py-14 space-y-8" >
-                <section className="bg-neutral-950 rounded flex gap-16 p-4">
+                <section className="bg-neutral-200 rounded flex gap-16 p-4">
                     <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover: w-32 h-32 cursor-pointer"></Image>
                     <div className="flex flex-col gap-4">
                         <Name user={user} handleUpdate={handleUpdateAcc}/>
@@ -177,8 +177,8 @@ function Name({ user, handleUpdate } : { user : User, handleUpdate : (user : Use
             {
                 edit ? 
                     <div className="flex gap-2">
-                        <input type="text" defaultValue={user.name} onKeyDown={handleKeyDown} onChange={(event) => setName(event.currentTarget.value)} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
-                        <input type="text" defaultValue={user.surname} onKeyDown={handleKeyDown} onChange={(event) => setSurname(event.currentTarget.value)} className="bg-neutral-950 outline-none border-b text-xl font-bold w-5/6"></input>
+                        <input type="text" defaultValue={user.name} onKeyDown={handleKeyDown} onChange={(event) => setName(event.currentTarget.value)} className="bg-neutral-200 outline-none border-b text-xl font-bold w-5/6"></input>
+                        <input type="text" defaultValue={user.surname} onKeyDown={handleKeyDown} onChange={(event) => setSurname(event.currentTarget.value)} className="bg-neutral-200 outline-none border-b text-xl font-bold w-5/6"></input>
                         <button className="btn-primary" onClick={handleSubmit}>Submit</button>
                     </div>
                     :
@@ -207,7 +207,7 @@ function Email({ user, handleUpdate } : { user : User, handleUpdate : (user : Us
             {
                 edit ? 
                     <div>
-                        <input type="email" defaultValue={user.email} onKeyDown={handleKayDown} className="bg-neutral-950 outline-none border-b w-5/6"></input>
+                        <input type="email" defaultValue={user.email} onKeyDown={handleKayDown} className="bg-neutral-200 outline-none border-b w-5/6"></input>
                     </div>
                     :
                     <p>{user.email}</p> 
@@ -220,7 +220,7 @@ function Email({ user, handleUpdate } : { user : User, handleUpdate : (user : Us
 
 function Id({ user } : { user : User }) {
     return (
-        <section className="bg-neutral-950 rounded p-4">
+        <section className="bg-neutral-200 rounded p-4">
             <h2 className="font-bold mb-4">Invite Id</h2>
             <p>{user.id}</p>
         </section>
@@ -260,7 +260,7 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
 
     return ( 
         <Dialog>
-            <div className='bg-neutral-950 rounded w-fit h-fit overflow-hidden relative p-8 '>
+            <div className='bg-neutral-200 rounded w-fit h-fit overflow-hidden relative p-8 '>
                 <DialogClose handleClose={onClose}/>
                 <h2 className="font-bold text-xl mb-8">Change password</h2>
                 <form onSubmit={handleChangePassword} className="flex flex-col gap-4 m-0 w-96">

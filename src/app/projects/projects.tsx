@@ -70,8 +70,8 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
                 <h2 className='text-xl  font-bold'>{name}</h2>
                 {list.length > 5 ?
                         <div className='flex gap-4'>
-                            <button onClick={() => changeIndex(-1)}><Image src="/arrow-small-left.svg" alt="to left" width={40} height={40} className='hover:stroke-violet-500 bg-neutral-950 rounded'></Image></button>
-                            <button onClick={() => changeIndex(1)}><Image src="/arrow-small-right.svg" alt="to right" width={40} height={40} className='hover:stroke-violet-500 bg-neutral-950 rounded'></Image></button>
+                            <button onClick={() => changeIndex(-1)}><Image src="/arrow-small-left.svg" alt="to left" width={40} height={40} className='hover:stroke-violet-500 bg-neutral-200 rounded'></Image></button>
+                            <button onClick={() => changeIndex(1)}><Image src="/arrow-small-right.svg" alt="to right" width={40} height={40} className='hover:stroke-violet-500 bg-neutral-200 rounded'></Image></button>
                         </div>
                     :
                         <></>
@@ -95,7 +95,7 @@ function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vi
     } 
     const icon = proj.icon ? `/uploads/project/${proj.icon}` : "/project.svg";
     return (
-        <li key={proj.id} className={`overflow-hidden bg-neutral-950 rounded w-96 h-50 h-auto ${visible}`}>
+        <li key={proj.id} className={`overflow-hidden bg-neutral-200 rounded w-96 h-50 h-auto ${visible}`}>
             <div className='absolute w-96 h-10' style={{backgroundColor: proj.color}}></div>
             <Image src={icon} alt="avater" width={50} height={50} className='w-12 h-12 rounded bg-neutral-50 mr-5 text-color cursor-pointer absolute z-10 left-4 top-4'></Image>
             <div className='p-4 mt-16'>

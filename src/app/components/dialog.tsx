@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 export function Dialog({children} : {children : ReactNode}) {
     return (
-        <dialog className='absolute z-50 flex bg-neutral-900 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-100 justify-center pt-40'>
+        <dialog className='absolute z-50 flex bg-neutral-50 bg-opacity-60 left-0 top-0 w-full h-full text-neutral-950 justify-center pt-40'>
             {children}
         </dialog>
     )

@@ -22,7 +22,7 @@ export function SearchInput() {
     return (
         <search className='flex flex-col'>
             <label className='text-sm text-neutral-400'>Search</label>
-            <input className='rounded bg-neutral-950 px-2 py-1 focus:outline focus:outline-2 focus:outline-violet-500'></input>
+            <input className='rounded bg-neutral-100 px-2 py-1 focus:outline focus:outline-2 focus:outline-violet-500'></input>
         </search>
     )
 }

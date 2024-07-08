@@ -113,7 +113,7 @@ function NodeCreatetor({ onCreate, onClose } : { onCreate : () => void, onClose 
 
     return (
         <Dialog>
-            <div className="bg-neutral-950 rounded p-4 h-fit relative w-1/3">
+            <div className="bg-neutral-200 rounded p-4 h-fit relative w-1/3">
                 <DialogClose handleClose={onClose}/>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <h2 className=" font-bold text-xl mb-4">Create new node</h2>
@@ -137,7 +137,7 @@ function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (i
 
     const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
     return ( 
-        <li key={node.id} className="bg-neutral-950 rounded min-h-[8rem]">
+        <li key={node.id} className="bg-neutral-200 rounded min-h-[8rem]">
             <div className="flex justify-between border-b p-4 items-center">
                 <h3>{node.name}</h3>
                 <div className="flex gap-4">

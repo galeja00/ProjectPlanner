@@ -114,7 +114,7 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
 
     }
     return (
-        <table className="bg-neutral-950 rounded flex flex-col">
+        <table className="bg-neutral-200 rounded flex flex-col">
             <thead className="">
                 <tr className='py-2 px-3 grid grid-cols-9 justify-items-left items-center'>
                     <th className='w-fit col-span-2'>Image</th>
@@ -141,13 +141,13 @@ function MemberRow({ memberInfo, handleRemove, openSettings } : { memberInfo : M
         imgSrc = `/uploads/user/${memberInfo.image}`;
     }
     return (
-        <tr key={memberInfo.memberId} className='bg-neutral-900 rounded grid grid-cols-9 p-2 gap-2 justify-items-left items-center'>
-            <td className='col-span-2'><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-300'/></td>
+        <tr key={memberInfo.memberId} className='bg-neutral-100 rounded grid grid-cols-9 p-2 gap-2 justify-items-left items-center'>
+            <td className='col-span-2'><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-400'/></td>
             <td className='col-span-2'>{memberInfo.name} {memberInfo.surname}</td>
             <td className='col-span-2'>{memberInfo.teamName}</td>
             <MemberLoad load={memberInfo.tasksLoad}/>
             <td className='flex gap-1 justify-end col-span-1'>
-                <button onClick={handleRemove} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
+                <button onClick={handleRemove} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">
                         <img src="/x.svg" title="Remove User" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
                 </button>
             </td>
@@ -268,7 +268,7 @@ function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
 
     return (
         <Dialog>
-            <search className='p-4 relative h-2/3 w-1/3 bg-neutral-950 rounded flex flex-col gap-4'>
+            <search className='p-4 relative h-2/3 w-1/3 bg-neutral-200 rounded flex flex-col gap-4'>
                 <DialogClose handleClose={onClose}/>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser} handleChange={handleChange}/>
                 <ListUsers users={results} id={id}/>
@@ -297,8 +297,8 @@ function AddForm(
                     ))
                 }
             </div>
-            <div className='py-2 px-4 bg-neutral-900 rounded-tr rounded-br rounded-bl w-full'>
-                <input className="bg-neutral-900 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-950 w-full" type="text" onKeyDown={handleKeyDown}></input>
+            <div className='py-2 px-4 bg-neutral-100 rounded-tr rounded-br rounded-bl w-full'>
+                <input className="bg-neutral-100 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-200 w-full" type="text" onKeyDown={handleKeyDown}></input>
             </div>
         </div>
     )
@@ -342,8 +342,8 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
     }
 
     return (
-        <li key={user.id} className='bg-neutral-900 rounded p-2 flex w-full'>
-            <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer'></Image>
+        <li key={user.id} className='bg-neutral-100 rounded p-2 flex w-full'>
+            <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-400 mr-5 text-color cursor-pointer'></Image>
             <div className='w-full'>{user.name} {user.surname}</div>
             <div className='flex w-full flex-row-reverse'>
                 <button className='btn-primary' onClick={inviteUser}>Send</button>

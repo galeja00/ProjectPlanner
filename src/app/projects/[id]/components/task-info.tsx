@@ -2,7 +2,7 @@
 
 import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "react";
 import Image from 'next/image' 
-import { Issue, Tag, Task, Ranking } from "@prisma/client";
+import { Issue, Tag, Task, Ranking, Team, ProjectMember } from "@prisma/client";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import { Name } from "./other-client";
@@ -51,7 +51,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     return (
         <Dialog>
-            <div className='bg-neutral-950 rounded w-[80rem] h-fit overflow-hidden relative'>
+            <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
                 { task 
                     ?
                     <>
@@ -99,11 +99,11 @@ enum TypeOfInfo {
     description = "Description",
     issues = "Issues",
     nodes = "Nodes",
-    other = "Other"
+    settings = "Settings"
 }
 
 function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
-    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes, TypeOfInfo.other];
+    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes, TypeOfInfo.settings];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task} updateTask={updateTask}/>);
 
@@ -117,9 +117,9 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
                 setActualInfo(<Nodes/>);
                 setActualInfoType(TypeOfInfo.nodes);
                 break;
-            case TypeOfInfo.other: 
-                setActualInfo(<Other/>)
-                setActualInfoType(TypeOfInfo.other);
+            case TypeOfInfo.settings: 
+                setActualInfo(<Settings task={task}/>)
+                setActualInfoType(TypeOfInfo.settings);
                 break;
             default:
                 setActualInfo(<Description task={task} updateTask={updateTask}/>);
@@ -143,9 +143,9 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
 }
 
 function MenuItem({ name, actualType, onClick } : { name : string, actualType : TypeOfInfo, onClick : () => void}) {
-    var bg : string = "bg-neutral-950";
+    var bg : string = "bg-neutral-200";
     if (actualType == name) {
-        bg = "bg-neutral-900";
+        bg = "bg-neutral-100";
     }
     return (
         <li className={`relative  ${bg}`}>
@@ -187,21 +187,21 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
     desc = editDesc;
     return (
         <article className='m-4 space-y-4'>
-            <button onClick={toggleEdit} className={`w-fit h-fit flex gap-2 items-center hover:text-neutral-100 text-neutral-400 `}>
-                <img src="/pencil.svg" alt="Edit Description" className={`rounded w-7 h-7 ${isEditing ? "bg-violet-600" : "bg-neutral-900"} p-1`}/>
+            <button onClick={toggleEdit} className={`w-fit h-fit flex gap-2 items-center hover:text-neutral-950 text-neutral-600 `}>
+                <img src="/pencil.svg" alt="Edit Description" className={`rounded w-7 h-7 ${isEditing ? "bg-violet-600" : "bg-neutral-100"} p-1`}/>
                 <div>Edit Description</div>
             </button>
             {
                 isEditing ? 
                     <div className="space-y-2">
-                        <textarea defaultValue={desc} onChange={handleChange} className="bg-neutral-900 w-full h-64 outline-none rounded focus:ring-1 focus:ring-violet-500 px-3 py-1"/>
+                        <textarea defaultValue={desc} onChange={handleChange} className="bg-neutral-100 w-full h-64 outline-none rounded focus:ring-1 focus:ring-violet-500 px-3 py-1"/>
                         <div className="flex flex-row-reverse">   
                             <button className="btn-primary relative right-0 bottom-0" onClick={handleSubmit}>Submit</button>
                         </div>
                     </div>
                     :
                     <div>
-                        <p className='px-3 py-1 bg-neutral-900 rounded '>
+                        <p className='px-3 py-1 bg-neutral-100 rounded '>
                             {desc}
                         </p>   
                     </div>
@@ -216,7 +216,7 @@ function Issues({ issues } : { issues : Issue[] }) {
     return (
         <div>
             <div className="flex flex-row gap-4">
-                <button className="bg-neutral-900 rounded" onClick={toggleCreating}>
+                <button className="bg-neutral-100 rounded" onClick={toggleCreating}>
                     <img src="plus.svg" alt="create"/>
                 </button>
                 <div>Create new Issue</div>
@@ -247,10 +247,72 @@ function Nodes() {
     )
 }
 
-function Other() {
+function Settings({ task } : { task : Task }) {
+    const [ allTeams, setAllTeams ] = useState<Team[]>([]);
+    const [ allMembers, setAllMembers ] = useState<ProjectMember[]>([]);
+
+    async function fetchTeams() {
+        try {
+            const res = await fetch(`/api/projects/${task.projectId}/team`, {
+                method: "GET"
+            })
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error);
+            }
+            setAllTeams(data.teams);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function fetchMembers() {
+        try {
+            const res = await fetch(`/api/projects/${task.projectId}/members`, {
+                method: "GET"
+            })
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error);
+            }
+            setAllTeams(data.data);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+        fetchTeams();
+        fetchMembers(); 
+    }, []);
+
     return (
-        <>
-        </>
+        <div className="flex gap-2 p-4">
+            <div>
+                <h4>Team</h4>
+                <ul className="">
+                    {
+                        allTeams.map((team) => (
+                            <li></li>
+                        ))
+                    }
+                </ul>
+            </div>
+            <div>
+                <h4>Solvers</h4>
+                <ul className="">
+                    {
+                        allMembers.map((member) => (
+                            <li></li>
+                        ))
+                    }
+                </ul>
+            </div>
+        </div>
     )
 }
 
@@ -293,7 +355,7 @@ function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) =
                 <h3 className='font-bold mb-2'>Info</h3>
                 <button onClick={changeMode} className="h-fit" title="Edit Info"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
             </div>
-            <ul className='bg-neutral-900 p-2 rounded w-full flex flex-col gap-2'>
+            <ul className='bg-neutral-100 p-2 rounded w-full flex flex-col gap-2'>
                 <DataItem name="type" value={task.type} isEditing={isEditing} updateVal={(newVal : any) => updateVal("type", newVal)}></DataItem>
                 <DataItem name="priority" value={task.priority} isEditing={isEditing} updateVal={(newVal : any) => updateVal("priority", newVal)}></DataItem>
                 <DataItem name="complexity" value={task.complexity} isEditing={isEditing} updateVal={(newVal : any) => updateVal("complexity", newVal)}></DataItem>
@@ -359,7 +421,7 @@ function SelectButtons({ items, value, changeVal } : { items : SelectType[], val
                 items.map(item => (
                     <li key={item.name} id={item.name}>
                         <button 
-                            className={`btn btn-primary ${selected  == item.name ? "bg-violet-600 text-neutral-100" : ""} text-xs px-1 py-0.5`} 
+                            className={`btn btn-primary ${selected  == item.name ? "bg-violet-600 text-neutral-950" : ""} text-xs px-1 py-0.5`} 
                             onClick={() => select(item.name)}
                         >
                             {item.name}
@@ -377,14 +439,15 @@ function DataEditInput({ value, name, changeVal } : { value : string, name : str
         changeVal(event.target.value);
     }
     return (
-        <input type={type} defaultValue={value} min={"0"} className="bg-neutral-900 outline-none border-b" onChange={handleChange}></input>
+        <input type={type} defaultValue={value} min={"0"} className="bg-neutral-100 outline-none border-b" onChange={handleChange}></input>
     )
 }
 
 
 //TODO : solover fecth and change it
 function Solvers({ task, projectId } : { task : Task, projectId : string }) {
-    const [solvers, setSolvers] = useState<Solver[]>([]); 
+    const [ solvers, setSolvers] = useState<Solver[]>([]); 
+    const [ team, setTeam ] = useState<Team | null>(null); 
     //<button className='btn-primary absolute px-3 py-1 right-0 mr-2'>Change</button>
     async function fetchSolvers() {
         try {
@@ -404,19 +467,49 @@ function Solvers({ task, projectId } : { task : Task, projectId : string }) {
         }
     }
 
-    useEffect(() => { fetchSolvers() }, []);
+    async function fetchTeam() {
+        if (!task.teamId) {
+            return;
+        } 
+        try {
+            const res = await fetch(`/api/pojects/${projectId}/team/${task.teamId}/info`, {
+                method: "GET"
+            })
+
+            const data = await res.json(); 
+            if (!res.ok) {
+                console.error(data.error);
+            }
+
+            setTeam(data.team);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => { 
+        fetchSolvers();
+        fetchTeam();
+    }, []);
+
+    //<button onClick={fetchSolvers} className="h-fit" title="Edit solvers"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
     return (
-        <div>
-            <div className="flex gap-2">
-                <h3 className='font-bold mb-2'>Solvers</h3>
-                <button onClick={fetchSolvers} className="h-fit" title="Edit solvers"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
+        <div className="space-y-2">
+            <div>
+                <div className="flex gap-2">
+                    <h3 className='font-bold mb-2'>Solvers</h3>
+                </div>
+                <div>
+                    <dt>team:</dt><dd>{team?.name}</dd>
+                </div>
             </div>
             <ul className="space-y-2">
                 {solvers.map((solver) => {
                     const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";
                     return (
-                        <li key={solver.id} className='bg-neutral-900 p-2 rounded w-full flex flex-row gap-1 relative items-center'>
-                            <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-300 mr-2 text-color cursor-pointer'></Image>
+                        <li key={solver.id} className='bg-neutral-100 p-2 rounded w-full flex flex-row gap-1 relative items-center'>
+                            <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-400 mr-2 text-color cursor-pointer'></Image>
                             <div>{solver.name} {solver.surname}</div>
                         </li>
                     )
