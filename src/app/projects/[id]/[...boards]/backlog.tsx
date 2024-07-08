@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useReducer, useState, createContext, useContext, DragEvent, useRef, Dispatch, SetStateAction } from 'react'
+import { useEffect, useReducer, useState, createContext, useContext, useRef} from 'react'
 import { FilterButton, SearchInput } from "../components/filter-tables";
 import { CreateTaskButton, Head } from "../components/other";
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
@@ -17,10 +17,12 @@ import { Name } from '../components/other-client';
 interface FunctionsContextType {
     createGroup: (name: string) => void;
     deleteGroup: (group: GroupOfTasks) => void;
+    updateGroup: (groupID: string, propertyKey : keyof GroupOfTasks, val : number | string) => void;
     fetchGroups: () => void;
     openTaskInfo : (task : Task) => void;
     projectId: string;
-    collumns: TaskColumn[]
+    collumns: TaskColumn[];
+    groups: GroupOfTasks[]
 }
 
 const FunctionsContext = createContext<FunctionsContextType | null>(null);
@@ -32,7 +34,7 @@ export default function Backlog({ id } : { id : string }) {
     const [ task, setTask ] = useState<Task | null>(null);
     async function fetchGroups() {
         try {
-            const res = await fetch(`/api/projects/${id}/backlog`, {
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}`, {
                 method: "GET"
             })
             const data = await res.json();
@@ -42,6 +44,7 @@ export default function Backlog({ id } : { id : string }) {
             }
             const newGroups : GroupOfTasks[] = data.backlog
             newGroups.sort((a, b) => sortGroups(a, b));
+            console.log(newGroups);
             setGroups(newGroups);
             setColumns(data.collumns);
         }
@@ -53,7 +56,7 @@ export default function Backlog({ id } : { id : string }) {
 
     async function createGroup(name : string) {
         try {
-            const res = await fetch(`/api/projects/${id}/backlog/group/create`, {
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/group/create`, {
                 method: "POST",
                 body: JSON.stringify({
                     name: name
@@ -62,11 +65,12 @@ export default function Backlog({ id } : { id : string }) {
 
             const data = await res.json();
             if (res.ok) {
+            
                 const newGroup : TasksGroup = data.group;
                 const newGroups : GroupOfTasks[] = groups;
                 newGroups.push({ id: newGroup.id, name: newGroup.name, backlogId: newGroup.backlogId, position: newGroup.position, tasks: []});
                 newGroups.sort((a, b) => sortGroups(a, b));
-                setGroups(newGroups);
+                setGroups([...newGroups]);
             }
         }
         catch (error) {
@@ -77,7 +81,7 @@ export default function Backlog({ id } : { id : string }) {
 
     async function deleteGroup(group : GroupOfTasks) {
         try {
-            const res = await fetch(`/api/projects/${id}/backlog/group/delete`, {
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/group/delete`, {
                 method: "POST",
                 body: JSON.stringify({
                     id: group.id
@@ -103,14 +107,15 @@ export default function Backlog({ id } : { id : string }) {
 
     async function updateTask(updateTask : Task) {
         try {
-            const response = await fetch(`/api/projects/${id}/board/task/update`, {
+            const response = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/task/update`, {
                 method: "POST", 
                 body: JSON.stringify({
                     task: updateTask
                 })
             });
-            const json = await response.json();
+            
             if (!response.ok) {
+                const json = await response.json();
                 throw new Error(json.error);
             }
             fetchGroups();
@@ -119,13 +124,40 @@ export default function Backlog({ id } : { id : string }) {
         }
     }
 
+    async function updateGroup(groupId : string, propertyKey : keyof GroupOfTasks, val : string | number) {
+        if (propertyKey != "position" && propertyKey != "name") {
+            return;
+        }
+        try {
+            const func = propertyKey == "position" ? "move" : "update";
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/group/${func}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    id: groupId,
+                    newVal: val,
+                    key: propertyKey
+                })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error);
+            }
+
+            fetchGroups();
+        }
+        catch (error) {
+            console.error(error);
+        }
+        return;
+    }
 
     useEffect(() => {
         fetchGroups()
     }, []);
 
     return (
-        <FunctionsContext.Provider value={{ createGroup, deleteGroup, fetchGroups, openTaskInfo, projectId: id, collumns: collumns }}>
+        <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups, openTaskInfo, projectId: id, collumns: collumns, groups: groups }}>
             <div className="w-3/4 mx-auto relative">
                 <Head text="Backlog"/>
                 <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
@@ -139,19 +171,14 @@ export default function Backlog({ id } : { id : string }) {
     )
 }
 
-enum DraggTypes {
-    task = "task",
-    group = "group"
-}
-
 function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
     //const [ draggetType, setDraggetType ] = useState<DraggTypes | null>(null);
-    const { createGroup, fetchGroups, projectId } = useContext(FunctionsContext)!;
+    const { createGroup, fetchGroups, updateGroup, projectId } = useContext(FunctionsContext)!;
     const groupsRef = useRef<HTMLUListElement>(null);
 
     async function moveTask(groupId : string, taskId : string) {
         try {
-            const res = await fetch(`/api/projects/${projectId}/backlog/task/group-move`, {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/group-move`, {
                 method: "POST",
                 body: JSON.stringify({
                     groupId: groupId,
@@ -170,27 +197,21 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
             console.error(error);
         }
     }
-    /*
-    function handleDragOver(e : React.DragEvent) {
-        e.preventDefault();
-        
+
+    function moveGroup(groupId : string, position: number) {
+        if (position < 0 || position > groups.length - 1) {
+            return;
+        }
+        updateGroup(groupId, "position", position);
     }
 
-    function handleOnDrop(e : React.DragEvent) {
-        e.preventDefault();
-        const groupId = e.dataTransfer.getData("text/groupId");
-        console.log(groupId);
-        const mouseY : number = e.clientY;
-        console.log(mouseY);
-    }
-*/
     return (
         <section className="w-full space-y-2" > 
             <Creator what="Create New Group" handleCreate={createGroup}/>
             <ul className="space-y-4 w-full" ref={groupsRef}>
                 {
                     groups.map((group) => (
-                        <GroupList key={group.id} group={group} moveTask={moveTask}/>
+                        <GroupList key={group.id} group={group} moveTask={moveTask} moveGroup={moveGroup}/>
                     ))
                 }
             </ul>
@@ -200,12 +221,12 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
 }
 
 
-function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (groupId : string, taskId : string) => void }) {
+function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, moveTask : (groupId : string, taskId : string) => void, moveGroup : (groupId : string, pos : number ) => void}) {
     const [ displayd, setDisplayd ] = useState<string>("block"); 
     const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false);
     const [ isDragOver, toggleDragOver ] = useReducer(isDragOver => !isDragOver, false);
     
-    const { deleteGroup, fetchGroups, projectId } = useContext(FunctionsContext)!;
+    const { deleteGroup, updateGroup, fetchGroups, projectId, groups } = useContext(FunctionsContext)!;
 
     async function createTask(name : string) {
         try {
@@ -274,7 +295,7 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
     }
 
     function updateName(name : string) {
-        console.log(name);
+        updateGroup(group.id, "name", name);
     }
 
     // zmanší zkupinu na uzivatelkse obrazovce (zakryje ukoly)
@@ -282,13 +303,21 @@ function GroupList({ group, moveTask } : { group : GroupOfTasks, moveTask : (gro
         setDisplayd(displayd == "block" ? "none" : "block");
     }
     
-    const buttons : Button[] = new Array(2);
+    const buttons : Button[] = new Array(4);
         
-    buttons[0] = { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.bright, title: "Hide Tasks" }
+    buttons[2] = { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.Bright, title: "Hide Tasks" }
     
     if (group.id != unassigned) {
         //buttons[0] = { onClick: () => openSettings(group), img: "/settings.svg", type: ButtonType.Normal, size: 2, padding: 1,lightness: Lighteness.bright, title: "Open Settings" };
-        buttons[1] = { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "Delete Group" };
+        const pos : number = group.position ?? -2;
+        if (pos > 0) {
+            buttons[1] = { onClick: () => moveGroup(group.id, pos - 1), img: "/arrow-up.svg", type: ButtonType.Normal, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Up" };
+        }
+        // - 2 - becouse of unassigned group
+        if (pos < groups.length - 2) {
+            buttons[0] = { onClick: () => moveGroup(group.id, pos + 1), img: "/arrow-down.svg", type: ButtonType.Normal, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Down" };
+        }
+        buttons[3] = { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "Delete Group" };
     }
     
 
@@ -440,7 +469,15 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         findColumnInfo();
     }, [task]);
 
-    // TODO: Use button Array komponent insted of fix button html
+     // TODO: Use button Array komponent insted of fix button html
+    
+    const buttons : Button[] = [
+        { onClick: () => deleteTask(task), img: "/trash.svg", size: 8, padding: 2, type: ButtonType.Destructive, lightness: Lighteness.Dark, title: "Delete Task"},
+        { onClick: () => removeTask(task), img: "/x.svg", size: 8, type: ButtonType.MidDestructive, lightness: Lighteness.Dark, title: "Remove Task"},
+        { onClick: () => openTaskInfo(task), img: "/info-lg.svg", size: 8, padding: 2, type: ButtonType.Normal, lightness: Lighteness.Dark, title: "Task Info"},
+    ]
+    
+   
     return (
         <>
             <li className="bg-neutral-900 w-full p-2 rounded grid  grid-cols-9 gap-2" draggable onDragStart={handleOnDrag}>
@@ -458,23 +495,17 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                     }
                 </ul>
                 <div className="flex h-full items-center justify-end gap-1 col-span-1">
-                    <button onClick={() => deleteTask(task)}  className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-red-600">
-                            <img src="/trash.svg" title="Delete Task" className="w-8 h-8 p-2 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
-                    </button>
-                    { task.tasksGroupId && 
-                    <button onClick={() => removeTask(task)}  className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-orange-600">
-                        <img src="/x.svg" title="Remove Task" className="w-8 h-8 hover:bg-orange-600 rounded hover:bg-opacity-40"></img>
-                    </button>
-                    }
-                    <button onClick={() => openTaskInfo(task)} className="w-fit h-fit bg-neutral-950 rounded hover:outline hover:outline-1 hover:outline-violet-600">
-                        <img src="/info-lg.svg" title="Task Info" className="w-8 h-8 p-2 rounde hover:bg-violet-600 hover:bg-opacity-40"></img>
-                    </button>
+                
+                    <ArrayButtons buttons={buttons} gap={1}/>
                 </div>
             </li>
             
         </>
     )
 }
+
+
+
 
 function SolverComp({ solver } : { solver : Solver }) {
     const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";

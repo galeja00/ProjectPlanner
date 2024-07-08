@@ -8,8 +8,8 @@ export enum ButtonType {
 }
 
 export enum Lighteness {
-    dark,
-    bright
+    Dark,
+    Bright
 }
 
 export type Button = {
@@ -35,10 +35,7 @@ export function ArrayButtons({ buttons, gap } : {  buttons : Button[], gap : num
 }
 
 function ButtonComp({ button } : { button : Button }) {
-    let bgColor = "bg-neutral-900";
-    if (button.lightness == Lighteness.dark) {
-        bgColor = "bg-neutral-900";
-    }
+    let bgColor = button.lightness == Lighteness.Dark ? "bg-neutral-950" : "bg-neutral-900";
     let hoverColor = "violet-600";
     switch (button.type) {
         case (ButtonType.Destructive):
@@ -52,11 +49,12 @@ function ButtonComp({ button } : { button : Button }) {
             break;
     }
     return (
-        <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor} hover:bg-${hoverColor} p-${button.padding ?? "0"} hover:bg-opacity-40`} onClick={button.onClick}>
-            <img src={button.img} title={button.title} className={`w-${button.size} h-${button.size}`}></img>
+        <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor} hover:bg-${hoverColor} w-fit h-fit  hover:bg-opacity-40`} onClick={button.onClick}>
+            <img src={button.img} title={button.title} className={`w-${button.size} h-${button.size} p-${button.padding ?? "0"}`}></img>
         </button>
     )
 }
+
 
 
 export function CreateButton({ text, onClick } : { text : string, onClick : () => void }) {

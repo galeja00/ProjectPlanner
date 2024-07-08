@@ -86,8 +86,8 @@ export function Editor({ val = "", create, endCreate, type } : { val? : string, 
     }
 
     const buttons : Button[] = [
-        { onClick: handleCreate, img: "/check.svg", type: ButtonType.Creative, size: 6, lightness: Lighteness.bright, title: "Create"},
-        { onClick: endCreate, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "End"}
+        { onClick: handleCreate, img: "/check.svg", type: ButtonType.Creative, size: 6, lightness: Lighteness.Bright, title: "Create"},
+        { onClick: endCreate, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "End"}
     ]
 
     return (
@@ -111,8 +111,8 @@ export function Selector({ val, options, select, endSelect } : { val : string ,o
     }
 
     const buttons : Button[] = [
-        { onClick: handleSubmit, img: "/check.svg", type: ButtonType.Creative, size: 6, lightness: Lighteness.bright, title: "Create"},
-        { onClick: endSelect, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "End"}
+        { onClick: handleSubmit, img: "/check.svg", type: ButtonType.Creative, size: 6, lightness: Lighteness.Bright, title: "Create"},
+        { onClick: endSelect, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "End"}
     ]
 
     return (

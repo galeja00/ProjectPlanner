@@ -135,7 +135,7 @@ function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (i
     const ago: number = node.createdAgo;
     const agoText: string = formatAgo(ago);
 
-    const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.bright}];
+    const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
     return ( 
         <li key={node.id} className="bg-neutral-950 rounded min-h-[8rem]">
             <div className="flex justify-between border-b p-4 items-center">

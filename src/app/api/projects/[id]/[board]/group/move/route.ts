@@ -45,27 +45,37 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             }
         })
 
-        let prevG = groups.find((g) => g.id = id);
+        if (groups.length < newVal) {
+            return Response.json({error: "Cant move to group out of indexis"}, { status: 400 });
+        }
+
+        let prevG = groups.find((g) => g.id == id);
         if (!prevG) {
             return Response.json({ error: "This Group don't exist."}, { status: 400 });
         }
-        let mov = 1;
-        if (newVal > prevG.position) mov = -1; 
-        let serchRange = createRange(newVal, prevG.position);
-        const moveGroups : TasksGroup[] = groups.filter((g) => isBetweenRangeInclude(serchRange, g.position) && g.id != prevG.id);
-        moveGroups.forEach((g) => g.position + mov);
-        moveGroups.push({ ...prevG, position: newVal})
+        
+        let mov = newVal > prevG.position ? -1 : 1;
+        
+        let searchRange = createRange(newVal, prevG.position);
+        const moveGroups = groups
+            .filter(g => isBetweenRangeInclude(searchRange, g.position) && g.id !== prevG.id)
+            .map(g => ({
+                ...g,
+                position: g.position + mov
+            }));
+        moveGroups.push({ ...prevG, position: newVal});
 
-        for (const g of moveGroups) {
-            prisma.tasksGroup.update({
+
+        await prisma.$transaction(
+            moveGroups.map((g) => prisma.tasksGroup.update({
                 where: {
                     id: g.id
                 },
                 data: {
                     position: g.position
                 }
-            })
-        }
+            }))
+        );
         return Response.json({ message: "Sucesfully moved group" }, { status: 200 });
     }
     catch (error) {
@@ -76,7 +86,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
 
 
 function createRange(a : number, b : number) : Range {
-    return { start: a < b ? a : b, end: a < b ? b : a };
+    return { start: Math.min(a, b), end: Math.max(a, b)  };
 }
 
 function isBetweenRangeInclude(range : Range, val : number) : boolean {
