@@ -205,7 +205,7 @@ export default function TimeTable({ id } : { id : string }) {
                     <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
                 </div>
                 <Table/>
-                <TimeMode mode={mode} changeMode={(mode : Mode) => setMode(mode)}/>
+                {/*<TimeMode mode={mode} changeMode={(mode : Mode) => setMode(mode)}/>*/}
             </section>
             { isAdding ? <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/> : <></>}
         </TimeTableContext.Provider>

@@ -1,20 +1,33 @@
 "use client"
 
-import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent } from "react";
+import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent, createContext, useContext } from "react";
 import Image from 'next/image' 
 import { Issue, Tag, Task, Ranking, Team, ProjectMember } from "@prisma/client";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import { Name } from "./other-client";
 import { TagList } from "./tags";
+import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
+import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 
+
+interface TaskInfoContextTypes {
+    task : Task,
+    team : Team | null,
+    solvers: Solver[]
+}
+
+const TaskInfoContext = createContext<TaskInfoContextTypes | null>(null);
 
 // TODO: Error handeling + loading screen
 // dialog about displaying all info abou task
 export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : string, projectId : string, handleClose : () => void, submitTask : (task : Task) => void}) {
-    const [task, setTask] = useState<Task | null>(null);
-    const [tags, setTags] = useState<Tag[]>([]);
-    const [error, setError] = useState<boolean>(false);
+    const [ task, setTask ] = useState<Task | null>(null);
+    const [ tags, setTags ] = useState<Tag[]>([]);
+    const [ solvers, setSolvers ] = useState<Solver[]>([]); 
+    const [ team, setTeam ] = useState<Team | null>(null); 
+    const [ error, setError] = useState<boolean>(false);
+
     async function fetchInfo() {
         try {
             const res = await fetch(`/api/projects/${projectId}/task/${id}/info`, {
@@ -34,6 +47,48 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
     }
 
+    async function fetchSolvers() {
+        if (!task) {
+            return;
+        } 
+        try {
+            const res = await fetch(`/api/projects/${projectId}/task/${task.id}/solver`, {
+                method: "GET",
+            }); 
+            const data = await res.json();
+            if (!res.ok) {
+                console.error(data.error);
+                return;
+            }
+
+            setSolvers(data.solvers);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function fetchTeam() {
+        if (!task || !task.teamId) {
+            return;
+        } 
+        try {
+            const res = await fetch(`/api/pojects/${projectId}/team/${task.teamId}/info`, {
+                method: "GET"
+            })
+
+            const data = await res.json(); 
+            if (!res.ok) {
+                console.error(data.error);
+            }
+
+            setTeam(data.team);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
     function updateAndClose(task : Task) {
         submitTask(task);
         handleClose();
@@ -49,21 +104,26 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         fetchInfo();
     }, []);
 
+    useEffect(() => {
+        fetchSolvers();
+        fetchTeam();
+    }, [task])
+
     return (
         <Dialog>
             <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
                 { task 
                     ?
-                    <>
+                    <TaskInfoContext.Provider value={{task, team, solvers}}>
                         <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
                         <div className='grid grid-cols-3 h-full'>
                             <MainInfoContainer task={task} updateTask={updateTask}/>
                             <section className='py-2 px-4  flex flex-col gap-4'>
                                 <Data task={task} updateTask={updateTask}/>
-                                <Solvers task={task} projectId={projectId}/>
+                                <Solvers solvers={solvers} team={team}/>
                             </section>
                         </div>
-                    </>
+                    </TaskInfoContext.Provider>
                     :
                     <>
                         <h3 className="h-60">Loading...</h3>
@@ -103,7 +163,7 @@ enum TypeOfInfo {
 }
 
 function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
-    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes, TypeOfInfo.settings];
+    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, /*TypeOfInfo.issues,*/ TypeOfInfo.nodes, TypeOfInfo.settings];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task} updateTask={updateTask}/>);
 
@@ -129,7 +189,7 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
 
 
     return (
-        <section className='col-span-2 border-r border-neutral-400 h-[28rem]'>
+        <section className='col-span-2 border-r border-neutral-400 h-[28rem] relative'>
             <menu className='flex w-full border-b border-neutral-400'>
                 {
                     menuItems.map((type) => (
@@ -137,7 +197,9 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
                     ))
                 }
             </menu>
-            {actualInfo}
+            <div className="relative h-[25rem]">
+                {actualInfo}
+            </div>
         </section>
     )
 }
@@ -248,8 +310,32 @@ function Nodes() {
 }
 
 function Settings({ task } : { task : Task }) {
-    const [ allTeams, setAllTeams ] = useState<Team[]>([]);
-    const [ allMembers, setAllMembers ] = useState<ProjectMember[]>([]);
+    const { team, solvers } = useContext(TaskInfoContext)!;   
+
+    return (
+        <div className="flex gap-4 p-4 relative h-full">
+            <div className="w-1/2 space-y-2">
+                <TeamSelector task={task} team={team} />
+            </div>
+            <div className="w-1/2 space-y-2">
+                <UserSelector task={task} solvers={solvers} team={team}/>
+            </div>
+        </div>
+    )
+}
+
+type SelectionItem = {
+    id: string,
+    name: string,
+    image?: string | null,
+    load?: number,
+    team?: string | null,
+    selected: boolean
+}
+
+function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
+    const [ teams, setTeams ] = useState<Team[]>([]);
+
 
     async function fetchTeams() {
         try {
@@ -261,12 +347,40 @@ function Settings({ task } : { task : Task }) {
             if (!res.ok) {
                 throw new Error(data.error);
             }
-            setAllTeams(data.teams);
+            console.log(data.teams);
+            setTeams(data.teams);
         }
         catch (error) {
             console.error(error);
         }
     }
+
+    useEffect(() => {
+        fetchTeams();
+    }, [])
+
+
+
+    return (
+        <>
+            <h4>Team</h4>
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1">
+                <Selector 
+                    items={teams.map(s => ({
+                        id: s.id,
+                        name: s.name,
+                        selected: s.id === team?.id
+                    }))} 
+                />
+            </ul>
+        </>
+    )
+}
+
+function UserSelector({ task, team, solvers } : { task : Task, team : Team | null, solvers : Solver[] }) {
+    const [ isAll, toggleAll ] = useReducer(isAll => !isAll, true); 
+    const [ members, setMembers ] = useState<MemberTableInfo[]>([]); 
+
 
     async function fetchMembers() {
         try {
@@ -278,7 +392,8 @@ function Settings({ task } : { task : Task }) {
             if (!res.ok) {
                 throw new Error(data.error);
             }
-            setAllTeams(data.data);
+            console.log(data.data);
+            setMembers(data.data);
         }
         catch (error) {
             console.error(error);
@@ -286,34 +401,59 @@ function Settings({ task } : { task : Task }) {
     }
 
     useEffect(() => {
-        fetchTeams();
-        fetchMembers(); 
+        fetchMembers();
     }, []);
 
+    const selectIteams : SelectionItem[] = members.map((member) => {
+        let isSelcted = false;
+        for (let solver of solvers) {
+            isSelcted = solver.memberId == member.memberId;
+            break;
+        }
+        if (!isAll && team && member.teamId == team.id) {
+            return { id: member.memberId, name: `${member.name} ${member.surname}`, image: member.image, selected: isSelcted, team:member.teamName  };
+        } 
+        return { id: member.memberId, name: `${member.name} ${member.surname}`, image: member.image, selected: isSelcted, team:member.teamName };
+    });
+
+
     return (
-        <div className="flex gap-2 p-4">
-            <div>
-                <h4>Team</h4>
-                <ul className="">
-                    {
-                        allTeams.map((team) => (
-                            <li></li>
-                        ))
-                    }
-                </ul>
-            </div>
-            <div>
+        <>
+            <div className="flex justify-between">
                 <h4>Solvers</h4>
-                <ul className="">
-                    {
-                        allMembers.map((member) => (
-                            <li></li>
-                        ))
-                    }
-                </ul>
+                <button onClick={toggleAll} className="border border-violet-600 rounded px-2 text-violet-600 hover:bg-opacity-40 hover:bg-violet-600 ">All</button>
             </div>
-        </div>
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1">
+                <Selector items={selectIteams}/>
+            </ul>
+        </>
     )
+}
+
+
+
+function Selector({ items } : { items : SelectionItem[]}) {
+    return (
+        <ul>
+            {
+                items.map((item) => { 
+                    const isImage = item.image != null || item.image != undefined;
+                    const pathToImage = "/avatar.svg";
+
+                    return (
+                        <li key={item.id} className="bg-neutral-200 rounded p-1 flex items-center gap-2">
+                            { isImage ? <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="rounded-full bg-neutral-300"></Image> : <></> }
+                            <div>{item.name}</div>
+                            <div className="text-sm"><span className="text-neutral-600 ">team:</span> <span className="bg-violet-600 bg-opacity-40 rounded border border-violet-600 text-violet-600 px-1">{item.team}</span></div>
+                            <div className="text-sm"><span className="text-sm text-neutral-600">load:</span> {0}</div>
+                        </li>
+                    )
+                }) 
+            }
+        </ul>
+    )
+
+
 }
 
 // DATA INFORMATIONS
@@ -444,54 +584,8 @@ function DataEditInput({ value, name, changeVal } : { value : string, name : str
 }
 
 
-//TODO : solover fecth and change it
-function Solvers({ task, projectId } : { task : Task, projectId : string }) {
-    const [ solvers, setSolvers] = useState<Solver[]>([]); 
-    const [ team, setTeam ] = useState<Team | null>(null); 
-    //<button className='btn-primary absolute px-3 py-1 right-0 mr-2'>Change</button>
-    async function fetchSolvers() {
-        try {
-            const res = await fetch(`/api/projects/${projectId}/task/${task.id}/solver`, {
-                method: "GET",
-            }); 
-            const data = await res.json();
-            if (!res.ok) {
-                console.error(data.error);
-                return;
-            }
 
-            setSolvers(data.solvers);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-
-    async function fetchTeam() {
-        if (!task.teamId) {
-            return;
-        } 
-        try {
-            const res = await fetch(`/api/pojects/${projectId}/team/${task.teamId}/info`, {
-                method: "GET"
-            })
-
-            const data = await res.json(); 
-            if (!res.ok) {
-                console.error(data.error);
-            }
-
-            setTeam(data.team);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-
-    useEffect(() => { 
-        fetchSolvers();
-        fetchTeam();
-    }, []);
+function Solvers({ solvers, team} : { solvers : Solver[], team : Team | null }) {
 
     //<button onClick={fetchSolvers} className="h-fit" title="Edit solvers"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
     return (
@@ -510,7 +604,7 @@ function Solvers({ task, projectId } : { task : Task, projectId : string }) {
                     return (
                         <li key={solver.id} className='bg-neutral-100 p-2 rounded w-full flex flex-row gap-1 relative items-center'>
                             <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-400 mr-2 text-color cursor-pointer'></Image>
-                            <div>{solver.name} {solver.surname}</div>
+                            <div className="bg-">{solver.name} {solver.surname}</div>
                         </li>
                     )
                 })}

@@ -52,7 +52,6 @@ function ButtonComp({ button } : { button : Button }) {
         default:
             hoverColor = "violet-600";
     }
-    console.log(hoverColor);
     return (
         <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor} hover:bg-${hoverColor} w-fit h-fit  hover:bg-opacity-40`} onClick={button.onClick}>
             <img src={button.img} title={button.title} className={`w-${button.size} h-${button.size} p-${button.padding ?? "0"}`}></img>

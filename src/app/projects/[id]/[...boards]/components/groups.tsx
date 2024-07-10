@@ -134,7 +134,7 @@ function ListGroups({ groups, handleMove } : { groups : GroupBasicInfo[], handle
     }
 
     return(
-        <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-200"}`}
+        <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-neutral-600" : "bg-neutral-100"}`}
             onDrop={handleOnDrop}
             onDragOver={handleOnDragOver}
             onDragLeave={handleOnLeave}

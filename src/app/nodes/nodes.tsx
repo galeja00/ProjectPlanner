@@ -138,10 +138,10 @@ function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (i
     const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
     return ( 
         <li key={node.id} className="bg-neutral-200 rounded min-h-[8rem]">
-            <div className="flex justify-between border-b p-4 items-center">
+            <div className="flex justify-between border-b border-neutral-900 p-4 items-center">
                 <h3>{node.name}</h3>
                 <div className="flex gap-4">
-                    <div className="text-neutral-400">
+                    <div className="text-neutral-600">
                         {agoText}
                     </div>
                     <ArrayButtons buttons={buttons} gap={1}/>

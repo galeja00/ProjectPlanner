@@ -102,15 +102,13 @@ export default function Teams({ projectId } : { projectId : string}) {
 
     useEffect(() => { fetchTeams() }, []);
 
-    
-
     return (
         <>
             { isSettings && team && <TeamDialog team={team} projectId={projectId} updateTeams={fetchTeams} closeSettings={closeSettings}/>}
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             <Head text="Teams" />
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                <SearchInput/>
+                {/*<SearchInput/>*/}
                 <ButtonWithImg image="/person-add.svg" alt="team" title="Create Team" onClick={toggleAdding}/>
             </section>
             <section>
@@ -150,7 +148,7 @@ function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInf
             <td className="col-span-2">{teamInfo.name}</td>
             <Members members={teamInfo.members}/>
             <td className="col-span-2">{count}</td>
-            <td className="col-span-2">0</td>
+            <td className="col-span-2">0</td> {/*TODO: fetch info about number of tasks*/} 
             <td className="h-fit flex gap-2 items-center justify-end">
                 <button onClick={handleDelete} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">
                     <img src="/x.svg" title="Delete Group" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>

@@ -169,10 +169,10 @@ export default function Board({ id } : { id : string }) {
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
             <div className='relative'>
                 <Head text='Board'/>
-                <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
+                {/*<section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                     <SearchInput/>
                     <FilterButton onClick={toggleFilterDialog}/>
-                </section>
+                </section>*/}
                 { isFilterDialog && <FilterDialog handleClose={toggleFilterDialog}/>}
                 <section className="flex gap-2 w-full">
                     {

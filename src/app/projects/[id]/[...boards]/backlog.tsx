@@ -159,10 +159,10 @@ export default function Backlog({ id } : { id : string }) {
         <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups, openTaskInfo, projectId: id, collumns: collumns, groups: groups }}>
             <div className="w-3/4 mx-auto relative">
                 <Head text="Backlog"/>
-                <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
+                {/*<section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                     <SearchInput/>
                     <FilterButton onClick={() => fetchGroups}/>
-                </section>
+                </section>*/}
                 <ListOfGroups groups={groups} />
                 {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
             </div>

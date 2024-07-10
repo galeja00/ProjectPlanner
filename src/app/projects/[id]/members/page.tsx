@@ -87,10 +87,11 @@ export default function Members({ params } : { params : { id : string }}) {
         <main className="py-14 px-14 relative w-full">
             <Head text="Members"/>
             <div className='flex gap-4 mb-4 w-full h-fit items-end'>
+                {/*
                 <SearchInput/>
                 <FilterButton onClick={function (): void {
                     throw new Error('Function not implemented.')
-                } }/>
+                } }/>*/}
                 <AddMemberButton handleClick={handleAddButton}/>
             </div>
             <TableMembers members={members} handleRemove={removeMember}/>
@@ -293,7 +294,7 @@ function AddForm(
             <div className='flex'>
                 {
                     types.map((t, i) => (
-                        <label key={i} onClick={() => handleChange(t)} className="rounded-t px-4 py-1 flex content-center" style={{ backgroundColor: t == actualType ? "#171717" : "#0a0a0a"}}>{t}</label>
+                        <label key={i} onClick={() => handleChange(t)} className="rounded-t px-4 py-1 flex content-center" style={{ backgroundColor: t == actualType ? "#f4f4f5" : "#e4e4e7"}}>{t}</label>
                     ))
                 }
             </div>
