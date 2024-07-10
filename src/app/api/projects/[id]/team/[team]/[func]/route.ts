@@ -56,7 +56,7 @@ export async function POST(req : Request, { params } : { params: { id: string, t
     }
 }
 
-export async function GET(req : Request, { params } : { params: { id: string, func : string } }) {
+export async function GET(req : Request, { params } : { params: { id: string, team : string, func : string } }) {
     try {
         const email = await authorize(req);
         if (!email) {
@@ -69,12 +69,12 @@ export async function GET(req : Request, { params } : { params: { id: string, fu
 
         const team : Team | null = await prisma.team.findFirst({
             where: {
-                id: params.id
+                id: params.team
             }
         })
 
         if (!team) {
-            return Response.json({status : 400});
+            return Response.json({ error: "" }, {status : 400});
         }
 
         return Response.json({ team : team }, { status: 200 });

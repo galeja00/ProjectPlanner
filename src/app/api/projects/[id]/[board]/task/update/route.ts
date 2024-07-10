@@ -21,7 +21,7 @@ export async function POST(req : Request, { params } : { params : { id : string 
                 return Response.json({ error: "Estimated hour need o be more the 0"}, { status: 400 }); 
             }
         }
-        const res = await prisma.task.update({
+        await prisma.task.update({
             where: {
                 id: task.id
             },
@@ -32,6 +32,7 @@ export async function POST(req : Request, { params } : { params : { id : string 
                 complexity: task.complexity,
                 priority: task.priority,
                 description: task.description,
+                teamId: task.teamId
             }
         })
 

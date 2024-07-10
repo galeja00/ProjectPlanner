@@ -14,13 +14,15 @@ import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 interface TaskInfoContextTypes {
     task : Task,
     team : Team | null,
-    solvers: Solver[]
+    solvers: Solver[],
+    changeTeam: (team : Team ) => void,
+    changeSolvers: (solvers : Solver[]) => void
 }
 
 const TaskInfoContext = createContext<TaskInfoContextTypes | null>(null);
 
 // TODO: Error handeling + loading screen
-// dialog about displaying all info abou task
+// dialog for display info and editing it
 export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : string, projectId : string, handleClose : () => void, submitTask : (task : Task) => void}) {
     const [ task, setTask ] = useState<Task | null>(null);
     const [ tags, setTags ] = useState<Tag[]>([]);
@@ -73,7 +75,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             return;
         } 
         try {
-            const res = await fetch(`/api/pojects/${projectId}/team/${task.teamId}/info`, {
+            const res = await fetch(`/api/projects/${projectId}/team/${task.teamId}/info`, {
                 method: "GET"
             })
 
@@ -81,7 +83,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             if (!res.ok) {
                 console.error(data.error);
             }
-
+            //console.log(data);
             setTeam(data.team);
         }
         catch (error) {
@@ -90,14 +92,31 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
     }
 
     function updateAndClose(task : Task) {
-        submitTask(task);
+        submitTask({...task});
         handleClose();
     }
 
     function updateTask(task : Task) {
-        setTask(task);
-        //console.log(task);
+        setTask({...task});
         submitTask(task);
+    }
+
+    function changeTeam(team : Team) {
+        if (!task) {
+            return;
+        }
+        if (task.teamId == team.id) {
+            task.teamId = null;
+            setTeam(null);
+        } else {
+            task.teamId = team.id;
+            setTeam({...team});
+        }
+        updateTask(task);
+    }
+
+    function changeSolvers(solvers : Solver[]) {
+
     }
  
     useEffect(() => {
@@ -114,7 +133,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
                 { task 
                     ?
-                    <TaskInfoContext.Provider value={{task, team, solvers}}>
+                    <TaskInfoContext.Provider value={{task, team, solvers, changeTeam, changeSolvers}}>
                         <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
                         <div className='grid grid-cols-3 h-full'>
                             <MainInfoContainer task={task} updateTask={updateTask}/>
@@ -335,7 +354,7 @@ type SelectionItem = {
 
 function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
     const [ teams, setTeams ] = useState<Team[]>([]);
-
+    const { changeTeam } = useContext(TaskInfoContext)!; 
 
     async function fetchTeams() {
         try {
@@ -347,7 +366,6 @@ function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
             if (!res.ok) {
                 throw new Error(data.error);
             }
-            console.log(data.teams);
             setTeams(data.teams);
         }
         catch (error) {
@@ -355,22 +373,28 @@ function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
         }
     }
 
+    function handleSelect(item : SelectionItem) {
+        const newTeam = teams.find((team) => team.id == item.id); 
+        if (newTeam) {
+            changeTeam(newTeam);
+        }
+    }
+
     useEffect(() => {
         fetchTeams();
-    }, [])
-
-
+    }, [team])
 
     return (
         <>
-            <h4>Team</h4>
-            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1">
+            <h4>Teams</h4>
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-1">
                 <Selector 
                     items={teams.map(s => ({
                         id: s.id,
                         name: s.name,
                         selected: s.id === team?.id
                     }))} 
+                    handleSelect={handleSelect}
                 />
             </ul>
         </>
@@ -380,7 +404,7 @@ function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
 function UserSelector({ task, team, solvers } : { task : Task, team : Team | null, solvers : Solver[] }) {
     const [ isAll, toggleAll ] = useReducer(isAll => !isAll, true); 
     const [ members, setMembers ] = useState<MemberTableInfo[]>([]); 
-
+    const { changeSolvers } = useContext(TaskInfoContext)!;
 
     async function fetchMembers() {
         try {
@@ -392,7 +416,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : Team | nul
             if (!res.ok) {
                 throw new Error(data.error);
             }
-            console.log(data.data);
+            //console.log(data.data);
             setMembers(data.data);
         }
         catch (error) {
@@ -400,31 +424,39 @@ function UserSelector({ task, team, solvers } : { task : Task, team : Team | nul
         }
     }
 
+    function handleSelect(item : SelectionItem) {
+        const newSolvers = [];
+        const member : MemberTableInfo | undefined = members.find((mem) => mem.memberId == item.id);
+        console.log(member);
+    }
+
     useEffect(() => {
         fetchMembers();
-    }, []);
+    }, [solvers]);
 
-    const selectIteams : SelectionItem[] = members.map((member) => {
-        let isSelcted = false;
-        for (let solver of solvers) {
-            isSelcted = solver.memberId == member.memberId;
-            break;
-        }
-        if (!isAll && team && member.teamId == team.id) {
-            return { id: member.memberId, name: `${member.name} ${member.surname}`, image: member.image, selected: isSelcted, team:member.teamName  };
-        } 
-        return { id: member.memberId, name: `${member.name} ${member.surname}`, image: member.image, selected: isSelcted, team:member.teamName };
-    });
+    const selectItems: SelectionItem[] = members
+        .filter(member => isAll || (team && member.teamId === team.id))
+        .map(member => {
+            const isSelected = solvers.some(solver => solver.memberId === member.memberId);
+            return {
+                id: member.memberId,
+                name: `${member.name} ${member.surname}`,
+                image: member.image,
+                selected: isSelected,
+                team: member.teamName,
+                load: member.tasksLoad
+            };
+        });
 
 
     return (
         <>
             <div className="flex justify-between">
                 <h4>Solvers</h4>
-                <button onClick={toggleAll} className="border border-violet-600 rounded px-2 text-violet-600 hover:bg-opacity-40 hover:bg-violet-600 ">All</button>
+                <button onClick={toggleAll} className="border border-violet-600 rounded px-2 text-violet-600 hover:bg-opacity-40 hover:bg-violet-600 ">{isAll ? "Team" : "All"}</button>
             </div>
-            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1">
-                <Selector items={selectIteams}/>
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-1">
+                <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
             </ul>
         </>
     )
@@ -432,25 +464,24 @@ function UserSelector({ task, team, solvers } : { task : Task, team : Team | nul
 
 
 
-function Selector({ items } : { items : SelectionItem[]}) {
+function Selector({ items, team = false, handleSelect } : { items : SelectionItem[], team? : boolean, handleSelect : (item : SelectionItem) => void }) {
     return (
-        <ul>
+        <>
             {
                 items.map((item) => { 
                     const isImage = item.image != null || item.image != undefined;
-                    const pathToImage = "/avatar.svg";
-
+                    const pathToImage = item.image ? `/uploads/user/${item.image}` :  "/avatar.svg";
                     return (
-                        <li key={item.id} className="bg-neutral-200 rounded p-1 flex items-center gap-2">
-                            { isImage ? <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="rounded-full bg-neutral-300"></Image> : <></> }
+                        <li key={item.id} onClick={() => handleSelect(item)} className={`cursor-pointer bg-neutral-200 rounded p-1 flex items-center gap-2 ${item.selected && "outline outline-2 outline-green-500"}`}>
+                            { isImage && <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="rounded-full bg-neutral-300"></Image>}
                             <div>{item.name}</div>
-                            <div className="text-sm"><span className="text-neutral-600 ">team:</span> <span className="bg-violet-600 bg-opacity-40 rounded border border-violet-600 text-violet-600 px-1">{item.team}</span></div>
-                            <div className="text-sm"><span className="text-sm text-neutral-600">load:</span> {0}</div>
+                            { team && <div className="text-sm"><span className="text-neutral-600 ">team:</span> <span className="bg-violet-600 bg-opacity-40 rounded border border-violet-600 text-violet-600 px-1">{item.team}</span></div>}
+                            <div className="text-sm"><span className="text-sm text-neutral-600">load:</span> {item.load}</div>
                         </li>
                     )
                 }) 
             }
-        </ul>
+        </>
     )
 
 
@@ -476,7 +507,7 @@ function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) =
     function changeMode() {
         
         if (isEditing) {
-            console.log(editedTask);
+            //console.log(editedTask);
             updateTask(editedTask);
         }
         toggleEditing();
@@ -594,7 +625,7 @@ function Solvers({ solvers, team} : { solvers : Solver[], team : Team | null }) 
                 <div className="flex gap-2">
                     <h3 className='font-bold mb-2'>Solvers</h3>
                 </div>
-                <div>
+                <div className="flex gap-2">
                     <dt>team:</dt><dd>{team?.name}</dd>
                 </div>
             </div>
