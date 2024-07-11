@@ -10,13 +10,17 @@ import { TagList } from "./tags";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 
+enum SolverFuncs {
+    Add = "add",
+    Remove = "Remove"
+}
 
 interface TaskInfoContextTypes {
     task : Task,
     team : Team | null,
     solvers: Solver[],
     changeTeam: (team : Team ) => void,
-    changeSolvers: (solvers : Solver[]) => void
+    changeSolvers: (funcs : SolverFuncs, memberId : string) => void
 }
 
 const TaskInfoContext = createContext<TaskInfoContextTypes | null>(null);
@@ -70,6 +74,51 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
     }
 
+    async function addSolver(memberId : string) {
+        //task.projectMemberId =  memberId;
+        try {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/solver/add`, {
+                method: "POST",
+                body: JSON.stringify({
+                    task: task,
+                    memberId: memberId
+                })
+            })
+        
+            if (!res.ok) {
+                const data = await res.json();
+                console.error(data.error);
+                return;
+            }
+            fetchSolvers();
+        }
+        catch (error) {
+            console.error(error);
+        }
+        
+    }
+
+    async function delSolver(memberId : string) {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/solver/remove`, {
+                method: "POST",
+                body: JSON.stringify({
+                    task: task,
+                    memberId: memberId
+                })
+            }) 
+            if (!res.ok) {
+                const data = await res.json();
+                console.error(data.error);
+                return;
+            }
+            fetchSolvers();
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
     async function fetchTeam() {
         if (!task || !task.teamId) {
             return;
@@ -115,8 +164,15 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         updateTask(task);
     }
 
-    function changeSolvers(solvers : Solver[]) {
-
+    function changeSolvers(func : SolverFuncs, memberId : string) {
+        if (func == SolverFuncs.Add) {
+            addSolver(memberId);
+        }
+        else {
+            const solver = solvers.find((sol) => sol.memberId == memberId);
+            if (!solver) return;
+            delSolver(memberId);
+        }
     }
  
     useEffect(() => {
@@ -424,10 +480,17 @@ function UserSelector({ task, team, solvers } : { task : Task, team : Team | nul
         }
     }
 
+
+
     function handleSelect(item : SelectionItem) {
-        const newSolvers = [];
         const member : MemberTableInfo | undefined = members.find((mem) => mem.memberId == item.id);
-        console.log(member);
+        if (!member) return; 
+        const isThere = solvers.some((sol) => sol.memberId == member.memberId);
+        if (isThere) {
+            changeSolvers(SolverFuncs.Remove, member.memberId);
+        } else {
+            changeSolvers(SolverFuncs.Add, member.memberId);
+        }
     }
 
     useEffect(() => {
@@ -455,7 +518,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : Team | nul
                 <h4>Solvers</h4>
                 <button onClick={toggleAll} className="border border-violet-600 rounded px-2 text-violet-600 hover:bg-opacity-40 hover:bg-violet-600 ">{isAll ? "Team" : "All"}</button>
             </div>
-            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-1">
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-2">
                 <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
             </ul>
         </>
@@ -470,7 +533,7 @@ function Selector({ items, team = false, handleSelect } : { items : SelectionIte
             {
                 items.map((item) => { 
                     const isImage = item.image != null || item.image != undefined;
-                    const pathToImage = item.image ? `/uploads/user/${item.image}` :  "/avatar.svg";
+                    const pathToImage = item.image ? `/uploads/user/${item.image}` : "/avatar.svg";
                     return (
                         <li key={item.id} onClick={() => handleSelect(item)} className={`cursor-pointer bg-neutral-200 rounded p-1 flex items-center gap-2 ${item.selected && "outline outline-2 outline-green-500"}`}>
                             { isImage && <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="rounded-full bg-neutral-300"></Image>}

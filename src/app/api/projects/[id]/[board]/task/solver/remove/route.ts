@@ -1,6 +1,7 @@
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../../static";
-import { prisma } from "@/db";
+import { prisma} from "@/db";
+import { TaskSolver } from "@prisma/client";
 
 export async function POST(req : Request, { params } : { params : { id : string }}) {
     try {
@@ -25,7 +26,8 @@ export async function POST(req : Request, { params } : { params : { id : string 
         return Response.json({ mess: "Succesfull remove" }, {status: 200 }); 
     }
     catch (error) {
-        return Response.json({error: ""}, {status: 400});
+        console.log(error);
+        return Response.json({error: "Somthing went wrong on server"}, {status: 500});
     }
 }
 

@@ -31,7 +31,6 @@ export default function NotifiactionsList() {
             if (!res.ok) {
                 throw new Error(data.error);
             }
-            console.log(data.notif); 
             setNotifs(data.notif);
         }
         catch (error) {
@@ -46,8 +45,8 @@ export default function NotifiactionsList() {
     return (
         <>
             <section className="flex gap-4 mb-4 w-fit h-fit items-end">
-                <SearchInput/>
-                <ButtonWithImg image="filter.svg" alt="filter" title="Filter Members" onClick={()=>new Error("Not implemented")}/>
+                {/*<SearchInput/>
+                <ButtonWithImg image="filter.svg" alt="filter" title="Filter Members" onClick={()=>new Error("Not implemented")}/>*/}
             </section>
             <ul className="rounded p-1 min-h-[40rem]">
                 {
@@ -55,7 +54,9 @@ export default function NotifiactionsList() {
                         <NotificationsItem key={notif.id} notif={notif} updateNotif={fetchNotifications}/>
                     ))
                 }
+                { notifs.length == 0 && <li>Right now you have zero notifications</li>}
             </ul>
+            
         </>
     )
 }
@@ -67,12 +68,13 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
             const res = await fetch(`/api/users/projectInvites/${type}`, {
                 method: "POST",
                 body: JSON.stringify({
-                    userId: notif.id
+                    id: notif.id
                 })
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                console.error(data.error);
+                //throw new Error(data.error);
             }
             updateNotif();
         }

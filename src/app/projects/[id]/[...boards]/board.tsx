@@ -418,7 +418,7 @@ function TaskComponent(
             console.error(error);
         }
     }
-    //TODO : change api endpoint
+
     async function addSolver(memberId : string) {
         //task.projectMemberId =  memberId;
         try {
@@ -491,19 +491,10 @@ function TaskComponent(
                 <div className={`flex justify-between ${task.priority ? "" : "flex-row-reverse"}`}>
                     { task.priority && <PriorityImg priority={task.priority}/> }
                     
-                    <div className='relative flex gap-1'>
+                    <div className='relative flex gap-1 justify-center items-center'>
                         { task.teamId && <TeamInf teamId={task.teamId} projectId={projectId}/> }
                         <Solver handleSolversMenu={toggleSolversMenu} solvers={solvers}/>
-                        {
-                            isSolversMenu 
-                                && 
-                                <SolversMenu 
-                                    projectId={projectId} 
-                                    solvers={solvers} 
-                                    addSolver={addSolver}
-                                    delSolver={delSolver}
-                                    />              
-                        }
+                        { isSolversMenu && <SolversMenu solvers={solvers} /> }
                     </div>
                 </div>
             </li>
@@ -519,7 +510,7 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
 
     async function fetchTeam(teamId : string ) {
         try {
-            const res = await fetch(`/api/pojects/${projectId}/team/${teamId}/info`, {
+            const res = await fetch(`/api/projects/${projectId}/team/${teamId}/info`, {
                 method: "GET"
             })
 
@@ -537,7 +528,7 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
 
     useEffect(() => { 
         fetchTeam(teamId);
-    }, []);
+    }, [teamId]);
 
     if (!team) {
         return (
@@ -546,7 +537,7 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
     } 
     
     return (
-        <div title={"Current Team"} className=' bg-violet-600 bg-opacity-60 border-violet-600 rounded text-sm flex justify-center'>
+        <div title={"Current Team"} className='bg-violet-600 bg-opacity-40 border border-violet-600 text-violet-600 rounded text-sm px-2 flex items-center  h-fit'>
             {team.name}
         </div>
     )
@@ -561,12 +552,12 @@ function Solver({ handleSolversMenu, solvers} : { handleSolversMenu : () => void
     let img = "/avatar.svg";
     const solver : Solver | null = solvers[0];
     if (solver && solver.image) {
-        img = pathToImages + "user/" + solvers[0].image;
+        img = "/uploads/user/" + solvers[0].image;
     }
     
     return (
         <button className='w-fit h-fit rounded-full hover:bg-neutral-200 p-1' title={solver ? `${solver.name} ${solver.surname}` : "add solver"} onClick={handleSolversMenu}>
-            <Image src={"/avatar.svg"} alt="avatar" width={2} height={2} className='w-6 h-6 rounded-full bg-neutral-400 cursor-pointer'></Image>
+            <Image src={img} alt="avatar" width={10} height={10} className='w-6 h-6 rounded-full bg-neutral-400 cursor-pointer'></Image>
         </button>    
     )
 }
@@ -581,13 +572,9 @@ type MemberTableInfo = {
 }
 
 
-function SolversMenu({ projectId, solvers, addSolver, delSolver } : { projectId : string, solvers : Solver[], addSolver : (memberId : string) => void, delSolver : (solverId : string) => void }) {
-    const [ users, setUsers ] = useState<MemberTableInfo[]>([]);
-   
-    useEffect(() => {
-        fetchProjectUsers(projectId);
-    }, []);
-
+function SolversMenu({ solvers} : { solvers : Solver[] }) {
+   // const [ users, setUsers ] = useState<MemberTableInfo[]>([]);
+/*
     // TODO: error hendeling
     async function fetchProjectUsers(projectId : string) {
         try {
@@ -606,23 +593,23 @@ function SolversMenu({ projectId, solvers, addSolver, delSolver } : { projectId 
             console.error(error);
         }
     }
-
+*/
     return (
-        <div className='w-max bg-neutral-200 absolute right-0 top-8 z-50 p-0 rounded shadow-neutral-100 shadow'>
+        <div className='w-max bg-neutral-200 absolute right-0 top-8 z-50 rounded shadow-neutral-100 shadow'>
+            <h4 className='text-sm text-neutral-600 p-2'>Solvers:</h4>
             <ul>
-            {users.map((user) => {
-                const isSolver = solvers.some((solver) => solver.memberId === user.memberId);
+            {solvers.map((user) => {
+                //const isSolver = solvers.some((solver) => solver.memberId === user.memberId);
                 var imgSrc = "/avatar.svg"
                 if (user.image) {
                     imgSrc = `/uploads/user/${user.image}`
                 }
                 return (
                     <li key={user.memberId} 
-                        className={`flex gap-2 m-1 p-1 w-fit hover:bg-neutral-400 cursor-pointer rounded relative`} 
-                        onClick={() => addSolver(user.memberId)}>
+                        className={`flex gap-2 m-1 p-1 rounded relative`} >
                         <Image src={imgSrc} alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
                         <h5>{user.name} {user.surname}</h5>
-                        {isSolver && <CurrentSolver delSolver={() => delSolver(user.memberId)}/>}
+                        { /*isSolver && <CurrentSolver delSolver={() => delSolver(user.memberId)}/> */}
                     </li>
                     );
                 })}
@@ -630,17 +617,17 @@ function SolversMenu({ projectId, solvers, addSolver, delSolver } : { projectId 
         </div>
     )
 }
-
+/*
 function CurrentSolver({ delSolver } : { delSolver : () => void}) {
     //<button onClick={delSolver}><img src="/x.svg" className='w-4 h-4'></img></button>
     return (
-        <div className=' border border-green-600 rounded-full  px-1 flex text-green-600 bg-green-600 bg-opacity-20'>
+        <div className='border border-green-600 rounded-full  px-1 flex text-green-600 bg-green-600 bg-opacity-20'>
             <p className='text-sm'>current</p>
         </div>
         
     )
 }
-
+*/
 
 function Name({ name, submitName } : { name : string, submitName : (name : string) => void }) {
     const [ edit, toggleEdit ] = useReducer(edit => !edit, false);

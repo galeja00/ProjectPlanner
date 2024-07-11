@@ -12,28 +12,31 @@ export async function POST(req : Request, { params } : { params : { func : strin
         // check if user is signet in
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "You must be authorize"}, { status: 400 });
         }
 
         const id : string | null = await getUserId(email);
         if (id == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "Cant accept invite, this invite is not for you"}, { status: 400 });
         }
 
         const data = await req.json();
+        
         // load Invite from DB
         const invite : ProjectInvite | null = await prisma.projectInvite.findFirst( {
             where: {
-                projectId: data.id
+                id: data.id
             }
         })
+
         // check if invite is in DB
         if(invite == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "This Invite dosn't exist"}, { status: 400 });
         }
+        console.log("inviteUserID: " + invite.invitedUserId);
         //
         if(id != invite.invitedUserId) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "Invite is not for you"}, { status: 400 });
         }
         // do api function for invite
         switch (params.func) {
@@ -49,7 +52,7 @@ export async function POST(req : Request, { params } : { params : { func : strin
         }
     } catch (error) {
         console.error(error);
-        return Response.json({ status : 400});
+        return Response.json({ error: "Somting went wrong on server"}, { status : 500 });
     }
 }
 

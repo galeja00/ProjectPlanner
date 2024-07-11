@@ -51,8 +51,8 @@ export default function DropImage({ closeDrop, updateImg } : { closeDrop : () =>
             onDragLeave={handleDragExit}
             onDrop={handleDrop}
         >
-            <div className={` w-64 h-64 ${isOver ? "bg-violet-600" : "bg-neutral-100"} rounded flex justify-center items-center p-2`}>
-                <div className="w-full h-full border border-dashed rounded flex flex-col justify-center items-center relative">
+            <div className={` w-64 h-64 ${isOver ? "bg-violet-600" : "bg-neutral-200"} rounded flex justify-center items-center p-2`}>
+                <div className="w-full h-full border border-neutral-950 border-dashed rounded flex flex-col justify-center items-center relative">
                     <DialogClose handleClose={closeDrop}/>
                     <div>Drop Image <div>Or</div></div>
                     <input type="file" title="" accept="image/png, image/jpeg" hidden ref={inputRef}
