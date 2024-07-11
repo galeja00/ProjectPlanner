@@ -25,7 +25,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         });
 
         if (!res) {
-            return Response.json({ error: "This task is not existing"}, { status: 400 });
+            return Response.json({ error: "This task don't exist"}, { status: 400 });
         } 
 
 
@@ -39,6 +39,9 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             resTasks = await prisma.task.findMany({
                 where: {
                     taskColumnId: res.taskColumnId
+                },
+                orderBy: {
+                    colIndex: "asc"
                 }
             })
         } else{

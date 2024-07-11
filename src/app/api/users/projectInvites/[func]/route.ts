@@ -48,7 +48,7 @@ export async function POST(req : Request, { params } : { params : { func : strin
                 deleteInv(invite.id);
                 return Response.json({ mess: "Decline was succesfull"}, {status: 200});
             default:
-                return Response.json({ error: "" }, { status: 400 });
+                return Response.json({ error: "This function don't exist" }, { status: 400 });
         }
     } catch (error) {
         console.error(error);

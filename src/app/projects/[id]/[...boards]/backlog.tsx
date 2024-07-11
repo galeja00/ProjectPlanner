@@ -265,11 +265,6 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
         }
         toggleDragOver();
     }
-    /*
-    function handleOnDragGroup(e : DragEvent) {
-        e.dataTransfer.setData("text/type", "group");
-        e.dataTransfer.setData("text/groupId", group.id);
-    }*/
 
     function handleOnDragTask(e : React.DragEvent, task : Task) {
         e.dataTransfer.setData("text/type", "task");
@@ -307,7 +302,6 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
     buttons[2] = { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.Bright, title: "Hide Tasks" }
     
     if (group.id != unassigned) {
-        //buttons[0] = { onClick: () => openSettings(group), img: "/settings.svg", type: ButtonType.Normal, size: 2, padding: 1,lightness: Lighteness.bright, title: "Open Settings" };
         const pos : number = group.position ?? -2;
         if (pos > 0) {
             buttons[1] = { onClick: () => moveGroup(group.id, pos - 1), img: "/arrow-up.svg", type: ButtonType.Normal, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Up" };
@@ -379,7 +373,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
             console.error(error);
         }
     }
-
+    
     async function removeTask(task : Task) {
         try {
             const res = await fetch(`/api/projects/${task.projectId}/${BoardsTypes.Backlog}/task/remove`, {
@@ -400,7 +394,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
             console.error(error);
         }
     }
-
+    
     async function deleteTask(task: Task) {
         try {
             const res = await fetch(`/api/projects/${task.projectId}/${BoardsTypes.Backlog}/task/delete`, {
@@ -470,12 +464,13 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
 
      // TODO: Use button Array komponent insted of fix button html
     
-    const buttons : Button[] = [
-        { onClick: () => deleteTask(task), img: "/trash.svg", size: 8, padding: 2, type: ButtonType.Destructive, lightness: Lighteness.Dark, title: "Delete Task"},
-        { onClick: () => removeTask(task), img: "/x.svg", size: 8, type: ButtonType.MidDestructive, lightness: Lighteness.Dark, title: "Remove Task"},
-        { onClick: () => openTaskInfo(task), img: "/info-lg.svg", size: 8, padding: 2, type: ButtonType.Normal, lightness: Lighteness.Dark, title: "Task Info"},
-    ]
+    const buttons : Button[] = new Array(3);
     
+    buttons[0] = { onClick: () => deleteTask(task), img: "/trash.svg", size: 8, padding: 2, type: ButtonType.Destructive, lightness: Lighteness.Dark, title: "Delete Task"}
+    if (task.tasksGroupId) {
+        buttons[1] = { onClick: () => removeTask(task), img: "/x.svg", size: 8, type: ButtonType.MidDestructive, lightness: Lighteness.Dark, title: "Remove Task"}
+    }
+    buttons[2] = { onClick: () => openTaskInfo(task), img: "/info-lg.svg", size: 8, padding: 2, type: ButtonType.Normal, lightness: Lighteness.Dark, title: "Task Info"}
    
     return (
         <>
@@ -494,7 +489,6 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                     }
                 </ul>
                 <div className="flex h-full items-center justify-end gap-1 col-span-1">
-                
                     <ArrayButtons buttons={buttons} gap={1}/>
                 </div>
             </li>

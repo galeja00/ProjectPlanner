@@ -211,7 +211,8 @@ function TasksColumn(
     }
 
     useEffect(() => {
-        setTasksCol(tasksColumns[index])
+        setTasksCol(tasksColumns[index]);
+        console.log(tasksColumns[0].tasks);
     }, [tasksColumns]);
 
 
@@ -242,7 +243,7 @@ function TasksColumn(
         }
     }
 
-    // TODO: api for delete and remove (remove delete from full project, removu only from board)
+    // delete delete from full project, removu only from board
     async function deleteTask(id : string) {
         try {
             const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/delete`, {
@@ -261,6 +262,26 @@ function TasksColumn(
         }
         catch (error) {
             console.error(error);
+        }
+    }
+
+    // remove task from collum but will remain in project
+    async function removeTask(id : string) {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/remove`, {
+                method: "POST",
+                body: JSON.stringify({
+                    taskId: id
+                })
+            });
+            const data = await res.json(); 
+            if (!res.ok) {
+                throw new Error(data.error);
+            }
+            const newTasks : Task[] = data.tasks;            
+            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: newTasks}); 
+        } catch (error) {
+            console.error(); 
         }
     }
 
@@ -286,24 +307,7 @@ function TasksColumn(
             console.error(error);
         }
     }
-    //TODO
-    async function removeTask(id : string) {
-        try {
-            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/taks/remove`, {
-                method: "POST",
-                body: JSON.stringify({
-                    taskId: id
-                })
-            });
-            const data = await res.json(); 
-            if (!res.ok) {
-                throw new Error(data.error);
-            }
-            setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: data.tasks}); 
-        } catch (error) {
-            console.error(); 
-        }
-    }
+
 
     async function handleOnDrop(e : React.DragEvent) {
         const fromColId : string = e.dataTransfer.getData("text/colId");
@@ -413,49 +417,6 @@ function TaskComponent(
                 throw new Error();
             }
             setSolvers(data.solvers);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-
-    async function addSolver(memberId : string) {
-        //task.projectMemberId =  memberId;
-        try {
-            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/solver`, {
-                method: "POST",
-                body: JSON.stringify({
-                    task: task,
-                    memberId: memberId
-                })
-            })
-            
-            if (!res.ok) {
-                const data = await res.json();
-                console.error(data.error);
-            }
-            fetchSolvers();
-        }
-        catch (error) {
-            console.error(error);
-        }
-        
-    }
-    //TODO: del api
-    async function delSolver(memberId : string) {
-        try {
-            const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/remove`, {
-                method: "POST",
-                body: JSON.stringify({
-                    task: task,
-                    memberId: memberId
-                })
-            }) 
-            if (!res.ok) {
-                const data = await res.json();
-                console.error(data.error);
-            }
-            fetchSolvers();
         }
         catch (error) {
             console.error(error);
@@ -573,33 +534,11 @@ type MemberTableInfo = {
 
 
 function SolversMenu({ solvers} : { solvers : Solver[] }) {
-   // const [ users, setUsers ] = useState<MemberTableInfo[]>([]);
-/*
-    // TODO: error hendeling
-    async function fetchProjectUsers(projectId : string) {
-        try {
-            const response = await fetch(`/api/projects/${projectId}/members`, {
-                method: "GET"
-            });
-
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.error);
-            }
-            setUsers(data.data);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-*/
     return (
         <div className='w-max bg-neutral-200 absolute right-0 top-8 z-50 rounded shadow-neutral-100 shadow'>
             <h4 className='text-sm text-neutral-600 p-2'>Solvers:</h4>
             <ul>
             {solvers.map((user) => {
-                //const isSolver = solvers.some((solver) => solver.memberId === user.memberId);
                 var imgSrc = "/avatar.svg"
                 if (user.image) {
                     imgSrc = `/uploads/user/${user.image}`
@@ -609,7 +548,6 @@ function SolversMenu({ solvers} : { solvers : Solver[] }) {
                         className={`flex gap-2 m-1 p-1 rounded relative`} >
                         <Image src={imgSrc} alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
                         <h5>{user.name} {user.surname}</h5>
-                        { /*isSolver && <CurrentSolver delSolver={() => delSolver(user.memberId)}/> */}
                     </li>
                     );
                 })}
@@ -617,17 +555,7 @@ function SolversMenu({ solvers} : { solvers : Solver[] }) {
         </div>
     )
 }
-/*
-function CurrentSolver({ delSolver } : { delSolver : () => void}) {
-    //<button onClick={delSolver}><img src="/x.svg" className='w-4 h-4'></img></button>
-    return (
-        <div className='border border-green-600 rounded-full  px-1 flex text-green-600 bg-green-600 bg-opacity-20'>
-            <p className='text-sm'>current</p>
-        </div>
-        
-    )
-}
-*/
+
 
 function Name({ name, submitName } : { name : string, submitName : (name : string) => void }) {
     const [ edit, toggleEdit ] = useReducer(edit => !edit, false);

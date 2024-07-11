@@ -19,26 +19,33 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
 
         const { taskId } : { taskId : string } = await req.json();
-    
-        let res : Task | null = null;
+        const prevRemove = await prisma.task.findFirst({
+            where: {
+                id: taskId
+            }
+        })
+        if (!prevRemove) {
+            return Response.json({ error: "This task don't exist"}, { status: 400 });
+        } 
+
+        if (prevRemove.taskColumnId && prevRemove.colIndex) {
+            await movAwayColumnIndexes(prevRemove.taskColumnId, prevRemove);
+        }
         if (BoardsTypes.Board == params.board) {
-            res = await prisma.task.update({
+            await prisma.task.update({
                 where: {
                    id: taskId 
                 },
                 data: {
-                    taskColumnId: null
+                    taskColumnId: null,
+                    colIndex: null
                 }
             });
-            if (!res) {
-                return Response.json({ error: "This task is not existing"}, { status: 400 });
-            } 
-            if (res.taskColumnId && res.colIndex) {
-                await movAwayColumnIndexes(res.taskColumnId, res);
-            }
+            
+            
             const finalTasks = await prisma.task.findMany({
                 where: {
-                    taskColumnId: res.taskColumnId
+                    taskColumnId: prevRemove.taskColumnId
                 },
                 orderBy: {
                     colIndex: "asc"
@@ -46,29 +53,26 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             })
             return Response.json({ tasks: finalTasks }, { status: 200 });
         } else if (BoardsTypes.Backlog == params.board) {
-            res = await prisma.task.update({
+            await prisma.task.update({
                 where: {
                    id: taskId 
                 },
                 data: {
-                    tasksGroupId: null
+                    tasksGroupId: null,
+                    colIndex: null
                 }
             });
-            if (!res) {
-                return Response.json({ error: "This task is not existing"}, { status: 400 });
-            } 
-            if (res.taskColumnId && res.colIndex) {
-                await movAwayColumnIndexes(res.taskColumnId, res);
-            }
+
             const finalTasks = await prisma.task.findMany({
                 where: {
-                    tasksGroupId: res.tasksGroupId
+                    tasksGroupId: prevRemove.tasksGroupId
                 }
             })
             return Response.json({ tasks: finalTasks }, { status : 200 });
         } else {
             return Response.json({ error: "On this board you cant remove task" }, { status: 400 });
         }
+        
     } 
     catch (error) {
         console.log(error);

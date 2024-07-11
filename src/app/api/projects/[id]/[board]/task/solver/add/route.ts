@@ -26,6 +26,6 @@ export async function POST(req : Request, { params } : { params : { id : string 
         return Response.json({ solver: "Succesfully added"}, {status: 200 }); 
     }
     catch (error) {
-        return Response.json({error: ""}, {status: 400});
+        return Response.json({error: "Somthing went wrong onm server"}, {status: 400});
     }
 }

@@ -185,14 +185,14 @@ async function getBacklog(projectId : string) : Promise<GroupOfTasks[] | null> {
 
     const groups : GroupOfTasks[] = [];
     for (const group of taskGroups) {
-        var tasks : Task[] = await prisma.task.findMany({
+        let tasks : Task[] = await prisma.task.findMany({
             where: {
                 tasksGroupId: group.id 
             }
         })
         groups.push({ id: group.id, name: group.name, backlogId: group.backlogId, tasks: tasks, position: group.position });
     }
-    var tasks : Task[] = await prisma.task.findMany({
+    let tasks : Task[] = await prisma.task.findMany({
         where: {
             tasksGroupId: null,
             projectId: projectId

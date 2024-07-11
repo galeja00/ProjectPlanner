@@ -37,18 +37,15 @@ export async function GET(req : Request) {
             },
         });
 
-        const projects = new Array<Project>();
-        for (const pm of projectsMem) {
-            var project = await prisma.project.findFirst({
-                where: {
-                    id: pm.projectId
+        const projectIds = projectsMem.map(pm => pm.projectId);
+
+        const projects : Project[] = await prisma.project.findMany({
+            where: {
+                id: {
+                    in: projectIds
                 }
-            });
-            if (project) {
-                projects.push(project);
             }
-        }
-       
+        });
         return NextResponse.json({ error: "succes", projects: projects}, { status: 200 })
     } catch {
         return NextResponse.json({ error: "error"}, { status: 400 })
