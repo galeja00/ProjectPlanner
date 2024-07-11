@@ -38,8 +38,6 @@ const TasksColumnsContext = createContext<ProviderColumns>(({
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]);
     const [ isFilterDialog, toggleFilterDialog ] = useReducer(isFilterDialog => !isFilterDialog, false);
-    //const router = useRouter();
-    //const { filter, sort } = router.query;
 
     useEffect(() => {
         fetchColumns(id);
@@ -58,6 +56,7 @@ export default function Board({ id } : { id : string }) {
             if (!data.data) {
                 throw new Error(data.error);
             }
+            console.log(data.data);
             setTaskColumns(data.data);
         }
         catch (Error) {
@@ -82,60 +81,8 @@ export default function Board({ id } : { id : string }) {
             if (!response.ok) {
                 throw new Error(data.error);
             }
-
-            //const movedTask : Task = data.task;
-            //movedTask.colIndex = taskIndex;
-            //const toCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == toColId);
-            //const fromCol : BoardTasksColumn | undefined = tasksColumns.find((col) => col.id == fromColId);
             await fetchColumns(id);
-            // Moving task on client side for better optimalization now have bugs dont work
-            /*
-            if (toCol && fromCol) {
-                let add : boolean = true;
-                for (const task of toCol.tasks) {
-                    if (task.id == movedTask.id) {
-                        add = false;
-                    }
-                }
-                if (add) {
-                    toCol.tasks.push(movedTask);
-                }
-                // preskladaní tasků podle indexu v danem poly
-                toCol.tasks.sort((task1, task2) => {
-                    return sortTaskByColIndex(task1, task2); 
-                })
-                if (fromCol.id == toCol.id) {
-                    return;
-                }
-                const newFromTasks : Task[] = [];
-                for (const task of fromCol.tasks) {
-                    if (task.id != movedTask.id) {
-                        newFromTasks.push(task);
-                    }
-                }
-                newFromTasks.sort((task1, task2) => {
-                    return sortTaskByColIndex(task1, task2); 
-                })
-                fromCol.tasks = newFromTasks;
-                const newBoardColumns : BoardTasksColumn[] = [];
-                for (const col of tasksColumns) {
-                    switch (col.id) {
-                        case toCol.id: 
-                            newBoardColumns.push(toCol); 
-                            break;
-                        case fromCol.id: 
-                            newBoardColumns.push(fromCol);
-                            break;
-                        default: 
-                            newBoardColumns.push(col);
-                    }
-                }
-                setTaskColumns(newBoardColumns);
-            }
-            else {
-                await fetchColumns(id);    
-            }
-            */
+            
 
         } catch (error) {
             console.error(error)
@@ -169,10 +116,6 @@ export default function Board({ id } : { id : string }) {
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
             <div className='relative'>
                 <Head text='Board'/>
-                {/*<section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                    <SearchInput/>
-                    <FilterButton onClick={toggleFilterDialog}/>
-                </section>*/}
                 { isFilterDialog && <FilterDialog handleClose={toggleFilterDialog}/>}
                 <section className="flex gap-2 w-full">
                     {
@@ -212,7 +155,6 @@ function TasksColumn(
 
     useEffect(() => {
         setTasksCol(tasksColumns[index]);
-        console.log(tasksColumns[0].tasks);
     }, [tasksColumns]);
 
 
@@ -323,7 +265,6 @@ function TasksColumn(
         let taskIndex : number = 0;
         while (taskIndex < tasksPositions.length && mouseY > tasksPositions[taskIndex]) taskIndex++;
         const colId = tasksColumns[index].id;    
-
         handleMoveOfTask(fromColId, colId, taskId, taskIndex);
         setIsDragetOver(false);
     }

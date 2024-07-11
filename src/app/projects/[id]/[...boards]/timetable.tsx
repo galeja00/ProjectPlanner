@@ -10,60 +10,74 @@ import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 
+// here is components for TimeTable (basic Grant diagram)
 
+// modes for Timetable week or month
+// now only for week month not implenetd
 enum Mode {
     Week = 7,
     Month = 31
 }
 
+// < start, end > 
 type Range = {
     start: number,
     end: number
 }
 
+// range bude fith Object Date < start, end >
 type DateRange = {
     start : Date,
     end : Date
 }
 
+// type for object for Range for group with posiiblity to connect with other ranges
+// connection not implemented but it is possible to add
 type GroupRange = {
     range : Range,
     next : GroupRange[],
     prev : GroupRange[]
 }
 
+// all info neded for working with groups range on front end (move, add, remove)
 type RangeInfo = {
     groupRange: GroupRange,
     group: TimeTableGroup,
     index: number
 }
 
+// for finding place and clicks of user
 type Position = {
     x : number,
     y : number
 }
 
+// to save row where user clicket
 type Row = {
     index : number,
     element: Element 
 }
 
+// to save day where user clicket
 type Day = {
     index: number,
     element: Element
 }
 
+// user mode when user is creating new range, moving with range and connecting (not implemented)
 enum UserMode {
     Creating = 1,
     Moving = 2,
     Connecting = 3
 }
 
+//
 enum ConnectType {
     from = 1,
     to = 2
 }
 
+// for easy acces for components to use of basic function in timetable
 interface TimeTableContextTypes {
     createGroup: (name: string) => void;
     updateGroups: (ranges : GroupRange[]) => void;
@@ -73,6 +87,7 @@ interface TimeTableContextTypes {
     mode : Mode;
 }
 
+// for easy acces to range functions
 interface RangesContextTypes {
     changeUserMode: (mode : UserMode) => void;
     updateRanges: (ranges : GroupRange[]) => void;
@@ -81,10 +96,11 @@ interface RangesContextTypes {
     ranges: GroupRange[];
 }
 
-
+// init Contexts
 const TimeTableContext = createContext<TimeTableContextTypes | null>(null);
 const RangesContext = createContext<RangesContextTypes | null>(null);
 
+// default component
 export default function TimeTable({ id } : { id : string }) {
     const [ groups, setGroups] = useState<TimeTableGroup[]>([]);
     const [ mode, setMode ] = useState<Mode>(Mode.Week);
@@ -92,6 +108,7 @@ export default function TimeTable({ id } : { id : string }) {
     const [ currentDate, setCurrentDate ] = useState<Date>(new Date()); 
     const [ isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false);
 
+    // get all basic data from REST-API like groups and start of project
     async function fetchGroups() {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}`, {
@@ -101,7 +118,6 @@ export default function TimeTable({ id } : { id : string }) {
             if (!res.ok) {
                 console.error(data.error);
             }
-            //console.log(data.groups);
             setProjectStart(new Date(data.start.toString()));
             setGroups([...data.groups]);
         }
@@ -110,6 +126,7 @@ export default function TimeTable({ id } : { id : string }) {
         }
     }
 
+    // thrue REST API create new group
     async function createGroup(name : string) {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}/group/create`, {
@@ -131,6 +148,7 @@ export default function TimeTable({ id } : { id : string }) {
         } 
     }
 
+    // update for grooup Dates (range - < startAt, deadlineAt >)
     async function submitGroupDates(group : TimeTableGroup)  {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}/group/dates`, {
@@ -151,10 +169,13 @@ export default function TimeTable({ id } : { id : string }) {
         } 
     
     }
-
+    // function for update groubs from Groubs Ranges
+    // Group Ranges convert to Timatable object and find diference -> update
+    // only update <startAt,deadlineAt> not names and other date
     function updateGroups(groupsRanges : GroupRange[]) {
         if (!projectStart) return null;
-        const toUpdate : TimeTableGroup[] = [];
+        const toUpdate : TimeTableGroup[] = []; // init groups need to be updated
+        // trying to find diference if exist -> update
         for (let i = 0; i < groups.length; i++) {
             const groupRange = convertGroupToRange(groups[i], projectStart);
             if (groupsRanges[i]) {
@@ -165,14 +186,15 @@ export default function TimeTable({ id } : { id : string }) {
                 toUpdate.push({ id: groups[i].id, name: groups[i].name, timeTableId: groups[i].id, startAt: null, deadlineAt: null, position: groups[i].position});
             }
         }
+        // submiting groups to BackEnd
         for (const toUp of toUpdate) {
             submitGroupDates(toUp);
         }
+        //updating state of groups on FrontEnd
         const newGroups = groups.map(group => {
             const updatedGroup = toUpdate.find(gUp => gUp.id === group.id);
             return updatedGroup ? updatedGroup : group;
         });
-        console.log(newGroups);
         setGroups([...newGroups]);
     }
 
@@ -180,6 +202,7 @@ export default function TimeTable({ id } : { id : string }) {
         toggleAdding();
     }
 
+    // timer for updating actual date
     useEffect(() => {
         const interval = setInterval(() => {
           setCurrentDate(new Date());
@@ -187,15 +210,15 @@ export default function TimeTable({ id } : { id : string }) {
         return () => clearInterval(interval);
     }, [groups]);
 
-
+    // init fetch of data
     useEffect(() => { fetchGroups() }, []);
 
+    // loading information
     if (!projectStart) {
         return (
             <h1>Loading...</h1>
         )
     }
-
 
     return (
         <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
@@ -205,14 +228,13 @@ export default function TimeTable({ id } : { id : string }) {
                     <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
                 </div>
                 <Table/>
-                {/*<TimeMode mode={mode} changeMode={(mode : Mode) => setMode(mode)}/>*/}
             </section>
-            { isAdding ? <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/> : <></>}
+            { isAdding && <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/>}
         </TimeTableContext.Provider>
     )
 }
 
-
+// Menu for timemods not implemented in final version
 function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mode) => void }) {
     return (
         <div className="fixed m-4 z-50 right-0 bottom-0 bg-neutral-200 rounded w-50 flex">
@@ -222,8 +244,9 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
     )
 }
 
+// default component to convert groups and devide to smaller components for bigger abstraction
 function Table() {
-    const { createGroup, updateGroups, currentDate, mode, groups, projectStart } = useContext(TimeTableContext)!;
+    const { createGroup, updateGroups, currentDate, groups, projectStart } = useContext(TimeTableContext)!;
     const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(new Array(groups.length));
     const [ count , setCount ] = useState<number>(80); // count - number of weeks displayed on timetable
 
@@ -232,11 +255,13 @@ function Table() {
         setGroupsRanges([...ranges]);
     }
     
+    // chack if timetable is big enough if not will double count
     useEffect(() => {
         const currentDay = getDiffInDays(projectStart, currentDate);
-        if ((currentDay * 7) * 2 > count) setCount(count * 2);
+        if (currentDay * 2 > count) setCount(count * 2);
     }, [currentDate])
     
+    // convert group to GroupRange on every update on group or in init phase
     useEffect(() => {
         const newRanges : GroupRange[] = new Array(groups.length);
         let i = 0;
@@ -250,7 +275,6 @@ function Table() {
             i++;
         }
         setGroupsRanges([...newRanges]);
-        
     }, [groups]);
 
     return (
@@ -273,6 +297,9 @@ function Table() {
     )
 }
 
+// component with displaing info about weeks on timetable 
+// each 7 columns represent week
+// need to be edditet to support mouths
 function TimesRanges({ range } : { range : number }) {
     const { projectStart } = useContext(TimeTableContext)!;
     const renderDivs = () => {
@@ -311,6 +338,8 @@ function DisplayDate({ date } : { date : Date}) {
     )
 }
 
+// display names of groups in rows
+// each row represents a group
 function Groups() {
     const { groups } = useContext(TimeTableContext)!;
     return (
@@ -326,7 +355,7 @@ function Groups() {
     )
 }
 
-
+// get row from coordinates on board
 function getRow(pos : Position, rows : Element[] ) : Row | null {
     for (let i = 0; i < rows.length; i++) {
         let row : DOMRect = rows[i].getBoundingClientRect();
@@ -337,6 +366,7 @@ function getRow(pos : Position, rows : Element[] ) : Row | null {
     return null;
 }
 
+// get day from coordinates on board
 function getDay(pos : Position, cols : Element[] ) : Day | null {
     //optimalizace vyhledáví v poly elementů pomocí binárního vyhledávání
     let start = 0;
@@ -358,13 +388,13 @@ function getDay(pos : Position, cols : Element[] ) : Day | null {
     return null;
 }
 
-
+// components with have inside matrix of divs
 function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: GroupRange[], updateRanges : (ranges : GroupRange[]) => void, count : number }) {
-    const [ userMode, setUserMode ] = useState<UserMode>(UserMode.Creating);
-    const [ rangeInfo, setRangeInfo ] = useState<RangeInfo | null>(null);
+    const [ userMode, setUserMode ] = useState<UserMode>(UserMode.Creating); // state of what user is doing on table
+    const [ rangeInfo, setRangeInfo ] = useState<RangeInfo | null>(null); // for popup
     const [ active, toggleActive ] = useReducer(active => !active, false);
-    const [ activeRow, setRow ] = useState<Row | null>(null);
-    const [ startDay, setStartDay ] = useState<Day | null>(null);
+    const [ activeRow, setRow ] = useState<Row | null>(null); // actual row where user moving or creating Range
+    const [ startDay, setStartDay ] = useState<Day | null>(null); // info about first click of user when is creating new range
     const { groups, projectStart, currentDate } = useContext(TimeTableContext)!
     const days = useRef<HTMLDivElement>(null);
 
@@ -374,10 +404,9 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
             return;
         }
     }
-
+    // handler to find where user clicket on board
     function handleClick(event: MouseEvent) {
         event.preventDefault();
-        
         if (event.button != 0) return;
         const clickPos : Position = { x: event.clientX, y: event.clientY };
         if (!days.current) return;
@@ -407,10 +436,6 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
             toggleActive();
         }
         
-    }
-
-    function handleContext(event : MouseEvent) {
-        event.preventDefault();
     }
 
     function openRangeMenu(groupRange: GroupRange, index: number) {
@@ -445,6 +470,7 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
     );
 }
 
+// displaying all divs for easy find where ranges are or where user start or end creating range
 function GroupRow({ row, size, current } : { row  : number, size : number, current : number }) {
     const count =  size * 7;
     const arr : boolean[] = new Array(count).fill(false);
@@ -457,7 +483,7 @@ function GroupRow({ row, size, current } : { row  : number, size : number, curre
     )
 }
 
-
+// displaying small divs (days)
 function DisplayRange({ col, current } : { col : number, current : boolean }) {
     const { mode } = useContext(TimeTableContext)!;
     return (
@@ -470,12 +496,13 @@ function DisplayRange({ col, current } : { col : number, current : boolean }) {
     )
 }
 
-
+// pop up menu for user to edit date of range by keyboard
 function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo, closeMenu : () => void, removeRange : () => void}) {
     const [len, setLen] = useState<number>(rangeInfo.groupRange.range.end -  rangeInfo.groupRange.range.start);
     const { ranges, updateRanges } = useContext(RangesContext)!;
     const { projectStart } = useContext(TimeTableContext)!;
     
+    // handle and convert date to range for edit of len of GroupRange
     function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
         event.preventDefault();
         let date = new Date(event.currentTarget.value);
@@ -522,12 +549,7 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
     )
 }
 
-type WorkRangesFuncs = {
-    handleGrap : (event: MouseEvent, range : GroupRange) => void,
-    handleMove : (event: MouseEvent) => void,
-    handleDrop : (event: MouseEvent) => void 
-}
-
+// maps or GroupsRanges on table
 function WorkRanges({days, groupsRange} : { days : RefObject<HTMLDivElement>, groupsRange : GroupRange[]}) {
     if(!days.current) {
         return (
@@ -559,22 +581,11 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     const [ isGrabed, toggleGrab ] = useReducer(isGraped => !isGraped, false);
     const [ range, setRange ] = useState<Range>(groupRange.range);
     const [ movPos, setMovPos ] = useState<Position | null>(null); 
-    const { changeUserMode, updateRanges, openRangeMenu, userMode, ranges } = useContext(RangesContext)!;
+    const { changeUserMode, updateRanges, openRangeMenu, ranges } = useContext(RangesContext)!;
 
-    function handleConnect(event: MouseEvent, type : ConnectType) {
-        event.stopPropagation();
-        //console.log("Connect button clicked");
-        if (userMode !== UserMode.Connecting) {
-            changeUserMode(UserMode.Connecting);
-        } else if (userMode === UserMode.Connecting) {
-            changeUserMode(UserMode.Creating);
-        }
-        
-    }
-
+    // handle start of moving with GroupRange
     function handleGrap(event: MouseEvent) {
         event.stopPropagation();
-        //console.log("Grabbing");
         if (!isGrabed && event.button !== 2) {
             changeUserMode(UserMode.Moving);
             toggleGrab();
@@ -582,6 +593,7 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         }
     }
 
+    // handler when user wont to move with GroupRange
     function handleMove(event: MouseEvent) {
         event.stopPropagation();
         if (isGrabed && movPos) {
@@ -603,10 +615,10 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         }
     }
 
+    // handle when user stop moves with GroupRange
     function handleDrop(event: MouseEvent) {
         event.stopPropagation();
         if (isGrabed) {
-            //console.log("Dropping");
             ranges[index].range = range;
             updateRanges(ranges);
             toggleGrab();
@@ -615,9 +627,9 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         }
     }
 
+    // open menu for edit GroupRange len
     function handleMenu(event: MouseEvent) {
         event.preventDefault();
-        //console.log("Context menu opened");
         openRangeMenu(groupRange, index);
     }
     
@@ -649,20 +661,7 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         </div>
     )
 }
-/*<ConnectRangeButton active={false} type={ConnectType.to} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.to)}/>
-            <ConnectRangeButton active={false} type={ConnectType.from} onClick={(event : MouseEvent) => handleConnect(event, ConnectType.from)}/>*/
-function ConnectRangeButton({active, type, onClick} : {active : boolean, type : ConnectType, onClick : (event : MouseEvent) => void}) {
-    return (
-        <div 
-            className={`hover:bg-opacity-100 hover:bg-violet-400  w-6 h-full bg-violet-700 
-                ${active ? "bg-opacity-100 bg-violet-400" : "bg-opacity-80"}
-                border-${type == ConnectType.to ? "r" : "l"} cursor-pointer`} 
-            onClick={onClick}>
-
-        </div>
-    )
-}
-
+// convertor Group -> GroupRange
 function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange | null {
     if (group.startAt && group.deadlineAt) {
         const range : Range = {start: getDiffInDays(start, new Date(group.startAt)), end: getDiffInDays(start, new Date(group.deadlineAt))};
@@ -671,6 +670,7 @@ function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange 
     return null;
 }
 
+// from Range update Group dates < startAt, deadlineAt >
 function updateGroupDates(group : TimeTableGroup, range : Range, start : Date) : TimeTableGroup {
     const newDates = convertRangeToDates(range, start); 
     const startAt = newDates.start;
@@ -678,12 +678,14 @@ function updateGroupDates(group : TimeTableGroup, range : Range, start : Date) :
     return { id: group.id, timeTableId: group.timeTableId, name: group.name, startAt: startAt, deadlineAt: endAt, position: group.position };
 }
 
+// converting number in Range to actual Date
 function convertRangeToDates(range : Range, start : Date) : DateRange {
     const startAt = new Date(start.getTime() + fromDayToMills(range.start));
     const endAt = new Date(start.getTime() + fromDayToMills(range.end));
     return { start: startAt, end: endAt };
 } 
 
+// compering to Ranges
 function isEqualRanges(a : Range, b : Range) {
     return a.start == b.start && a.end == b.end;
 }

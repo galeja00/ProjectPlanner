@@ -25,64 +25,63 @@ export async function saveTasks(tasks : Task[]) {
 }
 //TODO: bugs
 //TODO: pro vice sloupcu
-export async function movInColumnIndexes(columnId : string, uTask : Task, index : number) {
-    const tasks : Task[] = await getColumnsTasks(columnId);
-    if (!uTask.colIndex) {
-        uTask.colIndex = 99999999999;
+export async function movInColumnIndexes(columnId: string, uTask: Task, index: number) {
+    const tasks: Task[] = await getColumnsTasks(columnId);
+
+    // Ensure uTask has a colIndex
+    if (uTask.colIndex === null || uTask.colIndex === undefined) {
+        uTask.colIndex = Number.MAX_SAFE_INTEGER;  // Use a large number to avoid collision
     }
-    const updateTasks : Task[] = [];
+
+    const updateTasks: Task[] = [];
+
     for (const task of tasks) {
-        if (task.colIndex != null && task.id != uTask.id) {
-            if (task.colIndex >= index) {
-                if (uTask.colIndex < task.colIndex) {
-                    continue;
-                }
+        if (task.colIndex !== null && task.id !== uTask.id) {
+            if (task.colIndex >= index && uTask.colIndex > task.colIndex) {
                 task.colIndex++;
                 updateTasks.push(task);
-            } 
-            else if (task.colIndex <= index) {
-                if ( uTask.colIndex > task.colIndex) {
-                    continue;
-                }
+            } else if (task.colIndex <= index && uTask.colIndex < task.colIndex) {
                 task.colIndex--;
                 updateTasks.push(task);
             }
         }
     }
+
     await saveTasks(updateTasks);
 }
 
-export async function movAwayColumnIndexes(columnId : string, uTask : Task) {
-    const tasks : Task[] = await getColumnsTasks(columnId);
-    if (!uTask.colIndex) {
+export async function movAwayColumnIndexes(columnId: string, uTask: Task) {
+    const tasks: Task[] = await getColumnsTasks(columnId);
+
+    if (uTask.colIndex === null || uTask.colIndex === undefined) {
         return;
     }
-    const updateTasks : Task[] = [];
+
+    const updateTasks: Task[] = [];
+
     for (const task of tasks) {
-        if (task.colIndex != null && task.id != uTask.id) {
-            if (task.colIndex > uTask.colIndex) {
-                task.colIndex--;
-                updateTasks.push(task);
-            }
+        if (task.colIndex !== null && task.id !== uTask.id && task.colIndex > uTask.colIndex) {
+            task.colIndex--;
+            updateTasks.push(task);
         }
     }
+
     await saveTasks(updateTasks);
 }
+export async function movToColumnIndexes(columnId: string, uTask: Task, index: number) {
+    const tasks: Task[] = await getColumnsTasks(columnId);
 
-export async function movToColumnIndexes(columnId : string, uTask : Task, index : number) {
-    const tasks : Task[] = await getColumnsTasks(columnId);
-    const updateTasks : Task[] = [];
+    const updateTasks: Task[] = [];
+
     for (const task of tasks) {
-        if (task.colIndex != null && task.id != uTask.id) {
-            if (task.colIndex >= index) {
-                task.colIndex++;
-                updateTasks.push(task);
-            } 
+        if (task.colIndex !== null && task.id !== uTask.id && task.colIndex >= index) {
+            task.colIndex++;
+            updateTasks.push(task);
         }
     }
+
     await saveTasks(updateTasks);
 }
-
 
 
 

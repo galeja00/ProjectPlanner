@@ -27,11 +27,11 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         });
 
         if (!task) {
-            return Response.json({status : 400});
+            return Response.json({error: "This task doesn't exist"}, {status : 400});
         }
         
         let index : number;
-        if (taskIndex) {
+        if (taskIndex !== null && taskIndex !== undefined) {
             index = taskIndex
         } else {
             index = await prisma.task.count({
@@ -50,7 +50,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             await movAwayColumnIndexes(fromColId, task);
             await movToColumnIndexes(toColId, task, index);
         }
-
+        
         const updatedTask = await prisma.task.update({
             where: {
                 id: taskId,
@@ -60,6 +60,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                 colIndex: taskIndex
             }
         })
+        /*
         // for tests
         const updatedColumn = await prisma.task.findMany({
             where: {
@@ -69,8 +70,8 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                 colIndex: "asc"
             }
         })
-        console.log(updatedColumn);
-        // TODO: select column update nuber of tasks
+        console.log(updatedColumn);*/
+        // TODO: select column update number of tasks
         return Response.json({ task: updatedTask }, { status: 200 });
     }
     catch (error) {
