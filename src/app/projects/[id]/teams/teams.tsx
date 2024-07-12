@@ -148,7 +148,7 @@ function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInf
             <td className="col-span-2">{teamInfo.name}</td>
             <Members members={teamInfo.members}/>
             <td className="col-span-2">{count}</td>
-            <td className="col-span-2">0</td> {/*TODO: fetch info about number of tasks*/} 
+            <td className="col-span-2">{teamInfo.taskLoad}</td> {/*TODO: fetch info about number of tasks*/} 
             <td className="h-fit flex gap-2 items-center justify-end">
                 <button onClick={handleDelete} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">
                     <img src="/x.svg" title="Delete Group" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
@@ -319,7 +319,7 @@ function ProjectMember({ member, active, onClick } : { member : MemberInfo, acti
     }
     console.log(member);
     return (
-        <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 ${ac && " outline outline-1 outline-green-500"} cursor-pointer`}>
+        <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 ${ac && "outline outline-1 outline-green-500"} cursor-pointer`}>
             <Image src={img} alt="" height={15} width={15} className="rounded-full w-5 h-5"></Image>
             <p>{member.name} {member.surname}</p>
             { member.teamName && <TeamBadge name={member.teamName} color={""}/>}

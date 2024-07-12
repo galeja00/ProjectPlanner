@@ -10,17 +10,25 @@ import { TagList } from "./tags";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 import { Oval } from "react-loader-spinner";
+import { LoadingOval } from "@/app/components/other";
 
 enum SolverFuncs {
     Add = "add",
     Remove = "Remove"
 }
 
+
+type TeamInfo = {
+    id : string,
+    name: string,
+    taskLoad: number
+}
+
 interface TaskInfoContextTypes {
     task : Task,
-    team : Team | null,
+    team : TeamInfo| null,
     solvers: Solver[],
-    changeTeam: (team : Team ) => void,
+    changeTeam: (team : TeamInfo ) => void,
     changeSolvers: (funcs : SolverFuncs, memberId : string) => void
 }
 
@@ -32,7 +40,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
     const [ task, setTask ] = useState<Task | null>(null);
     const [ tags, setTags ] = useState<Tag[]>([]);
     const [ solvers, setSolvers ] = useState<Solver[]>([]); 
-    const [ team, setTeam ] = useState<Team | null>(null); 
+    const [ team, setTeam ] = useState<TeamInfo | null>(null); 
     const [ error, setError] = useState<boolean>(false);
 
     async function fetchInfo() {
@@ -133,7 +141,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             if (!res.ok) {
                 console.error(data.error);
             }
-            //console.log(data);
+
             setTeam(data.team);
         }
         catch (error) {
@@ -151,7 +159,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         submitTask(task);
     }
 
-    function changeTeam(team : Team) {
+    function changeTeam(team : TeamInfo) {
         if (!task) {
             return;
         }
@@ -202,15 +210,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                     </TaskInfoContext.Provider>
                     :
                     <div className="h-60 w-full flex justify-center items-center">
-                        <Oval
-                            visible={true}
-                            height="80"
-                            width="80"
-                            color={"#e5e5e5"}
-                            ariaLabel="oval-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                        />
+                        <LoadingOval/>
                         <DialogClose handleClose={handleClose}/>
                     </div>
                 }
@@ -247,18 +247,18 @@ enum TypeOfInfo {
 }
 
 function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
-    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, /*TypeOfInfo.issues,*/ TypeOfInfo.nodes, TypeOfInfo.settings];
+    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes, TypeOfInfo.settings];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task} updateTask={updateTask}/>);
 
     function handleChangeType(type : TypeOfInfo) {
         switch (type) {
             case TypeOfInfo.issues:
-                setActualInfo(<Issues issues={[]}/>);
+                setActualInfo(<Issues issues={[]} taskId={task.id}/>);
                 setActualInfoType(TypeOfInfo.issues);
                 break;
             case TypeOfInfo.nodes:
-                setActualInfo(<Nodes/>);
+                setActualInfo(<Nodes taskId={task.id}/>);
                 setActualInfoType(TypeOfInfo.nodes);
                 break;
             case TypeOfInfo.settings: 
@@ -357,24 +357,43 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
     )
 }
 
-function Issues({ issues } : { issues : Issue[] }) {
-    const [isCreating, toggleCreating] = useReducer(isCreating => !isCreating, false); 
+function Issues({ issues, taskId } : { issues : Issue[], taskId : string }) {
+    const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false); 
+    const [ taskIssues, setTaskIssues ] = useState<Issue[]>(issues);
+    
+    async function fetchIssus() {
+
+    }
+
+    async function createIssue() {
+
+    }
+
+    async function deleteIssue() {
+
+    }
+
+    useEffect(() => {
+        fetchIssus
+    }, []);
+    
+
     return (
-        <div>
-            <div className="flex flex-row gap-4">
-                <button className="bg-neutral-100 rounded" onClick={toggleCreating}>
-                    <img src="plus.svg" alt="create"/>
-                </button>
-                <div>Create new Issue</div>
-            </div>
-            <ul>
-                {
-                    issues.map(issue => (
-                        <IsssuesItem key={issue.id} issue={issue}/>
-                    ))
-                }
-            </ul>
+    <div>
+        <div className="flex flex-row gap-4">
+            <button className="bg-neutral-100 rounded" onClick={toggleCreating}>
+                <img src="plus.svg" alt="create"/>
+            </button>
+            <div>Create new Issue</div>
         </div>
+        <ul>
+            {
+                issues.map(issue => (
+                    <IsssuesItem key={issue.id} issue={issue}/>
+                ))
+            }
+        </ul>
+    </div>
     )
 }
 
@@ -386,10 +405,27 @@ function IsssuesItem({ issue } : { issue : Issue }) {
     )
 }
 
-function Nodes() {
+function Nodes({ taskId } : { taskId : string}) {
+    const [ nodes, setNodes ] = useState<Node[]>([]); 
+    const [ isCreating, toggleCreating ]= useReducer(isCreating => !isCreating, false); 
+
+    async function fetchNodes() {
+        try {
+
+        }
+        catch {
+
+        }
+    }
+
+    useEffect(() => {
+        fetchNodes()
+    }, [])
+
     return (
-        <>
-        </>
+        <div>
+
+        </div>
     )
 }
 
@@ -417,8 +453,8 @@ type SelectionItem = {
     selected: boolean
 }
 
-function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
-    const [ teams, setTeams ] = useState<Team[]>([]);
+function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) {
+    const [ teams, setTeams ] = useState<TeamInfo[]>([]);
     const { changeTeam } = useContext(TaskInfoContext)!; 
 
     async function fetchTeams() {
@@ -457,7 +493,8 @@ function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
                     items={teams.map(s => ({
                         id: s.id,
                         name: s.name,
-                        selected: s.id === team?.id
+                        selected: s.id === team?.id,
+                        load: s.taskLoad
                     }))} 
                     handleSelect={handleSelect}
                 />
@@ -466,7 +503,7 @@ function TeamSelector({ task, team } : { task : Task, team : Team | null }) {
     )
 }
 
-function UserSelector({ task, team, solvers } : { task : Task, team : Team | null, solvers : Solver[] }) {
+function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo | null, solvers : Solver[] }) {
     const [ isAll, toggleAll ] = useReducer(isAll => !isAll, true); 
     const [ members, setMembers ] = useState<MemberTableInfo[]>([]); 
     const { changeSolvers } = useContext(TaskInfoContext)!;
@@ -688,7 +725,7 @@ function DataEditInput({ value, name, changeVal } : { value : string, name : str
 
 
 
-function Solvers({ solvers, team} : { solvers : Solver[], team : Team | null }) {
+function Solvers({ solvers, team} : { solvers : Solver[], team : TeamInfo | null }) {
 
     //<button onClick={fetchSolvers} className="h-fit" title="Edit solvers"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
     return (

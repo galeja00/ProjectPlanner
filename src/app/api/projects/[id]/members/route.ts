@@ -19,7 +19,7 @@ export type MemberTableInfo = {
     teamId: string | null,
     teamName: string | null,
     image: string | null,
-    tasksLoad: Load 
+    tasksLoad: number 
 }
 
 
@@ -58,7 +58,12 @@ export async function GET(req : Request, { params } : { params: { id : string }}
                 })
             }
             if (user) {
-                //TODO: math function for load (hours, complexity, avg of members "for solo project some constant (might costumizeble)")
+                const taskLoad = await prisma.taskSolver.count({
+                    where: {
+                        memberId: member.id
+                    }
+                })
+
                 users.push({ 
                     id: user.id,
                     memberId: member.id, 
@@ -67,7 +72,7 @@ export async function GET(req : Request, { params } : { params: { id : string }}
                     surname: user.surname,
                     teamId: member.teamId,
                     teamName: team ? team.name : null,
-                    tasksLoad: Load.low 
+                    tasksLoad: taskLoad
                 });
             } 
         }

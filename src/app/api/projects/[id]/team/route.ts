@@ -6,7 +6,8 @@ import { prisma } from "@/db";
 type TeamInfo = {
     id : string,
     name: string,
-    members: MemberInfo[]
+    members: MemberInfo[],
+    taskLoad: number
 }
 
 type MemberInfo = {
@@ -45,6 +46,12 @@ export async function GET(req : Request ,{ params } : { params: { id: string } }
                     id: true
                 }
             })
+
+            const load = await prisma.task.count({
+                where: {
+                    teamId: team.id
+                }
+            })
             const members : MemberInfo[] = [];
             for (const member of teamMembers) {
                 const info = await prisma.user.findFirst({
@@ -62,7 +69,7 @@ export async function GET(req : Request ,{ params } : { params: { id: string } }
                     members.push({ id: info.id, memberId: member.id, name: info.name, surname: info.surname, image: info.image });
                 }
             }
-            teamsInfo.push({ id: team.id, name: team.name, members: members});
+            teamsInfo.push({ id: team.id, name: team.name, members: members, taskLoad: load });
         }
         
         return Response.json({ teams: teamsInfo }, { status: 200 }); 

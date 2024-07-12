@@ -146,7 +146,7 @@ function MemberRow({ memberInfo, handleRemove, openSettings } : { memberInfo : M
             <td className='col-span-2'><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-400'/></td>
             <td className='col-span-2'>{memberInfo.name} {memberInfo.surname}</td>
             <td className='col-span-2'>{memberInfo.teamName}</td>
-            <MemberLoad load={memberInfo.tasksLoad}/>
+            <td className='col-span-2'>{memberInfo.tasksLoad}</td>
             <td className='flex gap-1 justify-end col-span-1'>
                 <button onClick={handleRemove} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">
                         <img src="/x.svg" title="Remove User" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
