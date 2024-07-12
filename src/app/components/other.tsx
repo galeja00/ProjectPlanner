@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { Oval } from 'react-loader-spinner'
 
 
 
@@ -69,3 +70,16 @@ export function EditTextButton({ onClick } : { onClick : () => void}) {
     )
 }
 
+
+export function LoadingOval() {
+    return (
+        <Oval
+            visible={true}
+            height="80"
+            width="80"
+            color={"#e5e5e5"}
+            secondaryColor={"#525252"}
+            ariaLabel="oval-loading"
+        />
+    )
+}
