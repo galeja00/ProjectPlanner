@@ -27,7 +27,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
             }
         })
         if (!delNode) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "Fail to delete node"}, { status: 400 });
         }
 
         return Response.json({ message: `Succefully deleted node` }, { status: 200 });

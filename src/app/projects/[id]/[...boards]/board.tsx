@@ -46,7 +46,6 @@ export default function Board({ id } : { id : string }) {
             if (!data.data) {
                 throw new Error(data.error);
             }
-            console.log(data.data);
             setTaskColumns(data.data);
         }
         catch (Error) {

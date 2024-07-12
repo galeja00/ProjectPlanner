@@ -19,6 +19,7 @@
     "node": "^21.1.0",
     "react": "latest",
     "react-dom": "latest",
+    "react-loader-spinner": "^6.1.6",
     "react-xarrows": "^2.0.2",
     "sharp": "^0.33.2"
   },

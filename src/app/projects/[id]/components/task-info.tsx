@@ -9,6 +9,7 @@ import { Name } from "./other-client";
 import { TagList } from "./tags";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
+import { Oval } from "react-loader-spinner";
 
 enum SolverFuncs {
     Add = "add",
@@ -106,7 +107,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                     task: task,
                     memberId: memberId
                 })
-            }) 
+            })
             if (!res.ok) {
                 const data = await res.json();
                 console.error(data.error);
@@ -200,10 +201,18 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                         </div>
                     </TaskInfoContext.Provider>
                     :
-                    <>
-                        <h3 className="h-60">Loading...</h3>
+                    <div className="h-60 w-full flex justify-center items-center">
+                        <Oval
+                            visible={true}
+                            height="80"
+                            width="80"
+                            color={"#e5e5e5"}
+                            ariaLabel="oval-loading"
+                            wrapperStyle={{}}
+                            wrapperClass=""
+                        />
                         <DialogClose handleClose={handleClose}/>
-                    </>
+                    </div>
                 }
             </div>
         </Dialog>
