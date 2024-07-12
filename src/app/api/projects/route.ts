@@ -160,7 +160,6 @@ export async function POST(req : Request) {
                 projectId: project.id,
                 creator: true,
                 teamId: null,
-                isAdmin: false
             }});
 
     

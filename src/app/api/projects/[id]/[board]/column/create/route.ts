@@ -5,8 +5,7 @@ import { Session, User, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
 
-//TODO: diff board and backlog in create
-//TODO: refactor
+
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
         

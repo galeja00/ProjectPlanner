@@ -13,7 +13,6 @@ Table User {
   projects ProjectMember [not null]
   projectInvites ProjectInvite [not null]
   issues Issue [not null]
-  comments IssueComments [not null]
   nodes Node [not null]
 }
 
@@ -24,6 +23,8 @@ Table Node {
   text String [not null]
   userId String [not null]
   user User [not null]
+  taskId String
+  task Task
 }
 
 Table Project {
@@ -51,7 +52,6 @@ Table ProjectMember {
   teamId String
   team Team
   creator Boolean [not null, default: false]
-  isAdmin Boolean [not null, default: false]
   tasks TaskSolver [not null]
 
   indexes {
@@ -121,8 +121,6 @@ Table TaskColumn {
 
 Table Task {
   id String [pk]
-  taskColumn TaskColumn
-  taskColumnId String
   projectId String [not null]
   kanban Kanban [not null]
   createAt DateTime [default: `now()`, not null]
@@ -137,10 +135,13 @@ Table Task {
   description String
   issues Issue [not null]
   tags Tag [not null]
+  nodes Node [not null]
   taskSolvers TaskSolver [not null]
   tasksGroupId String
   tasksGroup TasksGroup
   status Boolean [not null, default: false]
+  taskColumnId String
+  taskColumn TaskColumn
 }
 
 Table TaskSolver {
@@ -178,21 +179,6 @@ Table Issue {
   creatorId String [not null]
   name String [not null]
   description String [not null]
-  commends IssueComments [not null]
-}
-
-Table IssueComments {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  issueId String [not null]
-  issue Issue [not null]
-  isFirst Boolean [not null]
-  text String [not null]
-  authorId String [not null]
-  author User [not null]
-  answers IssueComments [not null]
-  prevCommentId String
-  prevComment IssueComments
 }
 
 Table TasksGroup {
@@ -233,6 +219,8 @@ Enum Ranking {
 
 Ref: Node.userId > User.id [delete: Cascade]
 
+Ref: Node.taskId > Task.id [delete: Cascade]
+
 Ref: ProjectMember.userId > User.id [delete: Cascade]
 
 Ref: ProjectMember.projectId > Project.id [delete: Cascade]
@@ -253,13 +241,13 @@ Ref: TimeTable.projectId - Kanban.projectId [delete: Cascade]
 
 Ref: TaskColumn.boardId > Board.id [delete: Cascade]
 
-Ref: Task.taskColumnId > TaskColumn.id [delete: Cascade]
-
 Ref: Task.projectId > Kanban.projectId [delete: Cascade]
 
 Ref: Task.teamId > Team.id
 
 Ref: Task.tasksGroupId > TasksGroup.id
+
+Ref: Task.taskColumnId > TaskColumn.id [delete: Cascade]
 
 Ref: TaskSolver.memberId > ProjectMember.id [delete: Cascade]
 
@@ -274,12 +262,6 @@ Ref: Issue.taskId > Task.id [delete: Cascade]
 Ref: Issue.projectId > Project.id [delete: Cascade]
 
 Ref: Issue.creatorId > User.id
-
-Ref: IssueComments.issueId > Issue.id [delete: Cascade]
-
-Ref: IssueComments.authorId > User.id [delete: Cascade]
-
-Ref: IssueComments.prevCommentId > IssueComments.id
 
 Ref: TasksGroup.backlogId > Backlog.id [delete: Cascade]
 

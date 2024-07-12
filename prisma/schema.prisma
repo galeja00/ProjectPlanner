@@ -26,7 +26,6 @@ model User {
   projects  ProjectMember[]
   projectInvites   ProjectInvite[]
   issues    Issue[]
-  comments  IssueComments[]
   nodes     Node[]
 }
 
@@ -37,6 +36,8 @@ model Node {
   text      String      @db.Text
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId    String?
+  task      Task?       @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
 
 
@@ -68,7 +69,6 @@ model ProjectMember {
   teamId    String?
   team      Team?     @relation(fields: [teamId], references: [id])
   creator   Boolean   @default(false) 
-  isAdmin   Boolean   @default(false)
   tasks     TaskSolver[]
 
   @@unique([userId, projectId], name: "Unique_User_Project")
@@ -145,28 +145,28 @@ enum Ranking {
 
 // informace o ukolech v projektu
 model Task {
-  id            String  @id @default(cuid())
+  id            String    @id @default(cuid())
   projectId     String 
-  kanban        Kanban @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
-  createAt      DateTime @default(now())
+  kanban        Kanban    @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  createAt      DateTime  @default(now())
   name          String
   type          String
   colIndex      Int?
   priority      Ranking?
   teamId        String?
-  team          Team? @relation(fields: [teamId], references: [id])
+  team          Team?     @relation(fields: [teamId], references: [id])
   estimatedHours Int?
   complexity    Ranking?
   description   String?
   issues        Issue[]
   tags          Tag[]
+  nodes         Node[]
   taskSolvers   TaskSolver[]
   tasksGroupId  String?
   tasksGroup    TasksGroup? @relation(fields: [tasksGroupId], references: [id])
-  status        Boolean @default(false)
+  status        Boolean     @default(false)
   taskColumnId  String?
   taskColumn    TaskColumn? @relation(fields: [taskColumnId], references: [id], onDelete: Cascade) 
-  
 }
 
 // project member který reší úkol
@@ -205,25 +205,23 @@ model Issue {
   creatorId   String 
   name        String
   description String @db.Text
-  commends    IssueComments[]
 }
-
 
 // komentaře k dané issue
-model IssueComments {
-  id            String         @id @default(cuid())
-  createdAt     DateTime       @default(now())
-  issueId       String
-  issue         Issue          @relation(fields: [issueId], references: [id], onDelete: Cascade)
-  isFirst       Boolean
-  text          String
-  authorId      String
-  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  answers       IssueComments[] @relation("AnswersTo")
-  prevCommentId String?
-  prevComment   IssueComments? @relation("AnswersTo", fields: [prevCommentId], references: [id], onDelete: Cascade)
-}
+//model IssueComments {
+//  id            String         @id @default(cuid())
+//  createdAt     DateTime       @default(now())
+//  issueId       String
+//  issue         Issue          @relation(fields: [issueId], references: [id], onDelete: Cascade)
+//  isFirst       Boolean
+//  text          String
+//  authorId      String
+//  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+//
+//  answers       IssueComments[] @relation("AnswersTo")
+//  prevCommentId String?
+//  prevComment   IssueComments? @relation("AnswersTo", fields: [prevCommentId], references: [id], onDelete: Cascade)
+//}
 
 
 

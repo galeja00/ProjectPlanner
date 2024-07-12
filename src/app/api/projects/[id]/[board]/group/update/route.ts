@@ -22,8 +22,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         if (key != "name") {
             return Response.json({ error: "You cant update this key in Group"}, { status: 200 }); 
         }
-        console.log(newVal);
-        console.log(key);
+
         await prisma.tasksGroup.update({
             where: {
                 id: id
