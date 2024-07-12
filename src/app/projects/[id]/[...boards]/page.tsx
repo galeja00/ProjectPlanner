@@ -5,6 +5,7 @@ import Backlog from "./backlog";
 import TimeTable from "./timetable";
 import { useEffect, useState } from "react";
 
+// defalt compenet to decide with board to display
 export default function Boards({ params } :  { params: { id : string, boards : string[]}}) {
     var nameOfBoard : string;
     if (params.boards[0] === "") {

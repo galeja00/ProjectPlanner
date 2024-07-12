@@ -170,7 +170,7 @@ export default function TimeTable({ id } : { id : string }) {
     
     }
     // function for update groubs from Groubs Ranges
-    // Group Ranges convert to Timatable object and find diference -> update
+    // GroupRanges convert to Timatable object and find diference -> update
     // only update <startAt,deadlineAt> not names and other date
     function updateGroups(groupsRanges : GroupRange[]) {
         if (!projectStart) return null;

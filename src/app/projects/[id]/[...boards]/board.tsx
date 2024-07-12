@@ -2,15 +2,14 @@
 import { Tag, Task, Team } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
-import { FilterButton, FilterDialog, SearchInput } from '../components/filter-tables'
+import { FilterDialog } from '../components/filter-tables'
 import { TaskInfo } from '../components/task-info'
 import { Head, CreateTaskButton } from '../components/other'
-import { useRouter } from 'next/router';
-import { pathToImages } from '@/config'
 import { PriorityImg } from './components/priority'
 import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
 
+// defalt type for Object for work with column and tasks
 type BoardTasksColumn = {
     id : string,
     boardId: string,
@@ -18,16 +17,10 @@ type BoardTasksColumn = {
     tasks : Task[]
 }
 
+// provider of columns for components in board
 type ProviderColumns = {
     tasksColumns: BoardTasksColumn[];
     setTaskColumns: Dispatch<SetStateAction<BoardTasksColumn[]>>;
-}
-
-type MoveTaskInfo = {
-    fromColId: string,
-    toColId: string,
-    taskId: string,
-    taskIndex: number
 }
 
 const TasksColumnsContext = createContext<ProviderColumns>(({
@@ -35,14 +28,11 @@ const TasksColumnsContext = createContext<ProviderColumns>(({
     setTaskColumns: () => {},
   }));
 
+// root component of board
 export default function Board({ id } : { id : string }) {
-    const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]);
-    const [ isFilterDialog, toggleFilterDialog ] = useReducer(isFilterDialog => !isFilterDialog, false);
+    const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]); // stet of or columns on board
 
-    useEffect(() => {
-        fetchColumns(id);
-    }, [])
-
+    // get data of all columns from REST-API endpoint
     async function fetchColumns(id : string) : Promise<void> {
         try {
             const response = await fetch(`/api/projects/${id}/board`, {
@@ -64,9 +54,10 @@ export default function Board({ id } : { id : string }) {
         }
     }
 
+    // handler for move task from one column to other or in same column (work for both cases) by submiting data to REST-API endpoint
+    // REST-API endoint - handle all logic of move
     async function handleMoveOfTask(fromColId : string, toColId : string, taskId : string, taskIndex : number) {
         try {
-
             const response = await fetch(`/api/projects/${id}/board/task/move`, {
                 method: "POST",
                 body: JSON.stringify({
@@ -81,14 +72,14 @@ export default function Board({ id } : { id : string }) {
             if (!response.ok) {
                 throw new Error(data.error);
             }
-            await fetchColumns(id);
-            
 
+            fetchColumns(id);
         } catch (error) {
             console.error(error)
         }
     }
 
+    // handle create of new column by submiting data to endpoint REST-API
     async function createColumn(name : string) {
         try {
             const res = await fetch(`/api/projects/${id}/board/column/create`, {
@@ -111,12 +102,16 @@ export default function Board({ id } : { id : string }) {
         }
     }
 
+    // initial fetch of data when component is loaded
+    useEffect(() => {
+        fetchColumns(id);
+    }, [])
+
 
     return (
         <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
             <div className='relative'>
                 <Head text='Board'/>
-                { isFilterDialog && <FilterDialog handleClose={toggleFilterDialog}/>}
                 <section className="flex gap-2 w-full">
                     {
                         tasksColumns.map((col, index) => (
@@ -138,26 +133,27 @@ export default function Board({ id } : { id : string }) {
 }
 
 
-
+// component for lofi
 function TasksColumn(
         { index, projectId, handleMoveOfTask } : 
         { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string, taskIndex : number) => void }
     ) {
-    const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false);
+    const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false); //toggle between creating of task and normal
     const { tasksColumns: tasksColumns } = useContext(TasksColumnsContext);
     const [ tasksCol , setTasksCol ] = useState<BoardTasksColumn>(tasksColumns[index]);
-    const [ isDragetOver, setIsDragetOver ] = useState<boolean>(false);
+    const [ isDragetOver, setIsDragetOver ] = useState<boolean>(false); // state if user is drag over column when he wont to ove task
     const tasksRef = useRef<HTMLUListElement>(null);
 
     function handleCreateTaskForm() {
         toggle();
     }
-
+    
+    // update column every time when all columns changed
     useEffect(() => {
         setTasksCol(tasksColumns[index]);
     }, [tasksColumns]);
-
-
+ 
+    // sumbit created task to REST-API endpoint
     async function createTask(name : string) {
         try {
             const colId = tasksCol.id;
@@ -227,6 +223,7 @@ function TasksColumn(
         }
     }
 
+    // submit new valius in task to REST-API endpoint
     async function updateTask(updateTask : Task) {
         try {
             const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/update`, {
@@ -250,12 +247,15 @@ function TasksColumn(
         }
     }
 
-
+    // handler for drop of task
     async function handleOnDrop(e : React.DragEvent) {
+        // get data where task was placed and with one was it
         const fromColId : string = e.dataTransfer.getData("text/colId");
         const taskId : string = e.dataTransfer.getData("text/taskId");
 
+        // get where user droped task
         const mouseY : number = e.clientY;
+        // get all tasks element in columns and theyer positions
         const tasksElements : NodeListOf<Element> | undefined = tasksRef.current?.querySelectorAll('[data-task-id]');
         if (!tasksElements) return;
         const tasksPositions : number[] = Array.from(tasksElements).map(taskElement => {
@@ -263,17 +263,21 @@ function TasksColumn(
             return taskRect.top + taskRect.height / 2;
         })
         let taskIndex : number = 0;
+        // try to find new position for moved task
         while (taskIndex < tasksPositions.length && mouseY > tasksPositions[taskIndex]) taskIndex++;
-        const colId = tasksColumns[index].id;    
+        const colId = tasksColumns[index].id;  
+        // call handle to move task on postion and column  
         handleMoveOfTask(fromColId, colId, taskId, taskIndex);
         setIsDragetOver(false);
     }
-    // TODO: animace pro tasky posunuti dolu
+
+    // handle init of drag event 
     function handleOnDrag(e : React.DragEvent, task : Task) {
         e.dataTransfer.setData("text/colId", tasksCol.id);
         e.dataTransfer.setData("text/taskId", task.id);
     }
 
+    // indication for user
     function handleDragOver(e : React.DragEvent) {
         e.preventDefault();
         if (!isDragetOver) {
@@ -318,7 +322,7 @@ function TasksColumn(
         </section>
     )
 }
-
+// for menu on task to do diferenc funcs
 type MoreMenuItem = {
     name: string,
     img: string,
@@ -326,6 +330,7 @@ type MoreMenuItem = {
     handler: () => void
 }
 
+// type for solver of Task to display in popup
 type Solver = {
     id: string,
     memberId: string,
@@ -336,15 +341,18 @@ type Solver = {
 
 
 
-// TODO: to much argumentsa need to be better solved
+// compenent displying task in column
 function TaskComponent(
         { task, projectId, removeTask, deleteTask, handleOnDrag, updateTask } : 
         { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void , updateTask : (task : Task) => void}) {
+    // reducers for pop up menus and dialog for task-info (true = on, false = off)
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isInfo, toggleInfo ] = useReducer((isInfo) => !isInfo, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
+    // state of solvers of task
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
 
+    // fetch endopint to know with members are solving this task
     async function fetchSolvers() {
         try {
             const res = await fetch(`/api/projects/${projectId}/task/${task.id}/solver`, {
@@ -364,6 +372,7 @@ function TaskComponent(
         }
     }
 
+    // initial fetch
     useEffect(() => {
         fetchSolvers()
     }, []);
@@ -406,10 +415,11 @@ function TaskComponent(
 }
 
 
-
+// display basic info about team
 function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string }) {
     const [ team, setTeam ] = useState<Team | null>(null); 
 
+    // fetch team witch solving this task
     async function fetchTeam(teamId : string ) {
         try {
             const res = await fetch(`/api/projects/${projectId}/team/${teamId}/info`, {
@@ -427,7 +437,7 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
             console.error(error);
         }
     }
-
+    // inital fetch
     useEffect(() => { 
         fetchTeam(teamId);
     }, [teamId]);
@@ -449,7 +459,8 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
 
 
 
-// TODO: change to diferent icon or array of imiges undner
+// small icon of first solver in bottom right of task 
+// to open list of solvers
 function Solver({ handleSolversMenu, solvers} : { handleSolversMenu : () => void, solvers : Solver[]}) {
     let img = "/avatar.svg";
     const solver : Solver | null = solvers[0];
@@ -464,16 +475,7 @@ function Solver({ handleSolversMenu, solvers} : { handleSolversMenu : () => void
     )
 }
 
-type MemberTableInfo = {
-    memberId: string,
-    image: string | null,
-    name: string,
-    surname: string,
-    seniority: string | null,
-    position: string | null,
-}
-
-
+// menu of all solvers of task
 function SolversMenu({ solvers} : { solvers : Solver[] }) {
     return (
         <div className='w-max bg-neutral-200 absolute right-0 top-8 z-50 rounded shadow-neutral-100 shadow'>
@@ -497,10 +499,11 @@ function SolversMenu({ solvers} : { solvers : Solver[] }) {
     )
 }
 
-
+//for name oof atask to easy change it 
 function Name({ name, submitName } : { name : string, submitName : (name : string) => void }) {
     const [ edit, toggleEdit ] = useReducer(edit => !edit, false);
     
+    // handle user inputs to input when user is changing name
     function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
         const inputValue = event.currentTarget.value;
         if (event.key === 'Enter') {
