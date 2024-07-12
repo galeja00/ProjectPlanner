@@ -14,6 +14,7 @@ import { unassigned } from '@/config';
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
 import { Name } from '../components/other-client';
 
+// for Context to easy use of functions and values
 interface FunctionsContextType {
     createGroup: (name: string) => void;
     deleteGroup: (group: GroupOfTasks) => void;
@@ -27,11 +28,14 @@ interface FunctionsContextType {
 
 const FunctionsContext = createContext<FunctionsContextType | null>(null);
 
+// main compeent for rendering inside components
 export default function Backlog({ id } : { id : string }) {
-    const [ groups, setGroups] = useState<GroupOfTasks[]>([]); 
-    const [ collumns, setColumns] = useState<TaskColumn[]>([]);
+    const [ groups, setGroups] = useState<GroupOfTasks[]>([]); // state for every group display on backlog
+    const [ collumns, setColumns] = useState<TaskColumn[]>([]); // all possible collumns for tasks
     const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, true);
-    const [ task, setTask ] = useState<Task | null>(null);
+    const [ task, setTask ] = useState<Task | null>(null); // state inf isInfo = True will display atask info about task
+
+    // inti fetch of gorups
     async function fetchGroups() {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}`, {
@@ -52,7 +56,7 @@ export default function Backlog({ id } : { id : string }) {
         }
     }
 
-
+    // handle create of Group by submiting to RESP-API endpoint
     async function createGroup(name : string) {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/group/create`, {
@@ -70,14 +74,16 @@ export default function Backlog({ id } : { id : string }) {
                 newGroups.push({ id: newGroup.id, name: newGroup.name, backlogId: newGroup.backlogId, position: newGroup.position, tasks: []});
                 newGroups.sort((a, b) => sortGroups(a, b));
                 setGroups([...newGroups]);
+                return;
             }
+            console.error(data.error);
         }
         catch (error) {
             console.error(error);
         }
-    
     }
 
+    // handle delete of Group by fetching to REST-API endpoint
     async function deleteGroup(group : GroupOfTasks) {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/group/delete`, {
@@ -99,11 +105,13 @@ export default function Backlog({ id } : { id : string }) {
         }
     }
 
+    // handle of open a task info dialog with data of task
     function openTaskInfo(task : Task) {
         setTask(task);
         toggleInfo();
     }
 
+    // handle update of Task by fatching to REAS-API enpoint
     async function updateTask(updateTask : Task) {
         try {
             const response = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/task/update`, {
@@ -123,6 +131,7 @@ export default function Backlog({ id } : { id : string }) {
         }
     }
 
+    // handle two types of update one postion in backlog and other change of property value
     async function updateGroup(groupId : string, propertyKey : keyof GroupOfTasks, val : string | number) {
         if (propertyKey != "position" && propertyKey != "name") {
             return;
@@ -148,9 +157,9 @@ export default function Backlog({ id } : { id : string }) {
         catch (error) {
             console.error(error);
         }
-        return;
     }
 
+    // initial fetch of basic needed data
     useEffect(() => {
         fetchGroups()
     }, []);
@@ -159,10 +168,6 @@ export default function Backlog({ id } : { id : string }) {
         <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups, openTaskInfo, projectId: id, collumns: collumns, groups: groups }}>
             <div className="w-3/4 mx-auto relative">
                 <Head text="Backlog"/>
-                {/*<section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                    <SearchInput/>
-                    <FilterButton onClick={() => fetchGroups}/>
-                </section>*/}
                 <ListOfGroups groups={groups} />
                 {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
             </div>
@@ -170,8 +175,8 @@ export default function Backlog({ id } : { id : string }) {
     )
 }
 
+// display 
 function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
-    //const [ draggetType, setDraggetType ] = useState<DraggTypes | null>(null);
     const { createGroup, fetchGroups, updateGroup, projectId } = useContext(FunctionsContext)!;
     const groupsRef = useRef<HTMLUListElement>(null);
 
@@ -219,14 +224,15 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
     )
 }
 
-
+// componet render name of group and group tasks
 function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, moveTask : (groupId : string, taskId : string) => void, moveGroup : (groupId : string, pos : number ) => void}) {
-    const [ displayd, setDisplayd ] = useState<string>("block"); 
+    const [ displayd, setDisplayd ] = useState<string>("block"); // to toggle diaplay mode of group tasks
     const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false);
-    const [ isDragOver, toggleDragOver ] = useReducer(isDragOver => !isDragOver, false);
+    const [ isDragOver, toggleDragOver ] = useReducer(isDragOver => !isDragOver, false);  
     
     const { deleteGroup, updateGroup, fetchGroups, projectId, groups } = useContext(FunctionsContext)!;
 
+    // ahndle create of task by fecth to endpoint
     async function createTask(name : string) {
         try {
             const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/add`, {
@@ -248,30 +254,35 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
         }
     }
 
-
+    // handle drop of task when user wont to move it to other group
     function handleDropTask(e : React.DragEvent) {
         e.preventDefault();
         const type = e.dataTransfer.getData("text/type");
+        // only allow to move with task
         if (type != "task") {
             return;
         }
+        // get basic data from data tranfer to know with task from with group
         const taskId = e.dataTransfer.getData("text/taskId");
         const groupId = e.dataTransfer.getData("text/groupId");
         if (!taskId || !groupId) {
             return;
         }
+        // call handler for move
         if (group.id != groupId) {
             moveTask(group.id, taskId);
         }
         toggleDragOver();
     }
 
+    // initial handle for task drag event
     function handleOnDragTask(e : React.DragEvent, task : Task) {
         e.dataTransfer.setData("text/type", "task");
         e.dataTransfer.setData("text/taskId", task.id);
         e.dataTransfer.setData("text/groupId", group.id);
     }
 
+    // chack if user is on group, if yes change visuals
     function handleDragOver(e : React.DragEvent) {
         e.preventDefault();
         const type = e.dataTransfer.getData("text/type");
@@ -288,19 +299,19 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
         }
     }
 
+    // handle update name
     function updateName(name : string) {
         updateGroup(group.id, "name", name);
     }
 
-    // zmanší zkupinu na uzivatelkse obrazovce (zakryje ukoly)
+    // handle to smaller a group on user screen
     function toSmallGroup() {
         setDisplayd(displayd == "block" ? "none" : "block");
     }
     
-    const buttons : Button[] = new Array(4);
-        
+    // create button array for basic funcs with group
+    const buttons : Button[] = new Array(4); 
     buttons[2] = { onClick: toSmallGroup, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.Bright, title: "Hide Tasks" }
-    
     if (group.id != unassigned) {
         const pos : number = group.position ?? -2;
         if (pos > 0) {
@@ -308,7 +319,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
         }
         // - 2 - becouse of unassigned group
         if (pos < groups.length - 2) {
-            buttons[0] = { onClick: () => moveGroup(group.id, pos + 1), img: "/arrow-down.svg", type: ButtonType.Normal, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Down" };
+            buttons[0] = { onClick: () => moveGroup(group.id, pos + 1), img: "/arrow-down.svg", type: ButtonType.MidDestructive, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Down" };
         }
         buttons[3] = { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "Delete Group" };
     }
@@ -346,15 +357,15 @@ type ColumnInfo = {
     name: string
 }
 
+// task component with is randred in group
 function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : React.DragEvent) => void }) {
-    //const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, false);
-    const [ isSelecetCol, toggleSelectColl ] = useReducer(isSelecetCol => !isSelecetCol, false);
+    const [ isSelecetCol, toggleSelectColl ] = useReducer(isSelecetCol => !isSelecetCol, false); // to open pop up to change column on Board from Backlog
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
     const [ colInfo, setColInfo ] = useState<ColumnInfo | null>(null);
     
     const { collumns, projectId, fetchGroups, openTaskInfo } = useContext(FunctionsContext)!;
 
-    // ziska informace o řešičích daného ůkolu
+    // handle functions of buuton by fetching to endpoint
     async function fetchSolvers() {
         try {
             const res = await fetch(`/api/projects/${task.projectId}/task/${task.id}/solver`, {
@@ -416,7 +427,8 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
     }
 
-    // vyhleda ve vsech sloupcích které jsou v projektu a ulozi ten ve kterem je dany ukol na tabuli board pokud neni v zadnem tak navrati
+
+    // find in all columns of project and save in witch one is task saved
     function findColumnInfo() {
         if (task.taskColumnId == null) {
             return;
@@ -429,6 +441,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
     }
 
+    // handle move of task between columns
     async function handleMoveCol(id : string) {
         try {
             const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/move`, {
@@ -462,10 +475,8 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         findColumnInfo();
     }, [task]);
 
-     // TODO: Use button Array komponent insted of fix button html
     
     const buttons : Button[] = new Array(3);
-    
     buttons[0] = { onClick: () => deleteTask(task), img: "/trash.svg", size: 8, padding: 2, type: ButtonType.Destructive, lightness: Lighteness.Dark, title: "Delete Task"}
     if (task.tasksGroupId) {
         buttons[1] = { onClick: () => removeTask(task), img: "/x.svg", size: 8, type: ButtonType.MidDestructive, lightness: Lighteness.Dark, title: "Remove Task"}
@@ -497,9 +508,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
     )
 }
 
-
-
-
+// display solvers of task
 function SolverComp({ solver } : { solver : Solver }) {
     const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";
     return ( 
@@ -509,7 +518,7 @@ function SolverComp({ solver } : { solver : Solver }) {
     )
 }
 
-
+// display column info about task 
 function ColInfo({ info, onClick } : { info : ColumnInfo | null, onClick : () => void }) {
     let text = "undefined";
     if (info) {
@@ -531,6 +540,7 @@ function ColInfo({ info, onClick } : { info : ColumnInfo | null, onClick : () =>
     )
 }
 
+// menu where user can change in with column is task
 function ColMenu({ info, handleMoveCol } : { info : ColumnInfo | null, handleMoveCol : (id : string) => void }) {
     const { collumns } = useContext(FunctionsContext)!;
     let toSelect : TaskColumn[] = [];
@@ -560,7 +570,7 @@ function ColMenu({ info, handleMoveCol } : { info : ColumnInfo | null, handleMov
     )
 }
 
-// Array.sort(sort) - 
+
 function sortGroups(a : GroupOfTasks, b : GroupOfTasks) : number {
     if (a.position === null) return 1;
     if (b.position === null) return -1;
