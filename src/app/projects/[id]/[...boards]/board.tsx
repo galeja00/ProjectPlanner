@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { FilterDialog } from '../components/filter-tables'
 import { TaskInfo } from '../components/task-info'
-import { Head, CreateTaskButton } from '../components/other'
+import { Head, CreateTaskButton, TeamBadge } from '../components/other'
 import { PriorityImg } from './components/priority'
 import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
@@ -448,8 +448,8 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
     } 
     
     return (
-        <div title={"Current Team"} className='bg-violet-600 bg-opacity-40 border border-violet-600 text-violet-600 rounded text-sm px-2 flex items-center  h-fit'>
-            {team.name}
+        <div title={"Current Team"} className='bg-opacity-40 flex items-center  h-fit'>
+            <TeamBadge name={team.name} color={team.color} />
         </div>
     )
 }

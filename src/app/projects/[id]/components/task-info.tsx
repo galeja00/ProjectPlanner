@@ -11,6 +11,7 @@ import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 import { Oval } from "react-loader-spinner";
 import { LoadingOval } from "@/app/components/other";
+import { TeamBadge } from "./other";
 
 enum SolverFuncs {
     Add = "add",
@@ -21,6 +22,7 @@ enum SolverFuncs {
 type TeamInfo = {
     id : string,
     name: string,
+    color: string | null
     taskLoad: number
 }
 
@@ -735,7 +737,7 @@ function Solvers({ solvers, team} : { solvers : Solver[], team : TeamInfo | null
                     <h3 className='font-bold mb-2'>Solvers</h3>
                 </div>
                 <div className="flex gap-2">
-                    <dt>team:</dt><dd>{team?.name}</dd>
+                    <div>team:</div>{ team && <TeamBadge name={team.name} color={team.color}/> }
                 </div>
             </div>
             <ul className="space-y-2">

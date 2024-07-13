@@ -1,9 +1,9 @@
 "use client"
 import { useEffect, useReducer, useState, createContext, useContext, useRef} from 'react'
 import { FilterButton, SearchInput } from "../components/filter-tables";
-import { CreateTaskButton, Head } from "../components/other";
+import { CreateTaskButton, Head, TeamBadge } from "../components/other";
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
-import { Task, TaskColumn, TasksGroup } from "@prisma/client";
+import { Task, TaskColumn, TasksGroup, Team } from "@prisma/client";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import Image from 'next/image' 
 import { TaskInfo } from "../components/task-info";
@@ -232,7 +232,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
     
     const { deleteGroup, updateGroup, fetchGroups, projectId, groups } = useContext(FunctionsContext)!;
 
-    // ahndle create of task by fecth to endpoint
+    // handle create of task by fecth to endpoint
     async function createTask(name : string) {
         try {
             const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/add`, {
@@ -361,24 +361,46 @@ type ColumnInfo = {
 function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : React.DragEvent) => void }) {
     const [ isSelecetCol, toggleSelectColl ] = useReducer(isSelecetCol => !isSelecetCol, false); // to open pop up to change column on Board from Backlog
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
+    const [ team, setTeam ] = useState<Team | null>(null);
     const [ colInfo, setColInfo ] = useState<ColumnInfo | null>(null);
     
     const { collumns, projectId, fetchGroups, openTaskInfo } = useContext(FunctionsContext)!;
 
-    // handle functions of buuton by fetching to endpoint
-    async function fetchSolvers() {
+
+
+    async function fetchSolversAndTeam() {
         try {
-            const res = await fetch(`/api/projects/${task.projectId}/task/${task.id}/solver`, {
-                method: "GET"
-            })
-            if (!res.ok) {
-                fetchSolvers();
+            const fetchPromises = [
+                fetch(`/api/projects/${projectId}/task/${task.id}/solver`, {
+                    method: "GET"
+                })
+            ];
+    
+            if (task.teamId !== null) {
+                fetchPromises.push(
+                    fetch(`/api/projects/${projectId}/team/${task.teamId}/info`, {
+                        method: "GET"
+                    })
+                );
             }
-            const data = await res.json();
-            if (!data.solvers) {
-                throw new Error();
+            const [resSolvers, resTeam] = await Promise.all(fetchPromises);
+
+            if (!resSolvers.ok || (task.teamId !== null && !resTeam.ok)) {
+                throw new Error('Failed to fetch one or both endpoints');
             }
-            setSolvers(data.solvers);
+
+            const solversData = await resSolvers.json();
+
+            if (!solversData.solvers) {
+                throw new Error('No solvers data found');
+            }
+
+            if (task.teamId !== null) {
+                const teamData = await resTeam.json();
+                setTeam(teamData.team);
+            }
+
+            setSolvers(solversData.solvers);
         }
         catch (error) {
             console.error(error);
@@ -468,7 +490,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
 
 
     useEffect(() => {
-        fetchSolvers();
+        fetchSolversAndTeam();
     }, []);
 
     useEffect(() => {
@@ -491,7 +513,8 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                     <ColInfo info={colInfo} onClick={toggleSelectColl}/>
                     { isSelecetCol && <ColMenu info={colInfo} handleMoveCol={handleMoveCol} />}
                 </div>
-                <div className="col-span-2 flex items-center">{ task.priority && <PriorityText priority={task.priority}/>}</div>
+                <div className="col-span-1 flex items-center">{ task.priority && <PriorityText priority={task.priority}/>}</div>
+                <div className='col-span-1 flex items-center '>{ team && <TeamBadge name={team.name} color={team.color}></TeamBadge>}</div>
                 <ul className="flex gap-1 h-full items-center col-span-2">
                     {
                         solvers.map((solver) => (
@@ -569,7 +592,6 @@ function ColMenu({ info, handleMoveCol } : { info : ColumnInfo | null, handleMov
         </ul>
     )
 }
-
 
 function sortGroups(a : GroupOfTasks, b : GroupOfTasks) : number {
     if (a.position === null) return 1;

@@ -27,9 +27,12 @@ export function CreateTaskButton({ createTask } : { createTask : () => void }) {
     )
 }
 
-export function TeamBadge({ name, color} : { name : string, color : string }) {
+export function TeamBadge({ name, color} : { name : string, color : string | null }) {
+    const displaydColor = color ?? "#7c3aed"
+    const opacityHex = "66";
+
     return ( 
-        <div className=' px-1 rounded border border-violet-600 bg-violet-600 bg-opacity-60 text-sm'>
+        <div style={{ backgroundColor: `${displaydColor}${opacityHex}`, color: displaydColor, borderColor: displaydColor}} className='px-1 rounded border text-sm ' >
             {name}
         </div>
     ) 

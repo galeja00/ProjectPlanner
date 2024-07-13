@@ -25,10 +25,12 @@ export async function POST(req : Request, { params } : { params: { id: string } 
             return Response.json({ error: "You are not member of this project"}, { status: 400 });
         }
         const data = await req.json(); 
+        
         const team : Team = await prisma.team.create({
             data: {
                 name: data.name,
-                projectId: params.id
+                projectId: params.id,
+                color: data.color
             }
         })
         for (const member  of data.members) {

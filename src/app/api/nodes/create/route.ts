@@ -20,13 +20,14 @@ export async function POST(req : Request) {
             return Response.json({ error: "Fail to authorize"}, { status: 401 });
         }
 
-        const { header, desc } = await req.json();
+        const { header, desc, taskId } = await req.json();
         
         const node = await prisma.node.create({
             data: {
                 name: header,
                 text: desc,
-                userId: user.id
+                userId: user.id,
+                taskId: taskId ?? null
             }
         })
         
