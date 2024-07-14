@@ -71,7 +71,6 @@ export function CreatorOfTask({ createTask, endCreate } : { createTask: (text : 
 
     function create() {
         createTask(name);
-        endCreate();
     }
 
     return (

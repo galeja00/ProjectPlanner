@@ -6,6 +6,7 @@ import { Head } from '../components/other'
 import { User } from '@prisma/client'
 import { ButtonWithImg } from '@/app/components/other'
 import { Dialog, DialogClose } from '@/app/components/dialog'
+import { InitialLoader } from '@/app/components/other-client'
 
 enum Load {
     low = 1,
@@ -28,12 +29,14 @@ export default function Members({ params } : { params : { id : string }}) {
     const [ members, setMembers] = useState<MemberInfo[]>([]);
     const [ isAddDialog, toggleDialog ] = useState<boolean>(false);
     const [ isTeamDialog, toggleTeamDialog ] = useReducer(isTeamDialog => !isTeamDialog, false);
+    const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
 
     useEffect(() => {
         fetchMembers();
     }, [])
     
     async function fetchMembers() {
+        setInitialLoading(true);
         try {
             const response = await fetch(`/api/projects/${params.id}/members`, {
                 method: "GET"
@@ -50,6 +53,9 @@ export default function Members({ params } : { params : { id : string }}) {
         }
         catch (error) { 
             console.error(error);
+        }
+        finally {
+            setInitialLoading(false);
         }
     }
 
@@ -83,18 +89,22 @@ export default function Members({ params } : { params : { id : string }}) {
         toggleDialog(!isAddDialog);
     }
 
+
     return (
         <main className="py-14 px-14 relative w-full">
             <Head text="Members"/>
-            <div className='flex gap-4 mb-4 w-full h-fit items-end'>
-                {/*
-                <SearchInput/>
-                <FilterButton onClick={function (): void {
-                    throw new Error('Function not implemented.')
-                } }/>*/}
+            <section className='flex gap-4 mb-4 w-full h-fit items-end'>
+
                 <AddMemberButton handleClick={handleAddButton}/>
-            </div>
-            <TableMembers members={members} handleRemove={removeMember}/>
+            </section>
+            <section>
+            {
+                initialLoading ? 
+                    <InitialLoader/>
+                    :
+                    <TableMembers members={members} handleRemove={removeMember}/>
+            }
+             </section>
             { isAddDialog && <AddDialog onClose={handleAddButton} id={params.id} />}
         </main>
     )
@@ -128,7 +138,7 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
             <tbody className='flex flex-col gap-1 p-1'>
                 {
                     members.map((member) => (
-                        <MemberRow key={member.memberId} memberInfo={member} handleRemove={() => handleRemove(member.memberId)} openSettings={() => openSettings(member.memberId)}/>
+                        <MemberRow key={member.memberId} memberInfo={member} handleRemove={() => handleRemove(member.memberId)}/>
                     ))
                 }
             </tbody>
@@ -136,7 +146,7 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
     )
 }
 
-function MemberRow({ memberInfo, handleRemove, openSettings } : { memberInfo : MemberInfo, handleRemove : () => void, openSettings : () => void }) {
+function MemberRow({ memberInfo, handleRemove } : { memberInfo : MemberInfo, handleRemove : () => void }) {
     let imgSrc = "/avatar.svg"; 
     if (memberInfo.image) {
         imgSrc = `/uploads/user/${memberInfo.image}`;

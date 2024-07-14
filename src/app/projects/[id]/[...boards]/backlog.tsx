@@ -13,6 +13,7 @@ import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/b
 import { unassigned } from '@/config';
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
 import { Name } from '../components/other-client';
+import { InitialLoader } from './components/other';
 
 // for Context to easy use of functions and values
 interface FunctionsContextType {
@@ -34,9 +35,12 @@ export default function Backlog({ id } : { id : string }) {
     const [ collumns, setColumns] = useState<TaskColumn[]>([]); // all possible collumns for tasks
     const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, true);
     const [ task, setTask ] = useState<Task | null>(null); // state inf isInfo = True will display atask info about task
-
+    const [ initialLoading, setInitialLoading ] = useState<boolean>(false); 
     // inti fetch of gorups
-    async function fetchGroups() {
+    async function fetchGroups(isInitialLoading : boolean) {
+        if (initialLoading) {
+            setInitialLoading(true);
+        }
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}`, {
                 method: "GET"
@@ -53,6 +57,9 @@ export default function Backlog({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
+        }
+        finally {
+            setInitialLoading(false);
         }
     }
 
@@ -98,7 +105,7 @@ export default function Backlog({ id } : { id : string }) {
                 console.error(data.error);
                 return;
             }
-            fetchGroups();
+            fetchGroups(false);
         }   
         catch (error) {
             console.error(error);
@@ -125,7 +132,7 @@ export default function Backlog({ id } : { id : string }) {
                 const json = await response.json();
                 throw new Error(json.error);
             }
-            fetchGroups();
+            fetchGroups(false);
         } catch (error) {
             console.error(error);
         }
@@ -152,7 +159,7 @@ export default function Backlog({ id } : { id : string }) {
                 throw new Error(data.error);
             }
 
-            fetchGroups();
+            fetchGroups(false);
         }
         catch (error) {
             console.error(error);
@@ -161,11 +168,17 @@ export default function Backlog({ id } : { id : string }) {
 
     // initial fetch of basic needed data
     useEffect(() => {
-        fetchGroups()
+        fetchGroups(true)
     }, []);
 
+    if (initialLoading) {
+        return (
+            <InitialLoader/>
+        )
+    }
+    const fetchGroupsProv = () => fetchGroups(false);
     return (
-        <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups, openTaskInfo, projectId: id, collumns: collumns, groups: groups }}>
+        <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups: fetchGroupsProv , openTaskInfo, projectId: id, collumns: collumns, groups: groups }}>
             <div className="w-3/4 mx-auto relative">
                 <Head text="Backlog"/>
                 <ListOfGroups groups={groups} />

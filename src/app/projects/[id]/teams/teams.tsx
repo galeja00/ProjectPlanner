@@ -9,6 +9,7 @@ import { Dialog, DialogClose } from "@/app/components/dialog"
 import { FormItem } from "@/app/components/form"
 import Image from "next/image"
 import { TeamDialog } from "./team-info"
+import { InitialLoader } from "@/app/components/other-client"
 
 // TODO: better work with types for little error
 type TeamInfo = {
@@ -41,8 +42,11 @@ export default function Teams({ projectId } : { projectId : string}) {
     const [isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false); 
     const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); 
     const [team, setTeam] = useState<TeamInfo  | null>(null);
-    
+    const [initialLoading, setInitialLoading] = useState<boolean>(false); 
+
+
     async function fetchTeams() {
+        setInitialLoading(true);
         try {
             const res = await fetch(`/api/projects/${projectId}/team`, {
                 method: "GET"
@@ -56,6 +60,9 @@ export default function Teams({ projectId } : { projectId : string}) {
         }
         catch (error) {
             console.error(error);
+        }
+        finally {
+            setInitialLoading(false)
         }
     }
 
@@ -112,7 +119,12 @@ export default function Teams({ projectId } : { projectId : string}) {
                 <ButtonWithImg image="/person-add.svg" alt="team" title="Create Team" onClick={toggleAdding}/>
             </section>
             <section>
-                <TeamsTable teams={teams} handleDelete={deleteTeam} openSettings={openSettings}/>
+                {
+                    initialLoading ? 
+                        <InitialLoader/>
+                        :
+                        <TeamsTable teams={teams} handleDelete={deleteTeam} openSettings={openSettings}/>
+                }
             </section>
         </>
     )

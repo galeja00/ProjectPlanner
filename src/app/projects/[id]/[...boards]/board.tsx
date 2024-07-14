@@ -8,6 +8,9 @@ import { Head, CreateTaskButton, TeamBadge } from '../components/other'
 import { PriorityImg } from './components/priority'
 import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
+import { LoadingOval } from '@/app/components/other'
+import { InitialLoader } from '@/app/components/other-client'
+
 
 // defalt type for Object for work with column and tasks
 type BoardTasksColumn = {
@@ -30,10 +33,14 @@ const TasksColumnsContext = createContext<ProviderColumns>(({
 
 // root component of board
 export default function Board({ id } : { id : string }) {
-    const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]); // stet of or columns on board
+    const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]); // state of or columns on board
+    const [initialLoading, setInitialLoading] = useState<boolean>(true); // initial loading state
 
     // get data of all columns from REST-API endpoint
-    async function fetchColumns(id : string) : Promise<void> {
+    async function fetchColumns(id : string, isInitialLoading : boolean) : Promise<void> {
+        if (isInitialLoading) {
+            setInitialLoading(true);
+        }
         try {
             const response = await fetch(`/api/projects/${id}/board`, {
                 method: "GET"
@@ -51,6 +58,9 @@ export default function Board({ id } : { id : string }) {
         catch (Error) {
             console.error(Error);
         }
+        finally {
+            setInitialLoading(false);
+        } 
     }
 
     // handler for move task from one column to other or in same column (work for both cases) by submiting data to REST-API endpoint
@@ -72,7 +82,7 @@ export default function Board({ id } : { id : string }) {
                 throw new Error(data.error);
             }
 
-            fetchColumns(id);
+            fetchColumns(id, false);
         } catch (error) {
             console.error(error)
         }
@@ -94,7 +104,7 @@ export default function Board({ id } : { id : string }) {
                 return; 
             }
 
-            fetchColumns(id);
+            fetchColumns(id, false);
         }
         catch (error) {
             console.error(error);
@@ -103,8 +113,15 @@ export default function Board({ id } : { id : string }) {
 
     // initial fetch of data when component is loaded
     useEffect(() => {
-        fetchColumns(id);
+        fetchColumns(id, false);
     }, [])
+
+
+    if (initialLoading) {
+        return (
+            <InitialLoader/>
+        )
+    }
 
 
     return (

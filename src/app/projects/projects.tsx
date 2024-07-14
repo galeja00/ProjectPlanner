@@ -5,17 +5,19 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Image from 'next/image' 
 import { formatDate } from '@/date';
+import { InitialLoader } from '../components/other-client';
 
 export default function Projects() {
     const [inWorkP, setInWorkP] = useState<Project[]>([]);
     const [doneP, setDoneP] = useState<Project[]>([]);
+    const [initialLoading, setInitialLoading] = useState<boolean>(false);
     
     useEffect(() => {
-        getProjects();
+        fetchProjects();
     }, [])
 
-    // TODO: lepsi zachyceni chyby
-    async function getProjects() {
+    async function fetchProjects() {
+        setInitialLoading(true);
         try {
             const response = await fetch('/api/projects', {
                 method: "GET"
@@ -33,11 +35,21 @@ export default function Projects() {
 
             setInWorkP(inWorkProjects);
             setDoneP(doneProjects);
-        } catch (error) {
+        } 
+        catch (error) {
             console.error(error);
+        }
+        finally {
+            setInitialLoading(false);
         }
         
     }  
+
+    if (initialLoading) {
+        return (
+            <InitialLoader/>
+        )
+    }
     
     return (
         <>

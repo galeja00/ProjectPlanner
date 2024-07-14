@@ -8,6 +8,7 @@ import { Project } from '@prisma/client';
 import { formatDate } from '@/date';
 import { EditTextButton } from '@/app/components/other';
 import { Editor, InputTypes, Selector } from '../components/other-client';
+import { InitialLoader } from '@/app/components/other-client';
 
 enum Status {
     InWork = "In Work",
@@ -130,7 +131,7 @@ export default function Settings({ params } : { params : { id : string }}) {
     if (!project) {
         return (
             <main className="flex w-2/4 flex-col mx-auto py-14">
-                <h1>Loading ...</h1>
+                <InitialLoader/>
             </main>
         )
     }

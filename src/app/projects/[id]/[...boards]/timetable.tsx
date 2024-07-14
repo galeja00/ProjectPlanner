@@ -9,6 +9,7 @@ import { fromDayToMills, getDiffInDays } from "@/date";
 import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
+import { InitialLoader } from "@/app/components/other-client";
 
 // here is components for TimeTable (basic Grant diagram)
 
@@ -107,9 +108,13 @@ export default function TimeTable({ id } : { id : string }) {
     const [ projectStart, setProjectStart ] = useState<Date | null>(null);
     const [ currentDate, setCurrentDate ] = useState<Date>(new Date()); 
     const [ isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false);
+    const [ initialLoading, setInitialLoading ] = useState<boolean>(false); 
 
     // get all basic data from REST-API like groups and start of project
-    async function fetchGroups() {
+    async function fetchGroups(isInitialLoading : boolean) {
+        if (isInitialLoading) {
+            setInitialLoading(true)
+        }
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}`, {
                 method: "GET"
@@ -123,6 +128,9 @@ export default function TimeTable({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
+        } 
+        finally {
+            setInitialLoading(false);
         }
     }
 
@@ -211,12 +219,12 @@ export default function TimeTable({ id } : { id : string }) {
     }, [groups]);
 
     // init fetch of data
-    useEffect(() => { fetchGroups() }, []);
+    useEffect(() => { fetchGroups(true) }, []);
 
     // loading information
     if (!projectStart) {
         return (
-            <h1>Loading...</h1>
+            <InitialLoader/>
         )
     }
 
