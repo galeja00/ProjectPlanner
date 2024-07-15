@@ -4,7 +4,7 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-1 border rounded border-violet-500 text-violet-500 hover:bg-violet-500 hover:border-violet-700 hover:text-neutral-950 ease-in-out;
+    @apply px-4 py-1 border rounded border-violet-600 text-violet-600 hover:bg-violet-600 hover:bg-opacity-40 hover:border-violet-600 hover:text-violet-600 ease-in-out;
   }
   .btn-destructive {
     @apply px-4 py-1 border rounded border-red-500 text-red-500 hover:bg-red-500 hover:border-red-700 hover:text-neutral-950 ease-in-out;

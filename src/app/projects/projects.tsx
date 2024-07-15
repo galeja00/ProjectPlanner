@@ -6,12 +6,15 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image' 
 import { formatDate } from '@/date';
 import { InitialLoader } from '../components/other-client';
+import { ErrorBoundary, ErrorState } from '../components/error-handler';
+
 
 export default function Projects() {
     const [inWorkP, setInWorkP] = useState<Project[]>([]);
     const [doneP, setDoneP] = useState<Project[]>([]);
     const [initialLoading, setInitialLoading] = useState<boolean>(false);
-    
+    const [error, setError] = useState<ErrorState | null>(null);
+
     useEffect(() => {
         fetchProjects();
     }, [])
@@ -35,9 +38,11 @@ export default function Projects() {
 
             setInWorkP(inWorkProjects);
             setDoneP(doneProjects);
+            setError(null);
         } 
         catch (error) {
             console.error(error);
+            setError({ error: error, repeatFunc: fetchProjects});
         }
         finally {
             setInitialLoading(false);
@@ -52,14 +57,14 @@ export default function Projects() {
     }
     
     return (
-        <>
+        <ErrorBoundary error={error}>
             <ProjectList name="In Work" list={inWorkP}/>
             <ProjectList name="Done" list={doneP}/>
-        </>
+        </ErrorBoundary>
     )
 }
 
-//TODO: viewport-width number (custon indexis for diferent viewports width)
+
 function ProjectList({ name, list } : { name : string, list : Project[] }) {
     const [[bottom, top], setIndexes] = useState<number[]>([0, 4]);
 
@@ -98,7 +103,6 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
     )
 }
 
-// TODO: přidat animaci posunu
 function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vis : number[] }) {
     const linkTo = "/projects/" + proj.id;
     var visible = "relative";
