@@ -11,6 +11,7 @@ import { Editor, InputTypes, Selector } from '../components/other-client';
 import { InitialLoader } from '@/app/components/other-client';
 import { ErrorBoundary, ErrorState } from '@/app/components/error-handler';
 
+
 enum Status {
     InWork = "In Work",
     Done = "Done"
@@ -23,13 +24,14 @@ enum ItemType {
     Select = "select"
 }
 
-
+// init component
 export default function Settings({ params } : { params : { id : string }}) {
     const router = useRouter();
-    const [ isImgDrop, toggleImgDrop ] = useReducer(isImgDrop => !isImgDrop, false);
-    const [ project, setProject ] = useState<Project | null>(null); 
-    const [ error, setError ] = useState<ErrorState | null>(null);
+    const [ isImgDrop, toggleImgDrop ] = useReducer(isImgDrop => !isImgDrop, false); // state if dialog for drop img is open or not
+    const [ project, setProject ] = useState<Project | null>(null); //date of project
+    const [ error, setError ] = useState<ErrorState | null>(null);  //error state
 
+    // fetch date of project
     async function fetchProjectInfo() {
         try {
             const res = await fetch(`/api/projects/${params.id}`, {
@@ -40,7 +42,6 @@ export default function Settings({ params } : { params : { id : string }}) {
             if (!res.ok) {
                 throw new Error(data.error);
             }
-
             
             setProject(data.project);
         }
@@ -50,8 +51,10 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
     }
 
+    // initial fetch
     useEffect(() => {fetchProjectInfo()}, []);
 
+    // fetch to upload image to server and change image of project
     async function updateImg(image : File) {
         try {
             const formData = new FormData();
@@ -77,6 +80,7 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
     }
 
+    // handle delete of project by fetching to endpoint
     async function handleDelete() {
         try {
             const res = await fetch(`/api/projects/${params.id}/delete`, {
@@ -97,6 +101,7 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
     }
 
+    // update data of project by fetching to enpoint
     async function updateProject(upProj : Project) {
         try {
             const res = await fetch(`/api/projects/${params.id}/update`, {
@@ -119,9 +124,10 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
     }
 
+    // update a property of project by key(property) and value with will be asighn 
     function updateVal(key: keyof Project, val: any) {
         if (project) {
-            console.log(val);
+            // changing status type to boolean type
             if (key == "done") {
                 if (val as Status == Status.Done) {
                     val = true;
@@ -135,7 +141,7 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
     }
 
-
+    // display loader if data aren loaded
     if (!project) {
         return (
             <main className="flex w-2/4 flex-col mx-auto py-14">
@@ -144,9 +150,10 @@ export default function Settings({ params } : { params : { id : string }}) {
         )
     }
 
+
     const date = new Date(project.createdAt);
     const state = project.done ? Status.Done : Status.InWork;
-    const icon = project.icon ? `/uploads/project/${project.icon}` : "/project.svg";
+    const icon = project.icon ? `/uploads/project/${project.icon}` : "/project.svg"; //set path to img
 
     return (
         <ErrorBoundary error={error}>
@@ -176,7 +183,7 @@ export default function Settings({ params } : { params : { id : string }}) {
 }
 
 
-
+// editor of team name
 function Name({ name, update } : { name : string, update : (val : string) => void }) {
     const [ isEditing, toggle ] = useReducer(isEditing => !isEditing, false);
 
@@ -189,6 +196,7 @@ function Name({ name, update } : { name : string, update : (val : string) => voi
     )
 }
 
+// type for createing reuseble component for eazy edititng and sumbiting property value
 interface SettingsItemProps {
     propertyKey: keyof Project;
     type: ItemType;
@@ -198,6 +206,7 @@ interface SettingsItemProps {
     updateVal: (key: keyof Project, val: any) => void;
 }
 
+// componenet for settings property
 function SettingsItem({propertyKey, type, text, value, options, updateVal} : SettingsItemProps) {
     const [isEditing, toggle] = useReducer((isEditing) => !isEditing, false);
 

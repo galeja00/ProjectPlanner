@@ -12,7 +12,7 @@ import { TeamDialog } from "./team-info"
 import { InitialLoader } from "@/app/components/other-client"
 import { ErrorBoundary, ErrorState } from "@/app/components/error-handler"
 
-// TODO: better work with types for little error
+// type for teams and with mebers are in teams
 type TeamInfo = {
     id : string,
     name: string,
@@ -20,6 +20,7 @@ type TeamInfo = {
     members: TeamMemberInfo[]
 }
 
+// type for members with are in team
 type TeamMemberInfo = {
     id : string,
     memberId: string,
@@ -28,6 +29,7 @@ type TeamMemberInfo = {
     image : string | null
 }
 
+// information about members with arent in team
 type MemberInfo = {
     id : string,
     memberId: string,
@@ -38,14 +40,16 @@ type MemberInfo = {
     image: string | null,
 }
 
+// deafult componenet inhouse other smaller parts of teams information and states for moving parts
 export default function Teams({ projectId } : { projectId : string}) {
-    const [teams, setTeams] = useState<TeamInfo[]>([]);
-    const [isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false); 
-    const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); 
-    const [team, setTeam] = useState<TeamInfo  | null>(null);
+    const [teams, setTeams] = useState<TeamInfo[]>([]);// data about all teams
+    const [isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false); // indicate if is user creating/adding a team to project
+    const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); // indicate if is setting of some team open
+    const [team, setTeam] = useState<TeamInfo  | null>(null); // info about team when user is adding memebrs or remuving same with task
     const [initialLoading, setInitialLoading] = useState<boolean>(false); 
-    const [ error, setError ] = useState<ErrorState | null>(null);
+    const [ error, setError ] = useState<ErrorState | null>(null); // for errro handeling
 
+    // get data about teams in project from REST-APi
     async function fetchTeams() {
         setInitialLoading(true);
         try {
@@ -68,6 +72,7 @@ export default function Teams({ projectId } : { projectId : string}) {
         }
     }
 
+    // delete team from project 
     async function deleteTeam(teamId : string) {
         try {
             const res = await fetch(`/api/projects/${projectId}/team/delete`, {
@@ -95,6 +100,7 @@ export default function Teams({ projectId } : { projectId : string}) {
         }
     }
 
+    // handle if user want to open dialog where he can edit team
     function openSettings(teamId : string) {
         for (const team of teams) {
             if (team.id == teamId) {
@@ -105,11 +111,13 @@ export default function Teams({ projectId } : { projectId : string}) {
         toggleSettings();
     }
 
+    // handle close of dialog for editing team
     function closeSettings() {
         setTeam(null);
         toggleSettings();
     }
 
+    // initial fetch of data
     useEffect(() => { fetchTeams() }, []);
 
     return (
@@ -132,6 +140,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     )
 }
 
+// create table where are display team row
 function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[], handleDelete : (id : string) => void, openSettings : (id : string) => void }) {
     return (
         <table className="bg-neutral-200 rounded flex flex-col">
@@ -155,6 +164,8 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
     )
 }
 
+// display date about team like name, members, taskload and more. 
+// with button to du some operations with team
 function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInfo, handleDelete : () => void, openSettings : () => void}) {
     const count = teamInfo.members.length;
     return (
@@ -176,6 +187,7 @@ function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInf
     )
 }
 
+// display image od member with title is his name
 function Members({ members } : { members : TeamMemberInfo[] }) {
     const displayNum = 10;
     return (
@@ -197,17 +209,19 @@ function Members({ members } : { members : TeamMemberInfo[] }) {
     )
 }
 
-
+// creator of new team
 function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId : string,  handleCloseDialog : () => void, updateTeams : () => void}) {
     const [ correct, setCorrect ] = useState<boolean>(true);
-    const [ members, setMembers ] = useState<MemberInfo[]>([]);
-    const [ selected, setSelected ] = useState<MemberInfo[]>([]);
-    const [ msg, setMsg ] = useState<string>("");
+    const [ members, setMembers ] = useState<MemberInfo[]>([]); // state of all users
+    const [ selected, setSelected ] = useState<MemberInfo[]>([]); // state of selected users with will be in team
+    const [ msg, setMsg ] = useState<string>(""); // message displayd to user if some error occured
 
+    // updater
     function updateSelected(members : MemberInfo[]) {
         setSelected(members);
     }
 
+    // handle submit of form and fetch it to REST-API
     async function handleCreateTeam(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -240,8 +254,10 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
         }
     }
 
+    // init fatch of all memebrs in project
     useEffect(() => { fetchMembers() }, []);
 
+    // fetch all members of project endpoint
     async function fetchMembers() {
         try {
             const res = await fetch(`/api/projects/${projectId}/members`, {
@@ -252,11 +268,11 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
                 console.error(data.error);
                 fetchMembers();
             }
-            console.log(data);
             setMembers(data.data); 
         }
         catch (error) {
             console.error(error);
+            setMsg(error as string);
         }
     }
     return (
@@ -286,6 +302,7 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
     )
 }
 
+// select component witch is handling selecting members by clicking
 function SelectMembers({ members, selected, updateSelected } : { members : MemberInfo[], selected : MemberInfo[], updateSelected : (membres : MemberInfo[]) => void}) {
     function handleSelect(selectedMember : MemberInfo, active : boolean) {
         if (active) {
@@ -320,6 +337,7 @@ function SelectMembers({ members, selected, updateSelected } : { members : Membe
     )
 }
 
+// simple display of user data in selector
 function ProjectMember({ member, active, onClick } : { member : MemberInfo, active : boolean, onClick : () => void }) {
     const [ac, setAc] = useState<boolean>(active);
     let img = "/avatar.svg";
