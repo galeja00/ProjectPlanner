@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from 'next/image' 
 import { ButtonWithImg, ButtonWithText, SearchInput } from "../components/other";
+import { ErrorBoundary, ErrorState } from "../components/error-handler";
 
 type Notification = {
     id : string,
@@ -18,9 +19,10 @@ enum NotifictionsText {
     ProjectInvite = "You have been invited to project"
 }
 
-//TODO: fliters ...
+
 export default function NotifiactionsList() {
     const [notifs, setNotifs] = useState<Notification[]>([]); 
+    const [error, setError] = useState<ErrorState | null>(null); 
     
     async function fetchNotifications() {
         try {
@@ -35,6 +37,7 @@ export default function NotifiactionsList() {
         }
         catch (error) {
             console.error();
+            setError({ error, repeatFunc: fetchNotifications})
         }
     }
 
@@ -43,10 +46,8 @@ export default function NotifiactionsList() {
     }, [])
 
     return (
-        <>
+        <ErrorBoundary error={error}>
             <section className="flex gap-4 mb-4 w-fit h-fit items-end">
-                {/*<SearchInput/>
-                <ButtonWithImg image="filter.svg" alt="filter" title="Filter Members" onClick={()=>new Error("Not implemented")}/>*/}
             </section>
             <ul className="rounded p-1 min-h-[40rem]">
                 {
@@ -57,7 +58,7 @@ export default function NotifiactionsList() {
                 { notifs.length == 0 && <li>Right now you have zero notifications</li>}
             </ul>
             
-        </>
+        </ErrorBoundary>
     )
 }
 
@@ -73,8 +74,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
             })
             const data = await res.json();
             if (!res.ok) {
-                console.error(data.error);
-                //throw new Error(data.error);
+                throw new Error(data.error);
             }
             updateNotif();
         }

@@ -10,6 +10,7 @@ import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
 import { LoadingOval } from '@/app/components/other'
 import { InitialLoader } from '@/app/components/other-client'
+import { ErrorBoundary, ErrorState } from '@/app/components/error-handler'
 
 
 // defalt type for Object for work with column and tasks
@@ -24,17 +25,20 @@ type BoardTasksColumn = {
 type ProviderColumns = {
     tasksColumns: BoardTasksColumn[];
     setTaskColumns: Dispatch<SetStateAction<BoardTasksColumn[]>>;
+    submitError: (error : unknown, repeatFunc : () => void) => void;
 }
 
-const TasksColumnsContext = createContext<ProviderColumns>(({
+const TasksColumnsContext = createContext<ProviderColumns>({
     tasksColumns: [],
     setTaskColumns: () => {},
-  }));
+    submitError: () => { },
+  });
 
 // root component of board
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]); // state of or columns on board
     const [initialLoading, setInitialLoading] = useState<boolean>(true); // initial loading state
+    const [ error, setError ] = useState<ErrorState | null>(null)
 
     // get data of all columns from REST-API endpoint
     async function fetchColumns(id : string, isInitialLoading : boolean) : Promise<void> {
@@ -57,6 +61,7 @@ export default function Board({ id } : { id : string }) {
         }
         catch (Error) {
             console.error(Error);
+            setError({error, repeatFunc: () => fetchColumns(id, false)})
         }
         finally {
             setInitialLoading(false);
@@ -85,6 +90,7 @@ export default function Board({ id } : { id : string }) {
             fetchColumns(id, false);
         } catch (error) {
             console.error(error)
+            setError({ error, repeatFunc: () => handleMoveOfTask(fromColId, toColId, taskId, taskIndex)});
         }
     }
 
@@ -108,6 +114,7 @@ export default function Board({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => createColumn(name)});
         }
     }
 
@@ -115,6 +122,10 @@ export default function Board({ id } : { id : string }) {
     useEffect(() => {
         fetchColumns(id, false);
     }, [])
+
+    function submitError(error : unknown, repeatFunc : () => void) {
+        setError({ error, repeatFunc });
+    }
 
 
     if (initialLoading) {
@@ -125,26 +136,27 @@ export default function Board({ id } : { id : string }) {
 
 
     return (
-        <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns }}>
-            <div className='relative'>
-                <Head text='Board'/>
-                <section className="flex gap-2 w-full">
-                    {
-                        tasksColumns.map((col, index) => (
-                            <TasksColumn 
-                                key={col.id} 
-                                index={index} 
-                                projectId={id}
-                                handleMoveOfTask={handleMoveOfTask}
-                            />
-                            
-                        ))
-                    }
-                    <Creator what={"Create new column"} handleCreate={createColumn}/>
-                </section>
-
-            </div>
-        </TasksColumnsContext.Provider>
+        <ErrorBoundary error={error}>
+            <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns, submitError }}>
+                <div className='relative'>
+                    <Head text='Board'/>
+                    <section className="flex gap-2 w-full">
+                        {
+                            tasksColumns.map((col, index) => (
+                                <TasksColumn 
+                                    key={col.id} 
+                                    index={index} 
+                                    projectId={id}
+                                    handleMoveOfTask={handleMoveOfTask}
+                                />
+                                
+                            ))
+                        }
+                        <Creator what={"Create new column"} handleCreate={createColumn}/>
+                    </section>
+                </div>
+            </TasksColumnsContext.Provider>
+        </ErrorBoundary>
     )
 }
 
@@ -155,7 +167,7 @@ function TasksColumn(
         { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string, taskIndex : number) => void }
     ) {
     const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false); //toggle between creating of task and normal
-    const { tasksColumns: tasksColumns } = useContext(TasksColumnsContext);
+    const { tasksColumns: tasksColumns, submitError } = useContext(TasksColumnsContext);
     const [ tasksCol , setTasksCol ] = useState<BoardTasksColumn>(tasksColumns[index]);
     const [ isDragetOver, setIsDragetOver ] = useState<boolean>(false); // state if user is drag over column when he wont to ove task
     const tasksRef = useRef<HTMLUListElement>(null);
@@ -194,6 +206,7 @@ function TasksColumn(
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => createTask(name));
         }
     }
 
@@ -216,6 +229,7 @@ function TasksColumn(
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => deleteTask(id));
         }
     }
 
@@ -235,17 +249,18 @@ function TasksColumn(
             const newTasks : Task[] = data.tasks;            
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: newTasks}); 
         } catch (error) {
-            console.error(); 
+            console.error(error);
+            submitError(error, () => removeTask(id)); 
         }
     }
 
     // submit new valius in task to REST-API endpoint
-    async function updateTask(updateTask : Task) {
+    async function updateTask(upTask : Task) {
         try {
             const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/update`, {
                 method: "POST", 
                 body: JSON.stringify({
-                    task: updateTask
+                    task: upTask
                 })
             });
             const json = await response.json();
@@ -255,11 +270,12 @@ function TasksColumn(
             const tasks : Task[] = tasksCol.tasks;
             const updatedTasks : Task[] = [];
             for (let task of tasks) {
-                updatedTasks.push(task.id == updateTask.id ? updateTask : task);
+                updatedTasks.push(task.id == upTask.id ? upTask : task);
             }
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: updatedTasks });
         } catch (error) {
             console.error(error);
+            submitError(error, () => updateTask(upTask))
         }
     }
 
@@ -385,6 +401,7 @@ function TaskComponent(
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => fetchSolvers());
         }
     }
 
@@ -451,6 +468,7 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => fetchTeam(teamId));
         }
     }
     // inital fetch
@@ -614,3 +632,7 @@ function sortTaskByColIndex(task1 : Task, task2 : Task) : number {
     if (!task2.colIndex) return -1; // task2 má null colIndex, takže ho umístíme za task2
     return task2.colIndex - task1.colIndex;
 }
+function submitError(error: unknown, arg1: () => void) {
+    throw new Error('Function not implemented.')
+}
+

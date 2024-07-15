@@ -15,34 +15,39 @@ export default function LoginForm() {
 
 
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget); 
-        const email = formData.get("email");
-        const password = formData.get("password");
-        if (!(email && password)) {
-            setCorrectPsw(false);
-            setCorrectEmail(false);
-            setFaildMsg("You need to fill all inputs");
-            return;
-        }
-    
-        if (!EmailValidator.validate(email.toString())) {
-            setCorrectEmail(false);
-            setFaildMsg("You need to insert valid email");
-            return;
-        }
+        try {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget); 
+            const email = formData.get("email");
+            const password = formData.get("password");
+            if (!(email && password)) {
+                setCorrectPsw(false);
+                setCorrectEmail(false);
+                setFaildMsg("You need to fill all inputs");
+                return;
+            }
         
-        const response = await signIn('credentials', {
-            email: formData.get("email"),
-            password: formData.get("password"),
-            callbackUrl: "/"
-        });
-        
-        if (response) {
-            setCorrectPsw(false);
-            setCorrectEmail(false);
-            setFaildMsg("We didnt found this user credentials");
-            return;
+            if (!EmailValidator.validate(email.toString())) {
+                setCorrectEmail(false);
+                setFaildMsg("You need to insert valid email");
+                return;
+            }
+            
+            const response = await signIn('credentials', {
+                email: formData.get("email"),
+                password: formData.get("password"),
+                callbackUrl: "/"
+            });
+            
+            if (response === null || response == undefined) {
+                setCorrectPsw(false);
+                setCorrectEmail(false);
+                setFaildMsg("We didnt found this user credentials");
+                return;
+            }
+        }
+        catch (error) {
+            setFaildMsg("Somnthing went wrong");
         }
         
     }

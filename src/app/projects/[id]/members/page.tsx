@@ -7,6 +7,7 @@ import { User } from '@prisma/client'
 import { ButtonWithImg } from '@/app/components/other'
 import { Dialog, DialogClose } from '@/app/components/dialog'
 import { InitialLoader } from '@/app/components/other-client'
+import { ErrorBoundary, ErrorState } from '@/app/components/error-handler'
 
 enum Load {
     low = 1,
@@ -30,7 +31,7 @@ export default function Members({ params } : { params : { id : string }}) {
     const [ isAddDialog, toggleDialog ] = useState<boolean>(false);
     const [ isTeamDialog, toggleTeamDialog ] = useReducer(isTeamDialog => !isTeamDialog, false);
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
-
+    const [ error, setError ] = useState<ErrorState | null>(null);
     useEffect(() => {
         fetchMembers();
     }, [])
@@ -53,6 +54,7 @@ export default function Members({ params } : { params : { id : string }}) {
         }
         catch (error) { 
             console.error(error);
+            setError({ error, repeatFunc: fetchMembers });
         }
         finally {
             setInitialLoading(false);
@@ -68,7 +70,7 @@ export default function Members({ params } : { params : { id : string }}) {
                 })
             })
 
-            const data = await res.json();
+
             if (res.ok) {
                 const newMembres : MemberInfo[] = [];
                 for (const member of members) {
@@ -77,11 +79,15 @@ export default function Members({ params } : { params : { id : string }}) {
                     }
                 }
                 setMembers(newMembres);
+            } else {
+                const data = await res.json();
+                throw new Error(data.error);
             }
-            console.error(data.error);
+            
         }
         catch(error) {
             console.error(error);
+            setError({ error, repeatFunc: () => removeMember(memberId) });
         }
     }
 
@@ -92,20 +98,22 @@ export default function Members({ params } : { params : { id : string }}) {
 
     return (
         <main className="py-14 px-14 relative w-full">
-            <Head text="Members"/>
-            <section className='flex gap-4 mb-4 w-full h-fit items-end'>
+            <ErrorBoundary error={error}>
+                <Head text="Members"/>
+                <section className='flex gap-4 mb-4 w-full h-fit items-end'>
 
-                <AddMemberButton handleClick={handleAddButton}/>
-            </section>
-            <section>
-            {
-                initialLoading ? 
-                    <InitialLoader/>
-                    :
-                    <TableMembers members={members} handleRemove={removeMember}/>
-            }
-             </section>
-            { isAddDialog && <AddDialog onClose={handleAddButton} id={params.id} />}
+                    <AddMemberButton handleClick={handleAddButton}/>
+                </section>
+                <section>
+                {
+                    initialLoading ? 
+                        <InitialLoader/>
+                        :
+                        <TableMembers members={members} handleRemove={removeMember}/>
+                }
+                </section>
+                { isAddDialog && <AddDialog onClose={handleAddButton} id={params.id} />}
+            </ErrorBoundary>
         </main>
     )
 }

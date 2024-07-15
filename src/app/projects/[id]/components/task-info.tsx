@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useReducer, useState, KeyboardEvent, ChangeEvent, createContext, useContext } from "react";
+import { useEffect, useReducer, useState, ChangeEvent, createContext, useContext } from "react";
 import Image from 'next/image' 
 import { Issue, Tag, Task, Ranking, Team, ProjectMember } from "@prisma/client";
 import { Dialog, DialogClose } from "@/app/components/dialog";
@@ -9,9 +9,9 @@ import { Name } from "./other-client";
 import { TagList } from "./tags";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
-import { Oval } from "react-loader-spinner";
 import { LoadingOval } from "@/app/components/other";
 import { TeamBadge } from "./other";
+import { ErrorBoundary, ErrorState } from "@/app/components/error-handler";
 
 enum SolverFuncs {
     Add = "add",
@@ -31,7 +31,8 @@ interface TaskInfoContextTypes {
     team : TeamInfo| null,
     solvers: Solver[],
     changeTeam: (team : TeamInfo ) => void,
-    changeSolvers: (funcs : SolverFuncs, memberId : string) => void
+    changeSolvers: (funcs : SolverFuncs, memberId : string) => void,
+    submitError: (error : unknown, repeatFunc : () => void) => void
 }
 
 const TaskInfoContext = createContext<TaskInfoContextTypes | null>(null);
@@ -43,7 +44,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
     const [ tags, setTags ] = useState<Tag[]>([]);
     const [ solvers, setSolvers ] = useState<Solver[]>([]); 
     const [ team, setTeam ] = useState<TeamInfo | null>(null); 
-    const [ error, setError] = useState<boolean>(false);
+    const [ error, setError] = useState<ErrorState | null>(null);
 
     async function fetchInfo() {
         try {
@@ -60,7 +61,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
         catch (error) {
             console.error(error);
-            setError(true);
+            setError({error, repeatFunc: fetchInfo});
         }
     }
 
@@ -74,7 +75,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             }); 
             const data = await res.json();
             if (!res.ok) {
-                console.error(data.error);
+                throw new Error(data.error);
                 return;
             }
 
@@ -82,6 +83,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
         catch (error) {
             console.error(error);
+            setError({error, repeatFunc: fetchSolvers });
         }
     }
 
@@ -98,13 +100,14 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         
             if (!res.ok) {
                 const data = await res.json();
-                console.error(data.error);
+                throw new Error(data.error);
                 return;
             }
             fetchSolvers();
         }
         catch (error) {
             console.error(error);
+            setError({error, repeatFunc: () => addSolver(memberId)});
         }
         
     }
@@ -120,13 +123,13 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             })
             if (!res.ok) {
                 const data = await res.json();
-                console.error(data.error);
-                return;
+                throw new Error(data.error);
             }
             fetchSolvers();
         }
         catch (error) {
             console.error(error);
+            setError({error, repeatFunc: () => delSolver(memberId)});
         }
     }
 
@@ -141,13 +144,14 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
             const data = await res.json(); 
             if (!res.ok) {
-                console.error(data.error);
+                throw new Error(data.error);
             }
 
             setTeam(data.team);
         }
         catch (error) {
             console.error(error);
+            setError({error, repeatFunc: fetchTeam});
         }
     }
 
@@ -185,6 +189,10 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             delSolver(memberId);
         }
     }
+
+    function submitError(error : unknown, repeatFunc : () => void) {
+        setError({ error, repeatFunc });
+    }
  
     useEffect(() => {
         fetchInfo();
@@ -197,26 +205,28 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     return (
         <Dialog>
-            <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
-                { task 
-                    ?
-                    <TaskInfoContext.Provider value={{task, team, solvers, changeTeam, changeSolvers}}>
-                        <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
-                        <div className='grid grid-cols-3 h-full'>
-                            <MainInfoContainer task={task} updateTask={updateTask}/>
-                            <section className='py-2 px-4  flex flex-col gap-4'>
-                                <Data task={task} updateTask={updateTask}/>
-                                <Solvers solvers={solvers} team={team}/>
-                            </section>
+            <ErrorBoundary error={null}>
+                <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
+                    { task 
+                        ?
+                        <TaskInfoContext.Provider value={{task, team, solvers, changeTeam, changeSolvers, submitError}}>
+                            <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
+                            <div className='grid grid-cols-3 h-full'>
+                                <MainInfoContainer task={task} updateTask={updateTask}/>
+                                <section className='py-2 px-4  flex flex-col gap-4'>
+                                    <Data task={task} updateTask={updateTask}/>
+                                    <Solvers solvers={solvers} team={team}/>
+                                </section>
+                            </div>
+                        </TaskInfoContext.Provider>
+                        :
+                        <div className="h-60 w-full flex justify-center items-center">
+                            <LoadingOval/>
+                            <DialogClose handleClose={handleClose}/>
                         </div>
-                    </TaskInfoContext.Provider>
-                    :
-                    <div className="h-60 w-full flex justify-center items-center">
-                        <LoadingOval/>
-                        <DialogClose handleClose={handleClose}/>
-                    </div>
-                }
-            </div>
+                    }
+                </div>
+            </ErrorBoundary>
         </Dialog>
     ) 
 }  
@@ -457,7 +467,7 @@ type SelectionItem = {
 
 function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) {
     const [ teams, setTeams ] = useState<TeamInfo[]>([]);
-    const { changeTeam } = useContext(TaskInfoContext)!; 
+    const { changeTeam, submitError } = useContext(TaskInfoContext)!; 
 
     async function fetchTeams() {
         try {
@@ -473,6 +483,7 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
         }
         catch (error) {
             console.error(error);
+            submitError(error, fetchTeams);
         }
     }
 
@@ -508,7 +519,7 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
 function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo | null, solvers : Solver[] }) {
     const [ isAll, toggleAll ] = useReducer(isAll => !isAll, true); 
     const [ members, setMembers ] = useState<MemberTableInfo[]>([]); 
-    const { changeSolvers } = useContext(TaskInfoContext)!;
+    const { changeSolvers, submitError } = useContext(TaskInfoContext)!;
 
     async function fetchMembers() {
         try {
@@ -525,6 +536,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
         }
         catch (error) {
             console.error(error);
+            submitError(error, fetchMembers);
         }
     }
 

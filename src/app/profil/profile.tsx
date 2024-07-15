@@ -10,6 +10,8 @@ import { signOut } from "next-auth/react";
 import { FormItem, SubmitButton } from "../components/form";
 import { pathToImages } from "@/config";
 import { Dialog, DialogClose } from "../components/dialog";
+import { ErrorState } from "../components/error-handler";
+import { InitialLoader } from "../components/other-client";
 
 enum UpdateTypes {
     Name = "Name",
@@ -22,6 +24,7 @@ export default function Profile() {
     const [user, setUser] = useState<User | null>(null);
     const [isPassw, togglePassw] = useReducer(isPassw => !isPassw, false);
     const [isDell, toggleDell] = useReducer(isDell => !isDell, false);
+    const [error, setError] = useState<ErrorState | null>(null);
     const router = useRouter(); 
 
     async function fetchProfile() {
@@ -38,6 +41,7 @@ export default function Profile() {
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: fetchProfile})
         }
     }
 
@@ -78,12 +82,11 @@ export default function Profile() {
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => handleUpdateAcc(upUser)})
         }
     }
 
-    function updateImg(img : string) {
-        
-    }
+
     async function fetchImage(image : File) {
         try {
             const formData = new FormData();
@@ -99,16 +102,19 @@ export default function Profile() {
                     setUser(user);
                     toggleDrop();
                 }
+                return;
             }
+            throw new Error(data.error);
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => fetchImage(image)});
         }
     }
 
     if(!user) {
         return (
-            <h1>Loading...</h1>
+            <InitialLoader/>
         )
     }
 

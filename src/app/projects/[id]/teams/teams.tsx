@@ -10,6 +10,7 @@ import { FormItem } from "@/app/components/form"
 import Image from "next/image"
 import { TeamDialog } from "./team-info"
 import { InitialLoader } from "@/app/components/other-client"
+import { ErrorBoundary, ErrorState } from "@/app/components/error-handler"
 
 // TODO: better work with types for little error
 type TeamInfo = {
@@ -43,7 +44,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); 
     const [team, setTeam] = useState<TeamInfo  | null>(null);
     const [initialLoading, setInitialLoading] = useState<boolean>(false); 
-
+    const [ error, setError ] = useState<ErrorState | null>(null);
 
     async function fetchTeams() {
         setInitialLoading(true);
@@ -53,13 +54,14 @@ export default function Teams({ projectId } : { projectId : string}) {
             });
             const data = await res.json();
             if (!res.ok) {
-                console.error(data.error);
+                throw new Error(data.error);
                 return;
             }
             setTeams(data.teams);
         }
         catch (error) {
             console.error(error);
+            setError({error, repeatFunc: fetchTeams});
         }
         finally {
             setInitialLoading(false)
@@ -85,10 +87,11 @@ export default function Teams({ projectId } : { projectId : string}) {
                 return;
             }
             const data = await res.json(); 
-            console.error(data.error);
+            throw new Error(data.error);
         }
         catch (error) {
             console.error(error);
+            setError({error, repeatFunc: fetchTeams});
         }
     }
 
@@ -110,12 +113,11 @@ export default function Teams({ projectId } : { projectId : string}) {
     useEffect(() => { fetchTeams() }, []);
 
     return (
-        <>
+        <ErrorBoundary error={error}>
             { isSettings && team && <TeamDialog team={team} projectId={projectId} updateTeams={fetchTeams} closeSettings={closeSettings}/>}
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             <Head text="Teams" />
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                {/*<SearchInput/>*/}
                 <ButtonWithImg image="/person-add.svg" alt="team" title="Create Team" onClick={toggleAdding}/>
             </section>
             <section>
@@ -126,7 +128,7 @@ export default function Teams({ projectId } : { projectId : string}) {
                         <TeamsTable teams={teams} handleDelete={deleteTeam} openSettings={openSettings}/>
                 }
             </section>
-        </>
+        </ErrorBoundary>
     )
 }
 

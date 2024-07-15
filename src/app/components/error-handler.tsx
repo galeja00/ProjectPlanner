@@ -1,12 +1,28 @@
 "use client"
 
 import { ButtonWithText } from "./other"
+import { createContext, useState } from "react"
+
+// komponent for simple Error handling by displaying message to user with button to try again
+
+// for state of components witch is using tyhs Error boundery
+export type ErrorState = {
+    error : unknown,
+    repeatFunc : () => void
+}
 
 type ErrorInfo = {
     msg : string,
     repeatFunc : () => void
 }
 
+interface ErrorContextType {
+    submitError : (error : unknown, repeatFunc : () => void) => void
+}
+
+export const ErrroContext = createContext<ErrorContextType | null>(null);
+
+// extract from error messaage or change to default value
 function extractErrorMessage(error: unknown): string {
     if (error instanceof Error) {
         return error.message;
@@ -17,14 +33,14 @@ function extractErrorMessage(error: unknown): string {
     }
 }
 
-export function ErrorBoundary({ children, error, repeatFunc }: { children: React.ReactNode; error: unknown | null; repeatFunc: () => void }) {
-    const extractedError = error ? extractErrorMessage(error) : null;
+export function ErrorBoundary({ children, error }: { children: React.ReactNode, error : ErrorState | null }) {
+    //const [error, setError] = useState<ErrorState | null>(null);
 
-    if (!extractedError) {
+    if (!error) {
         return <>{children}</>;
     }
-
-    const errorInfo: ErrorInfo = { msg: extractedError, repeatFunc };
+    const extractedError = extractErrorMessage(error.error);
+    const errorInfo: ErrorInfo = { msg: extractedError, repeatFunc: error.repeatFunc };
 
     return (
         <>

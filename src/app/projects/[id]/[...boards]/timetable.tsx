@@ -10,6 +10,7 @@ import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { InitialLoader } from "@/app/components/other-client";
+import { ErrorBoundary, ErrorState } from "@/app/components/error-handler";
 
 // here is components for TimeTable (basic Grant diagram)
 
@@ -108,30 +109,26 @@ export default function TimeTable({ id } : { id : string }) {
     const [ projectStart, setProjectStart ] = useState<Date | null>(null);
     const [ currentDate, setCurrentDate ] = useState<Date>(new Date()); 
     const [ isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false);
-    const [ initialLoading, setInitialLoading ] = useState<boolean>(false); 
+    const [ error, setError ] = useState<ErrorState | null> (null);
 
     // get all basic data from REST-API like groups and start of project
-    async function fetchGroups(isInitialLoading : boolean) {
-        if (isInitialLoading) {
-            setInitialLoading(true)
-        }
+    async function fetchGroups() {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}`, {
                 method: "GET"
             })
             const data = await res.json();
             if (!res.ok) {
-                console.error(data.error);
+                throw new Error(data.error);
+                return;
             }
             setProjectStart(new Date(data.start.toString()));
             setGroups([...data.groups]);
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: fetchGroups }); 
         } 
-        finally {
-            setInitialLoading(false);
-        }
     }
 
     // thrue REST API create new group
@@ -150,9 +147,12 @@ export default function TimeTable({ id } : { id : string }) {
                 const newGroups : TimeTableGroup[] = [...groups, newGroup ];
                 setGroups([...newGroups]);
             }
+            const data = await res.json();
+            throw new Error(data.error);
         }
         catch (error) {
             console.error(error); 
+            setError({ error, repeatFunc: () => createGroup(name)}); 
         } 
     }
 
@@ -219,7 +219,7 @@ export default function TimeTable({ id } : { id : string }) {
     }, [groups]);
 
     // init fetch of data
-    useEffect(() => { fetchGroups(true) }, []);
+    useEffect(() => { fetchGroups() }, []);
 
     // loading information
     if (!projectStart) {
@@ -229,16 +229,18 @@ export default function TimeTable({ id } : { id : string }) {
     }
 
     return (
-        <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
-            <section className="overflow-x-hidden h-full max-h-full ">
-                <Head text='Time Table'/>
-                <div className="mb-2">
-                    <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
-                </div>
-                <Table/>
-            </section>
-            { isAdding && <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/>}
-        </TimeTableContext.Provider>
+        <ErrorBoundary error={error}>
+            <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
+                <section className="overflow-x-hidden h-full max-h-full ">
+                    <Head text='Time Table'/>
+                    <div className="mb-2">
+                        <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
+                    </div>
+                    <Table/>
+                </section>
+                { isAdding && <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/>}
+            </TimeTableContext.Provider>
+        </ErrorBoundary>
     )
 }
 

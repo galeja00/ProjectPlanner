@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { DateTime } from 'next-auth/providers/kakao'
 import { useRouter } from 'next/navigation'
 
+// user info in right top corner of navbar
 export default function UserInfo() {
     const [userImg, setImg] = useState<string>("/avatar.svg");
     const [menu, setMenu] = useState<boolean>(false);
@@ -53,6 +54,7 @@ export default function UserInfo() {
     )
 }
 
+// menu fo user where he want to go
 function UserMenu() {
     const router = useRouter();
     function handleSignOut() {
@@ -68,6 +70,8 @@ function UserMenu() {
     )
 }
 
+// inform if user have some notifications
+// in same tame easy to navigate to notifications
 function NotificationIcon() {
     const [ring, toggle] = useReducer((ring) => !ring,true);
     const [count, setCount] = useState<number>(0);
@@ -93,8 +97,14 @@ function NotificationIcon() {
         }
     }
 
-    useEffect(() => { fetchInfo();
-    }, [])
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchInfo(); // Call fo info
+        }, 5000); // Interval 5000 ms
+
+        // Clean Interval
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <Link href="/notifications" className='relative'>

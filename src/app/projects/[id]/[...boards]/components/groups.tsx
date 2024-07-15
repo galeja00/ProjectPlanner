@@ -1,6 +1,9 @@
+"use client"
+
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
 import { Dialog, DialogClose } from "@/app/components/dialog";
+import { ErrorBoundary, ErrorState } from "@/app/components/error-handler";
 import { TasksGroup } from "@prisma/client";
 import { useContext, useState, useEffect, useReducer, DragEvent } from "react";
 
@@ -15,11 +18,13 @@ enum ColumnType {
     Other = 1
 }
 
+// component to add grouups to time table from backlog
 export function AddGroupToTimeTable({ projectId, groups, handleClose } : { projectId : string, groups : TimeTableGroup[], handleClose : () => void }) {
     const [ unassignedGroups, setUnassignedGroups ] = useState<GroupBasicInfo[]>([]);
     const [ timetableGroups, setTimetableGroups] = useState<GroupBasicInfo[]>(() =>
         groups.map(g => ({ id: g.id, name: g.name, col: ColumnType.TimeTable }))
     );
+    const [ error, setError ] = useState<ErrorState | null>(null);
 
     async function fetchGroups() {
         try {
@@ -40,13 +45,12 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
         }
         catch (error) {
             console.error(error);
-            //fetchUnassignedGroups(); 
+            setError({error, repeatFunc: fetchGroups});
         }
     }
 
     async function fetchCrudGroup(group : GroupBasicInfo, method : string) {
         try {
-           
             const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.TimeTable}/group/${method}`, {
                 method: "POST",
                 body: JSON.stringify({
@@ -63,6 +67,7 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
         }
         catch (error) {
             console.error(error);
+            setError({error, repeatFunc: () => fetchCrudGroup(group, method)});
         }
     }
 
@@ -77,24 +82,26 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
 
     return (
         <Dialog>
-            <div className="relative bg-neutral-200 rounded h-fit w-fit p-4">
-                <DialogClose handleClose={handleClose}/>
-                <h2 className="font-bold text-xl mb-4">Move groups</h2>
-                <section className="h-fit relative flex gap-4 w-full justify-around">
-                    <div>
-                        <h3>Groups on Time Table</h3>
-                        <ListGroups 
-                            groups={timetableGroups} 
-                            handleMove={(group) => handleMove(group, ColumnType.TimeTable)}/>
-                    </div>
-                    <div>
-                        <h3>Other Groups</h3>
-                        <ListGroups 
-                            groups={unassignedGroups} 
-                            handleMove={(group) => handleMove(group, ColumnType.Other)}/>
-                    </div>
-                </section>
-            </div>
+            <ErrorBoundary error={error}>
+                <div className="relative bg-neutral-200 rounded h-fit w-fit p-4">
+                    <DialogClose handleClose={handleClose}/>
+                    <h2 className="font-bold text-xl mb-4">Move groups</h2>
+                    <section className="h-fit relative flex gap-4 w-full justify-around">
+                        <div>
+                            <h3>Groups on Time Table</h3>
+                            <ListGroups 
+                                groups={timetableGroups} 
+                                handleMove={(group) => handleMove(group, ColumnType.TimeTable)}/>
+                        </div>
+                        <div>
+                            <h3>Other Groups</h3>
+                            <ListGroups 
+                                groups={unassignedGroups} 
+                                handleMove={(group) => handleMove(group, ColumnType.Other)}/>
+                        </div>
+                    </section>
+                </div>
+            </ErrorBoundary>
         </Dialog>
     )
 }

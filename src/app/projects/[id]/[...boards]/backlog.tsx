@@ -13,7 +13,9 @@ import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/b
 import { unassigned } from '@/config';
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
 import { Name } from '../components/other-client';
-import { InitialLoader } from './components/other';
+import { InitialLoader } from '@/app/components/other-client';
+import { ErrorBoundary, ErrorState } from '@/app/components/error-handler';
+
 
 // for Context to easy use of functions and values
 interface FunctionsContextType {
@@ -22,6 +24,7 @@ interface FunctionsContextType {
     updateGroup: (groupID: string, propertyKey : keyof GroupOfTasks, val : number | string) => void;
     fetchGroups: () => void;
     openTaskInfo : (task : Task) => void;
+    submitError: (error : unknown, repeatFunc : () => void) => void
     projectId: string;
     collumns: TaskColumn[];
     groups: GroupOfTasks[]
@@ -36,9 +39,11 @@ export default function Backlog({ id } : { id : string }) {
     const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, true);
     const [ task, setTask ] = useState<Task | null>(null); // state inf isInfo = True will display atask info about task
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false); 
-    // inti fetch of gorups
+    const [ error, setError ] = useState<ErrorState | null>(null); // state if in fecth or other async comunication with server failed
+
+    // init fetch of gorups
     async function fetchGroups(isInitialLoading : boolean) {
-        if (initialLoading) {
+        if (isInitialLoading) {
             setInitialLoading(true);
         }
         try {
@@ -47,7 +52,7 @@ export default function Backlog({ id } : { id : string }) {
             })
             const data = await res.json();
             if (!res.ok) {
-                console.error(data.error);
+                throw new Error(data.error);
                 return;
             }
             const newGroups : GroupOfTasks[] = data.backlog
@@ -57,6 +62,7 @@ export default function Backlog({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
+            setError({ error: error, repeatFunc: () => fetchGroups(isInitialLoading) });
         }
         finally {
             setInitialLoading(false);
@@ -83,10 +89,11 @@ export default function Backlog({ id } : { id : string }) {
                 setGroups([...newGroups]);
                 return;
             }
-            console.error(data.error);
+            throw new Error(data.error);
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => createGroup(name)})
         }
     }
 
@@ -102,13 +109,13 @@ export default function Backlog({ id } : { id : string }) {
 
             if (!res.ok) {
                 const data = await res.json();
-                console.error(data.error);
-                return;
+                throw new Error(data.error);
             }
             fetchGroups(false);
         }   
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => deleteGroup(group)});
         }
     }
 
@@ -119,12 +126,12 @@ export default function Backlog({ id } : { id : string }) {
     }
 
     // handle update of Task by fatching to REAS-API enpoint
-    async function updateTask(updateTask : Task) {
+    async function updateTask(upTask : Task) : Promise<void> {
         try {
             const response = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/task/update`, {
                 method: "POST", 
                 body: JSON.stringify({
-                    task: updateTask
+                    task: upTask
                 })
             });
             
@@ -135,6 +142,7 @@ export default function Backlog({ id } : { id : string }) {
             fetchGroups(false);
         } catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => updateTask(upTask)});
         }
     }
 
@@ -163,7 +171,12 @@ export default function Backlog({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => updateGroup(groupId, propertyKey, val)});
         }
+    }
+
+    function submitError(error : unknown, repeatFunc: () => void) {
+        setError({error, repeatFunc});
     }
 
     // initial fetch of basic needed data
@@ -178,19 +191,21 @@ export default function Backlog({ id } : { id : string }) {
     }
     const fetchGroupsProv = () => fetchGroups(false);
     return (
-        <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups: fetchGroupsProv , openTaskInfo, projectId: id, collumns: collumns, groups: groups }}>
-            <div className="w-3/4 mx-auto relative">
-                <Head text="Backlog"/>
-                <ListOfGroups groups={groups} />
-                {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
-            </div>
-        </FunctionsContext.Provider>
+        <ErrorBoundary error={error}>
+            <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups: fetchGroupsProv , openTaskInfo, submitError, projectId: id, collumns: collumns, groups: groups }}>
+                <div className="w-3/4 mx-auto relative">
+                    <Head text="Backlog"/>
+                    <ListOfGroups groups={groups} />
+                    {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
+                </div>
+            </FunctionsContext.Provider>
+        </ErrorBoundary>
     )
 }
 
 // display 
 function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
-    const { createGroup, fetchGroups, updateGroup, projectId } = useContext(FunctionsContext)!;
+    const { createGroup, fetchGroups, updateGroup, submitError, projectId } = useContext(FunctionsContext)!;
     const groupsRef = useRef<HTMLUListElement>(null);
 
     async function moveTask(groupId : string, taskId : string) {
@@ -207,11 +222,12 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
                 fetchGroups(); 
             }
             const data = await res.json();
-            console.error(data.error); 
+            throw new Error(data.error);
         
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => moveTask(groupId, taskId));
         }
     }
 
@@ -243,7 +259,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
     const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false);
     const [ isDragOver, toggleDragOver ] = useReducer(isDragOver => !isDragOver, false);  
     
-    const { deleteGroup, updateGroup, fetchGroups, projectId, groups } = useContext(FunctionsContext)!;
+    const { deleteGroup, updateGroup, fetchGroups, submitError, projectId, groups } = useContext(FunctionsContext)!;
 
     // handle create of task by fecth to endpoint
     async function createTask(name : string) {
@@ -260,10 +276,11 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
                 return;
             }
             const data = await res.json();
-            console.error(data.error);
+            throw new Error(data.error); 
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => createTask(name)); 
         }
     }
 
@@ -377,7 +394,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
     const [ team, setTeam ] = useState<Team | null>(null);
     const [ colInfo, setColInfo ] = useState<ColumnInfo | null>(null);
     
-    const { collumns, projectId, fetchGroups, openTaskInfo } = useContext(FunctionsContext)!;
+    const { collumns, projectId, fetchGroups, openTaskInfo, submitError } = useContext(FunctionsContext)!;
 
 
 
@@ -417,6 +434,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
         catch (error) {
             console.error(error);
+            submitError(error, fetchSolversAndTeam);
         }
     }
     
@@ -438,6 +456,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => removeTask(task));
         }
     }
     
@@ -459,6 +478,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => deleteTask(task));
         }
     }
 
@@ -494,10 +514,11 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                 return;
             }
             const data = await res.json();
-            console.error(data.error);
+            throw new Error(data.error);
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => handleMoveCol(id));
         }
     }
 

@@ -9,6 +9,7 @@ import { formatDate } from '@/date';
 import { EditTextButton } from '@/app/components/other';
 import { Editor, InputTypes, Selector } from '../components/other-client';
 import { InitialLoader } from '@/app/components/other-client';
+import { ErrorBoundary, ErrorState } from '@/app/components/error-handler';
 
 enum Status {
     InWork = "In Work",
@@ -27,7 +28,7 @@ export default function Settings({ params } : { params : { id : string }}) {
     const router = useRouter();
     const [ isImgDrop, toggleImgDrop ] = useReducer(isImgDrop => !isImgDrop, false);
     const [ project, setProject ] = useState<Project | null>(null); 
-
+    const [ error, setError ] = useState<ErrorState | null>(null);
 
     async function fetchProjectInfo() {
         try {
@@ -35,15 +36,17 @@ export default function Settings({ params } : { params : { id : string }}) {
                 method: "GET"
             });
 
+            const data = await res.json();
             if (!res.ok) {
-                return;
+                throw new Error(data.error);
             }
 
-            const data = await res.json();
+            
             setProject(data.project);
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: fetchProjectInfo})
         }
     }
 
@@ -64,10 +67,13 @@ export default function Settings({ params } : { params : { id : string }}) {
                     setProject(project);
                     toggleImgDrop();
                 }
+            } else {
+                throw new Error(data.error);
             }
         }
         catch (error) {
             console.error(error); 
+            setError({ error, repeatFunc: () => updateImg(image) })
         }
     }
 
@@ -87,6 +93,7 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => handleDelete() });
         }
     }
 
@@ -108,6 +115,7 @@ export default function Settings({ params } : { params : { id : string }}) {
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => updateProject(upProj) });
         }
     }
 
@@ -141,7 +149,7 @@ export default function Settings({ params } : { params : { id : string }}) {
     const icon = project.icon ? `/uploads/project/${project.icon}` : "/project.svg";
 
     return (
-        <>
+        <ErrorBoundary error={error}>
             {isImgDrop && <DropImage closeDrop={toggleImgDrop} updateImg={updateImg} />}
             <main className="flex w-2/4 flex-col mx-auto py-14">
                 <Head text="Settings" />
@@ -163,7 +171,7 @@ export default function Settings({ params } : { params : { id : string }}) {
                     <ButtonDel onClick={handleDelete} />
                 </div>
             </main>
-        </>
+        </ErrorBoundary>
     );
 }
 

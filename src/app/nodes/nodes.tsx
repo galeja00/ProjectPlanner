@@ -5,25 +5,39 @@ import { Dialog, DialogClose } from "../components/dialog";
 import { ArrayButtons, Button, ButtonType, CreateButton, Lighteness } from "../components/buttons";
 import { FormItem, SubmitButton } from "../components/form";
 import { NodeInfo } from "../api/nodes/static";
+import { ErrorBoundary, ErrorState } from "../components/error-handler";
+import { InitialLoader } from "../components/other-client";
 
 export default function Nodes() {
     const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);
     const [ nodes, setNodes ] = useState<NodeInfo[]>([]); 
-    async function fetchNodes() {
+    const [ error, setError ] = useState<ErrorState | null>(null);
+    const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
+
+
+    async function fetchNodes(isInitialLoading : boolean) {
+        if (isInitialLoading) {
+            setInitialLoading(true);
+        }
         try {
             const res = await fetch("/api/nodes", {
                 method: "GET"
             })
             const data = await res.json();
             if (!res.ok) {
-                console.error(data.error);
+                throw new Error(data.error);
                 return;
             }
             setNodes(data.nodes);
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => fetchNodes(true) });
         }
+        finally {
+            setInitialLoading(false);
+        }
+
     }
 
     async function deleteNode(id : string) {
@@ -34,8 +48,7 @@ export default function Nodes() {
             
             if (!res.ok) {
                 const data = await res.json(); 
-                console.error(data.error);
-                return;
+                throw new Error(data.error);
             }
             const newNodes : NodeInfo[] = [];
             for (let node of nodes) {
@@ -47,31 +60,37 @@ export default function Nodes() {
         }
         catch (error) {
             console.error(error);
+            setError({ error, repeatFunc: () => deleteNode(id) });
         }
     }
 
     async function onCreate() {
-        fetchNodes();
+        fetchNodes(false);
         toggleCreator();
     }
 
-    useEffect(() => { fetchNodes() }, []);
+    useEffect(() => { fetchNodes(true) }, []);
+
+    if (initialLoading) {
+        return (
+            <InitialLoader/>
+        )
+    }
 
     return (
-        <>
-        
-        <section>
-        { isCreator && <NodeCreatetor onClose={toggleCreator} onCreate={onCreate}/>}
-            <CreateButton text="Create new node" onClick={toggleCreator} />
-            <ul className="grid grid-cols-2 gap-2">
-                {
-                    nodes.map((node) => (
-                        <NodeComponent key={node.id} node={node} deleteNode={deleteNode} />
-                    ))
-                }
-            </ul>
-        </section>
-        </>
+        <ErrorBoundary error={error}>
+            <section>
+            { isCreator && <NodeCreatetor onClose={toggleCreator} onCreate={onCreate}/>}
+                <CreateButton text="Create new node" onClick={toggleCreator} />
+                <ul className="grid grid-cols-2 gap-2">
+                    {
+                        nodes.map((node) => (
+                            <NodeComponent key={node.id} node={node} deleteNode={deleteNode} />
+                        ))
+                    }
+                </ul>
+            </section>
+        </ErrorBoundary>
         
     )
 }

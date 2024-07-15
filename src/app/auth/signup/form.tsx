@@ -4,7 +4,6 @@ import { FormEvent, useState } from 'react';
 import EmailValidator from 'email-validator';
 import { useRouter } from 'next/navigation';
 import { SubmitButton } from '@/app/components/form';
-//import { FormItem, SubmitButton } from '@/app/components/form';
 
 type Msg = {
     message : string,
@@ -27,44 +26,47 @@ export default function RegisterForm() {
         const surname = formData.get("surname");
         const password = formData.get("password");
         const repeatpassword = formData.get("repeatpassword");
-
-        // TODO: validaci emailu a potvrzení emailove adresy... (nodemailer...)
-        if (!(email && name && surname && password && repeatpassword )) {
-            setMsg({ message: "You need to fill all inputs", type: false});
-            setCorrectPsw(false);
-            setCorrectEmail(false);
-            setCorrectName(false);
-            setCorrectSurName(false);
-            return;
-        }
-        if (!EmailValidator.validate(email.toString())) {
-            setCorrectEmail(false);
-            setMsg({ message: "You need to insert valid email", type: false});
-            return;
-        }
-        if (password == repeatpassword) {
-            try {
-                var response = await fetch('/api/auth/signup', {
-                    method: "POST",
-                    body: JSON.stringify({
-                        email: email,
-                        name: name,
-                        surname: surname,
-                        password: password,
-                        repeatpassword: repeatpassword
-                    })
-                }) 
-                if  (!response.ok) {
-                    setMsg({ message: "Error in communication with server, try again", type: false });
-                } else {
-                    setMsg({ message: "Succesfull registration", type: true});
-                }
-            } catch (error) {
-                setMsg({ message: "Error in communication with server, try again", type: false });
+        try {
+            if (!(email && name && surname && password && repeatpassword )) {
+                setMsg({ message: "You need to fill all inputs", type: false});
+                setCorrectPsw(false);
+                setCorrectEmail(false);
+                setCorrectName(false);
+                setCorrectSurName(false);
+                return;
             }
-        } else {
-            setCorrectPsw(false);
-            setMsg({ message: "Your passwords arent same", type: false });
+            if (!EmailValidator.validate(email.toString())) {
+                setCorrectEmail(false);
+                setMsg({ message: "You need to insert valid email", type: false});
+                return;
+            }
+            if (password == repeatpassword) {
+                try {
+                    var response = await fetch('/api/auth/signup', {
+                        method: "POST",
+                        body: JSON.stringify({
+                            email: email,
+                            name: name,
+                            surname: surname,
+                            password: password,
+                            repeatpassword: repeatpassword
+                        })
+                    }) 
+                    if  (!response.ok) {
+                        setMsg({ message: "Error in communication with server, try again", type: false });
+                    } else {
+                        setMsg({ message: "Succesfull registration", type: true});
+                    }
+                } catch (error) {
+                    setMsg({ message: "Error in communication with server, try again", type: false });
+                }
+            } else {
+                setCorrectPsw(false);
+                setMsg({ message: "Your passwords aren't same", type: false });
+            }
+        }
+        catch (error) {
+            setMsg({ message: "Somthing went wrong", type: false });
         }
         
     }
