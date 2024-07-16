@@ -3,7 +3,6 @@ import { randomUUID } from "crypto";
 
 import fs from 'fs';
 import sharp, { Sharp } from 'sharp';
-import { pathToImages } from "@/config";
 import { prisma } from "@/db";
 import { User } from "@prisma/client";
 import { unlink } from "fs/promises";
@@ -44,6 +43,7 @@ export async function POST(req : Request) {
             return Response.json({ error: "No files received." }, { status: 400 });
         }
         if (image instanceof File) {
+            const pathToImages = process.env.IMAGE_DIRECTORY_PATH;
             const file : File = image;
             if (!file || file.type != "image/png" && file.type != "image/jpeg") {
                 return Response.json({ error: "This file isnt image" }, { status: 400 })

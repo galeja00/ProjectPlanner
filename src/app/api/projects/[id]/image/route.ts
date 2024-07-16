@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { unlink } from "fs/promises";
 import { prisma } from "@/db";
-import { pathToImages } from "@/config";
+
 import sharp, { Sharp } from "sharp";
 import { randomUUID } from "crypto";
 import fs from 'fs';
@@ -37,6 +37,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
             return Response.json({ error: "No files received." }, { status: 400 });
         }
         if (image instanceof File) {
+            const pathToImages = process.env.IMAGE_DIRECTORY_PATH;
             const file : File = image;
             if (!file || file.type != "image/png" && file.type != "image/jpeg") {
                 return Response.json({ error: "This file isnt image" }, { status: 400 })
