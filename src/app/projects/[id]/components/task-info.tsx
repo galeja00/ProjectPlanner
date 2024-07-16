@@ -2,7 +2,7 @@
 
 import { useEffect, useReducer, useState, ChangeEvent, createContext, useContext } from "react";
 import Image from 'next/image' 
-import { Issue, Tag, Task, Ranking, Team, ProjectMember } from "@prisma/client";
+import { Tag, Task, Ranking, Team, ProjectMember } from "@prisma/client";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import { Name } from "./other-client";
@@ -263,16 +263,12 @@ enum TypeOfInfo {
 }
 
 function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
-    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.issues, TypeOfInfo.nodes, TypeOfInfo.settings];
+    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.nodes, TypeOfInfo.settings];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task} updateTask={updateTask}/>);
 
     function handleChangeType(type : TypeOfInfo) {
         switch (type) {
-            case TypeOfInfo.issues:
-                setActualInfo(<Issues issues={[]} taskId={task.id}/>);
-                setActualInfoType(TypeOfInfo.issues);
-                break;
             case TypeOfInfo.nodes:
                 setActualInfo(<Nodes task={task}/>);
                 setActualInfoType(TypeOfInfo.nodes);
@@ -360,48 +356,6 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
     )
 }
 
-function Issues({ issues, taskId } : { issues : Issue[], taskId : string }) {
-    const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false); 
-    const [ taskIssues, setTaskIssues ] = useState<Issue[]>(issues);
-    
-    async function fetchIssus() {
-
-    }
-
-    async function createIssue() {
-
-    }
-
-    async function deleteIssue() {
-
-    }
-
-    useEffect(() => {
-        fetchIssus
-    }, []);
-    
-
-    return (
-    <div className="m-4">
-        <ButtonSideText text={"Create new Issue"} image={"/plus.svg"} onClick={toggleCreating}/>
-        <ul>
-            {
-                issues.map(issue => (
-                    <IsssuesItem key={issue.id} issue={issue}/>
-                ))
-            }
-        </ul>
-    </div>
-    )
-}
-
-function IsssuesItem({ issue } : { issue : Issue }) {
-    return ( 
-        <li key={issue.id}>
-            {issue.name}
-        </li>
-    )
-}
 
 function Nodes({ task } : { task : Task }) {
     const [ nodes, setNodes ] = useState<NodeInfo[]>([]); 

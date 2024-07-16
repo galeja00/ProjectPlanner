@@ -25,7 +25,7 @@ model User {
   image     String?
   projects  ProjectMember[]
   projectInvites   ProjectInvite[]
-  issues    Issue[]
+//  issues    Issue[]
   nodes     Node[]
 }
 
@@ -53,7 +53,7 @@ model Project {
   doneAt    DateTime?
   members   ProjectMember[]
   teams     Team[]
-  issues    Issue[]
+//  issues    Issue[]
   invites   ProjectInvite[]
   
   kanban    Kanban?
@@ -158,7 +158,7 @@ model Task {
   estimatedHours Int?
   complexity    Ranking?
   description   String?
-  issues        Issue[]
+//  issues        Issue[]
   tags          Tag[]
   nodes         Node[]
   taskSolvers   TaskSolver[]
@@ -179,51 +179,6 @@ model TaskSolver {
  
   @@unique([taskId, memberId], name: "Unique_task_member")
 }
-
-// systém tagu pro týmy a úkoly
-model Tag {
-  id          String   @id @default(cuid()) 
-  createdAt   DateTime @default(now())
-  taskId      String?  
-  task        Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  teamId      String?
-  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  name        String
-  color       String
-}
-
-// problemy při řešení úkolů nebo jine
-model Issue {
-  id          String @id @default(cuid())
-  createdAt   DateTime @default(now())
-  taskId      String?
-  task        Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  projectId   String
-  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  priority    Ranking
-  creator     User @relation(fields: [creatorId], references: [id])
-  creatorId   String 
-  name        String
-  description String @db.Text
-}
-
-// komentaře k dané issue
-//model IssueComments {
-//  id            String         @id @default(cuid())
-//  createdAt     DateTime       @default(now())
-//  issueId       String
-//  issue         Issue          @relation(fields: [issueId], references: [id], onDelete: Cascade)
-//  isFirst       Boolean
-//  text          String
-//  authorId      String
-//  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
-//
-//  answers       IssueComments[] @relation("AnswersTo")
-//  prevCommentId String?
-//  prevComment   IssueComments? @relation("AnswersTo", fields: [prevCommentId], references: [id], onDelete: Cascade)
-//}
-
-
 
 // skupiny tasku ktere jsou v danem projektu
 model TasksGroup {
@@ -255,4 +210,51 @@ model Team {
   tasks     Task[]
   tags      Tag[]
 }
+
+
+// systém tagu pro týmy a úkoly
+model Tag {
+  id          String   @id @default(cuid()) 
+  createdAt   DateTime @default(now())
+  taskId      String?  
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  name        String
+  color       String
+}
+
+// problemy při řešení úkolů nebo jine
+//model Issue {
+//  id          String @id @default(cuid())
+//  createdAt   DateTime @default(now())
+//  taskId      String?
+//  task        Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+//  projectId   String
+//  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+//  priority    Ranking
+//  creator     User @relation(fields: [creatorId], references: [id])
+//  creatorId   String 
+//  name        String
+//  description String @db.Text
+//}
+
+// komentaře k dané issue
+//model IssueComments {
+//  id            String         @id @default(cuid())
+//  createdAt     DateTime       @default(now())
+//  issueId       String
+//  issue         Issue          @relation(fields: [issueId], references: [id], onDelete: Cascade)
+//  isFirst       Boolean
+//  text          String
+//  authorId      String
+//  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+//
+//  answers       IssueComments[] @relation("AnswersTo")
+//  prevCommentId String?
+//  prevComment   IssueComments? @relation("AnswersTo", fields: [prevCommentId], references: [id], onDelete: Cascade)
+//}
+
+
+
 

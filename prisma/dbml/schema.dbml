@@ -12,7 +12,6 @@ Table User {
   image String
   projects ProjectMember [not null]
   projectInvites ProjectInvite [not null]
-  issues Issue [not null]
   nodes Node [not null]
 }
 
@@ -38,7 +37,6 @@ Table Project {
   doneAt DateTime
   members ProjectMember [not null]
   teams Team [not null]
-  issues Issue [not null]
   invites ProjectInvite [not null]
   kanban Kanban
 }
@@ -133,7 +131,6 @@ Table Task {
   estimatedHours Int
   complexity Ranking
   description String
-  issues Issue [not null]
   tags Tag [not null]
   nodes Node [not null]
   taskSolvers TaskSolver [not null]
@@ -154,31 +151,6 @@ Table TaskSolver {
   indexes {
     (taskId, memberId) [unique]
   }
-}
-
-Table Tag {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  taskId String
-  task Task
-  teamId String
-  team Team
-  name String [not null]
-  color String [not null]
-}
-
-Table Issue {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  taskId String
-  task Task
-  projectId String [not null]
-  project Project [not null]
-  priority Ranking [not null]
-  creator User [not null]
-  creatorId String [not null]
-  name String [not null]
-  description String [not null]
 }
 
 Table TasksGroup {
@@ -209,6 +181,17 @@ Table Team {
   members ProjectMember [not null]
   tasks Task [not null]
   tags Tag [not null]
+}
+
+Table Tag {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  taskId String
+  task Task
+  teamId String
+  team Team
+  name String [not null]
+  color String [not null]
 }
 
 Enum Ranking {
@@ -253,18 +236,12 @@ Ref: TaskSolver.memberId > ProjectMember.id [delete: Cascade]
 
 Ref: TaskSolver.taskId > Task.id [delete: Cascade]
 
-Ref: Tag.taskId > Task.id [delete: Cascade]
-
-Ref: Tag.teamId > Team.id [delete: Cascade]
-
-Ref: Issue.taskId > Task.id [delete: Cascade]
-
-Ref: Issue.projectId > Project.id [delete: Cascade]
-
-Ref: Issue.creatorId > User.id
-
 Ref: TasksGroup.backlogId > Backlog.id [delete: Cascade]
 
 Ref: TasksGroup.timeTableId > TimeTable.id
 
 Ref: Team.projectId > Project.id [delete: Cascade]
+
+Ref: Tag.taskId > Task.id [delete: Cascade]
+
+Ref: Tag.teamId > Team.id [delete: Cascade]
