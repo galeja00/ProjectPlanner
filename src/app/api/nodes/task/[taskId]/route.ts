@@ -1,13 +1,12 @@
-import { getServerSession } from "next-auth";
-import { options } from "../auth/[...nextauth]/options";
+
+import { authorize } from "@/app/api/static";
 import { prisma } from "@/db";
-import { authorize } from "../static";
+
 import { Node } from "@prisma/client";
-import { NodeInfo } from "./static";
+import { NodeInfo } from "../../static";
 
 
-
-export async function GET(req : Request) {
+export async function GET(req : Request, { params } : { params: { taskId: string } })  {
     try {
         const email = await authorize(req);
         if (!email) {
@@ -25,13 +24,14 @@ export async function GET(req : Request) {
 
         const nodes : Node[] = await prisma.node.findMany({
             where: {
-                userId: user.id
+                userId: user.id,
+                taskId: params.taskId
             },
             orderBy: {
                 createdAt: "asc"
             }
         })
-
+        
         const resNodes: NodeInfo[] = await Promise.all(nodes.map(async node => {
             const currentDate: Date = new Date();
             const timeDifferenceInSec = Math.floor((currentDate.getTime() - node.createdAt.getTime()) / 1000);
@@ -51,6 +51,7 @@ export async function GET(req : Request) {
                 createdAgo: timeDifferenceInSec
             };
         }));
+
         return Response.json({ nodes: resNodes }, { status: 200 });
     }
     catch (error) {

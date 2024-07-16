@@ -100,7 +100,7 @@ function NotificationIcon() {
     useEffect(() => {
         const interval = setInterval(() => {
             fetchInfo(); // Call fo info
-        }, 5000); // Interval 5000 ms
+        }, 50000); 
 
         // Clean Interval
         return () => clearInterval(interval);

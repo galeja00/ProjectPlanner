@@ -1,5 +1,5 @@
 "use client"
-import { Node } from "@prisma/client"
+import { Node, Task } from "@prisma/client"
 import { ChangeEvent, FormEvent, useEffect, useReducer, useState } from "react";
 import { Dialog, DialogClose } from "../components/dialog";
 import { ArrayButtons, Button, ButtonType, CreateButton, Lighteness } from "../components/buttons";
@@ -7,6 +7,7 @@ import { FormItem, SubmitButton } from "../components/form";
 import { NodeInfo } from "../api/nodes/static";
 import { ErrorBoundary, ErrorState } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
+import { formatAgo } from "@/date";
 
 // components to display personal user nodes
 
@@ -83,7 +84,7 @@ export default function Nodes() {
     return (
         <ErrorBoundary error={error}>
             <section>
-            { isCreator && <NodeCreatetor onClose={toggleCreator} onCreate={onCreate}/>}
+            { isCreator && <NodeDialog onClose={toggleCreator} onCreate={onCreate}/>}
                 <CreateButton text="Create new node" onClick={toggleCreator} />
                 <ul className="grid grid-cols-2 gap-2">
                     {
@@ -98,10 +99,21 @@ export default function Nodes() {
     )
 }
 
-// component where user can create his personal nodes
-function NodeCreatetor({ onCreate, onClose } : { onCreate : () => void, onClose : () => void }) {
-    const [ desc, setDesc ] = useState<string>("");
+// open dialog where user can create his personal nodes
+function NodeDialog({ onCreate, onClose } : { onCreate : () => void, onClose : () => void }) {
+    return (
+        <Dialog>
+            <div className="bg-neutral-200 rounded p-4 h-fit relative w-1/3">
+                <DialogClose handleClose={onClose}/>
+                <NodeCreator onCreate={onCreate}/>
+            </div>
+        </Dialog>
+    )
+}
 
+export function NodeCreator({ onCreate, selector = false, head = true, taskId = null } : { onCreate : () => void, selector? : boolean, head? : boolean, taskId? : string | null}) {
+    const [ desc, setDesc ] = useState<string>("");
+    const [ selectedTask, setTask ] = useState<string | null>(taskId);
     // handle change of user input
     function handleChange(event : ChangeEvent<HTMLTextAreaElement>) {
         setDesc(event.target.value);
@@ -112,15 +124,14 @@ function NodeCreatetor({ onCreate, onClose } : { onCreate : () => void, onClose 
         event.preventDefault();
         const formData = new FormData(event.currentTarget); 
         const header = formData.get("header");
-        if (header == "") {
-
-        }
+        console.log(header + " " + desc + " " + selectedTask);
         try {
             const res = await fetch("/api/nodes/create", {
                 method: "POST",
                 body: JSON.stringify({
                     header: header,
-                    desc: desc
+                    desc: desc,
+                    taskId: selectedTask
                 })
             })
             const data = await res.json(); 
@@ -135,34 +146,35 @@ function NodeCreatetor({ onCreate, onClose } : { onCreate : () => void, onClose 
         }
     }
     
-
-    return (
-        <Dialog>
-            <div className="bg-neutral-200 rounded p-4 h-fit relative w-1/3">
-                <DialogClose handleClose={onClose}/>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <h2 className=" font-bold text-xl mb-4">Create new node</h2>
-                    <FormItem item={"Header"} type={"text"} name={"header"} correct={true}/>
-                    <div className="flex flex-col">
-                        <label>Description</label>
-                        <textarea className="input-primary h-32" onChange={handleChange} />
-                    </div>
-                    <SubmitButton text={"Create node"}/>
-                </form>
+    return ( 
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            { head && <h2 className="font-bold text-xl mb-4">Create new node</h2>}
+            <FormItem item={"Header"} type={"text"} name={"header"} correct={true}/>
+            <div className="flex flex-col">
+                <label>Description</label>
+                <textarea className="input-primary h-32" onChange={handleChange} />
             </div>
-        </Dialog>
+            { selector && <SelectorTask/>}
+            <SubmitButton text={"Create node"}/>
+        </form>
+    )
+}
+
+function SelectorTask() {
+    return (
+        <div></div>
     )
 }
 
 
 // display info about node
-function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (id : string) => void }) {
+export function NodeComponent({ node, deleteNode, colorMode = 200 } : { node : NodeInfo, deleteNode : (id : string) => void, colorMode? : number }) {
     const ago: number = node.createdAgo;
     const agoText: string = formatAgo(ago);
 
-    const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
+    const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "/x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
     return ( 
-        <li key={node.id} className="bg-neutral-200 rounded min-h-[8rem]">
+        <li key={node.id} className={`bg-neutral-${colorMode} rounded min-h-[8rem]`}>
             <div className="flex justify-between border-b border-neutral-900 p-4 items-center">
                 <h3>{node.name}</h3>
                 <div className="flex gap-4">
@@ -178,15 +190,3 @@ function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (i
     )
 }
 
-// format date
-function formatAgo(time: number): string {
-    const units = ['sec', 'min', 'h', 'd'];
-    let unitIndex = 0;
-
-    while (time >= 60 && unitIndex < units.length - 1) {
-        time /= 60;
-        unitIndex++;
-    }
-    time = Math.round(time);
-    return `${time} ${units[unitIndex]}`;
-}

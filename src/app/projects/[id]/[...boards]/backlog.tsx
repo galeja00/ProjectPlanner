@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useReducer, useState, createContext, useContext, useRef} from 'react'
-import { FilterButton, SearchInput } from "../components/filter-tables";
-import { CreateTaskButton, Head, TeamBadge } from "../components/other";
+import { ButtonSideText, Head, TeamBadge } from "../components/other";
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
 import { Task, TaskColumn, TasksGroup, Team } from "@prisma/client";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
@@ -375,7 +374,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
                 }
                 { isCreating && <CreatorOfTask createTask={createTask} endCreate={toggleCreating} />}
             </ul>
-            { displayd == "block" && <CreateTaskButton createTask={toggleCreating}/>}
+            { displayd == "block" && <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={toggleCreating}/>}
         </li> 
     )
 }

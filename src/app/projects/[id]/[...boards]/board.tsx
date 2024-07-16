@@ -2,9 +2,8 @@
 import { Tag, Task, Team } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
-import { FilterDialog } from '../components/filter-tables'
 import { TaskInfo } from '../components/task-info'
-import { Head, CreateTaskButton, TeamBadge } from '../components/other'
+import { Head,  ButtonSideText, TeamBadge } from '../components/other'
 import { PriorityImg } from './components/priority'
 import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
@@ -349,7 +348,7 @@ function TasksColumn(
                     }
                     { creating && <CreatorOfTask key={"create"} createTask={createTask} endCreate={toggle}/> }
                 </ul>
-                <CreateTaskButton createTask={() => handleCreateTaskForm()}/>
+                <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={() => handleCreateTaskForm()}/>
             </div>
         </section>
     )

@@ -10,8 +10,12 @@ import { TagList } from "./tags";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 import { LoadingOval } from "@/app/components/other";
-import { TeamBadge } from "./other";
+import { ButtonSideText, TeamBadge } from "./other";
 import { ErrorBoundary, ErrorState } from "@/app/components/error-handler";
+import { NodeInfo } from "@/app/api/nodes/static";
+import { FormItem, SubmitButton } from "@/app/components/form";
+import { NodeComponent, NodeCreator } from "@/app/nodes/nodes";
+import { formatAgo } from "@/date";
 
 enum SolverFuncs {
     Add = "add",
@@ -37,7 +41,7 @@ interface TaskInfoContextTypes {
 
 const TaskInfoContext = createContext<TaskInfoContextTypes | null>(null);
 
-// TODO: Error handeling + loading screen
+// TODO: Error handeling
 // dialog for display info and editing it
 export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : string, projectId : string, handleClose : () => void, submitTask : (task : Task) => void}) {
     const [ task, setTask ] = useState<Task | null>(null);
@@ -205,7 +209,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     return (
         <Dialog>
-            <ErrorBoundary error={null}>
+            <ErrorBoundary error={error}>
                 <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
                     { task 
                         ?
@@ -270,7 +274,7 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
                 setActualInfoType(TypeOfInfo.issues);
                 break;
             case TypeOfInfo.nodes:
-                setActualInfo(<Nodes taskId={task.id}/>);
+                setActualInfo(<Nodes task={task}/>);
                 setActualInfoType(TypeOfInfo.nodes);
                 break;
             case TypeOfInfo.settings: 
@@ -293,7 +297,7 @@ function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (t
                     ))
                 }
             </menu>
-            <div className="relative h-[25rem]">
+            <div className="relative h-[25rem] overflow-y-auto">
                 {actualInfo}
             </div>
         </section>
@@ -319,16 +323,6 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
     } 
     const [ isEditing, toggleEdit ] = useReducer(isEditing => !isEditing, false);
     const [ editDesc, setEditDesc ] = useState<string>(desc);
-    /*function handleDesc(event : KeyboardEvent<HTMLTextAreaElement>) {
-        const inputValue = event.currentTarget.value;
-        if (event.key == 'Enter') {
-            if (inputValue.length > 0) {
-                task.description = inputValue;
-                updateTask(task);
-                toggleEdit();
-            }
-        }
-    }*/
     
     function handleSubmit() {
         if (editDesc != "") {
@@ -345,10 +339,7 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
     desc = editDesc;
     return (
         <article className='m-4 space-y-4'>
-            <button onClick={toggleEdit} className={`w-fit h-fit flex gap-2 items-center hover:text-neutral-950 text-neutral-600 `}>
-                <img src="/pencil.svg" alt="Edit Description" className={`rounded w-7 h-7 ${isEditing ? "bg-violet-600" : "bg-neutral-100"} p-1`}/>
-                <div>Edit Description</div>
-            </button>
+            <ButtonSideText text={"Edit Description"} image={"/pencil.svg"} onClick={toggleEdit}/>
             {
                 isEditing ? 
                     <div className="space-y-2">
@@ -391,13 +382,8 @@ function Issues({ issues, taskId } : { issues : Issue[], taskId : string }) {
     
 
     return (
-    <div>
-        <div className="flex flex-row gap-4">
-            <button className="bg-neutral-100 rounded" onClick={toggleCreating}>
-                <img src="plus.svg" alt="create"/>
-            </button>
-            <div>Create new Issue</div>
-        </div>
+    <div className="m-4">
+        <ButtonSideText text={"Create new Issue"} image={"/plus.svg"} onClick={toggleCreating}/>
         <ul>
             {
                 issues.map(issue => (
@@ -417,16 +403,52 @@ function IsssuesItem({ issue } : { issue : Issue }) {
     )
 }
 
-function Nodes({ taskId } : { taskId : string}) {
-    const [ nodes, setNodes ] = useState<Node[]>([]); 
+function Nodes({ task } : { task : Task }) {
+    const [ nodes, setNodes ] = useState<NodeInfo[]>([]); 
     const [ isCreating, toggleCreating ]= useReducer(isCreating => !isCreating, false); 
+    const { submitError } = useContext(TaskInfoContext)!;
 
     async function fetchNodes() {
         try {
+            const res = await fetch(`/api/nodes/task/${task.id}`, {
+                method: "GET",
 
+            })
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error);
+            }
+            console.log(data);
+            setNodes(data.nodes);
         }
-        catch {
+        catch(error) {
+            console.error(error);
+            submitError(error, fetchNodes);
+        }
+    }
 
+    async function deleteNode(id : string) {
+        try {
+            const res = await fetch(`/api/nodes/${id}/delete`, {
+                method: "POST"
+            })
+            
+            if (!res.ok) {
+                const data = await res.json(); 
+                throw new Error(data.error);
+            }
+            const newNodes : NodeInfo[] = [];
+            for (let node of nodes) {
+                if (node.id != id) {
+                    newNodes.push(node);
+                }
+            }
+            setNodes(newNodes);
+        }
+        catch (error) {
+            console.error(error);
+            //setError({ error, repeatFunc: () => deleteNode(id) });
         }
     }
 
@@ -434,12 +456,36 @@ function Nodes({ taskId } : { taskId : string}) {
         fetchNodes()
     }, [])
 
-    return (
-        <div>
+    function onCreate() {
+        toggleCreating();
+        fetchNodes();
+    }
 
-        </div>
+    if (isCreating) {
+        return (
+            <div className="m-4 space-y-4">
+                <ButtonSideText text={"Create new Node"} image={"/plus.svg"} onClick={toggleCreating}/>
+                <NodeCreator onCreate={onCreate} head={false} taskId={task.id}/>
+            </div>
+        )
+    }
+
+    return (
+        <div className="m-4 space-y-4">
+            <ButtonSideText text={"Create new Node"} image={"/plus.svg"} onClick={toggleCreating}/>
+            <ul className=" grid auto-cols-fr gap-2">
+                {
+                    nodes.map((node) => (
+                        <NodeComponent key={node.id} node={node} deleteNode={deleteNode} colorMode={100}/>
+                    ))
+                }
+            </ul>  
+        </div>   
+            
     )
 }
+
+
 
 function Settings({ task } : { task : Task }) {
     const { team, solvers } = useContext(TaskInfoContext)!;   
@@ -606,8 +652,6 @@ function Selector({ items, team = false, handleSelect } : { items : SelectionIte
             }
         </>
     )
-
-
 }
 
 // DATA INFORMATIONS
@@ -740,8 +784,6 @@ function DataEditInput({ value, name, changeVal } : { value : string, name : str
 
 
 function Solvers({ solvers, team} : { solvers : Solver[], team : TeamInfo | null }) {
-
-    //<button onClick={fetchSolvers} className="h-fit" title="Edit solvers"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
     return (
         <div className="space-y-2">
             <div>
