@@ -3,7 +3,7 @@
 import { FormEvent, useState } from 'react';
 import EmailValidator from 'email-validator';
 import { useRouter } from 'next/navigation';
-import { SubmitButton } from '@/app/components/form';
+import { FormItem, SubmitButton } from '@/app/components/form';
 
 type Msg = {
     message : string,
@@ -11,11 +11,12 @@ type Msg = {
 }
 
 export default function RegisterForm() {
+    // state of every input if is correct or incorrect filled by user
     const [correctPsw, setCorrectPsw] = useState<boolean | null>(null); 
     const [correctEmail, setCorrectEmail] = useState<boolean | null>(null); 
     const [correctName, setCorrectName] = useState<boolean | null>(null);
     const [correctSurName, setCorrectSurName] = useState<boolean | null>(null);
-    const [Msg, setMsg] = useState<Msg>({ message: "",  type: false});
+    const [Msg, setMsg] = useState<Msg>({ message: "",  type: false}); // error message
     const router = useRouter();
 
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
@@ -27,6 +28,7 @@ export default function RegisterForm() {
         const password = formData.get("password");
         const repeatpassword = formData.get("repeatpassword");
         try {
+            // validet if user fild all inputs
             if (!(email && name && surname && password && repeatpassword )) {
                 setMsg({ message: "You need to fill all inputs", type: false});
                 setCorrectPsw(false);
@@ -35,11 +37,13 @@ export default function RegisterForm() {
                 setCorrectSurName(false);
                 return;
             }
+            // validete if email is looking like real one
             if (!EmailValidator.validate(email.toString())) {
                 setCorrectEmail(false);
                 setMsg({ message: "You need to insert valid email", type: false});
                 return;
             }
+            // chack if passwords are same
             if (password == repeatpassword) {
                 try {
                     var response = await fetch('/api/auth/signup', {
@@ -52,10 +56,13 @@ export default function RegisterForm() {
                             repeatpassword: repeatpassword
                         })
                     }) 
+
+                    // chack if response from API is OK
                     if  (!response.ok) {
                         setMsg({ message: "Error in communication with server, try again", type: false });
                     } else {
                         setMsg({ message: "Succesfull registration", type: true});
+                        router.push("/");
                     }
                 } catch (error) {
                     setMsg({ message: "Error in communication with server, try again", type: false });
@@ -86,16 +93,4 @@ export default function RegisterForm() {
     )
 }
 
-function FormItem({ item, type, name, correct }: { item : string, type: string, name : string, correct : null | boolean }) {
-    var inputClass = "input-primary";
-    if (correct == false) {
-        inputClass = "input-faild";
-    }
-    return (
-        <div className='flex flex-col'>
-            <label>{item}</label>
-            <input type={type} name={name} className={inputClass}></input>
-        </div>
-    )
-}
 

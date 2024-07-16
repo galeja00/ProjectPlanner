@@ -8,13 +8,16 @@ import { NodeInfo } from "../api/nodes/static";
 import { ErrorBoundary, ErrorState } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
 
+// components to display personal user nodes
+
+// main component
 export default function Nodes() {
-    const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);
-    const [ nodes, setNodes ] = useState<NodeInfo[]>([]); 
+    const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);  // toggler between modes
+    const [ nodes, setNodes ] = useState<NodeInfo[]>([]); // state of every node user have
     const [ error, setError ] = useState<ErrorState | null>(null);
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
 
-
+    // fetch data about nodes from endpoint
     async function fetchNodes(isInitialLoading : boolean) {
         if (isInitialLoading) {
             setInitialLoading(true);
@@ -26,7 +29,6 @@ export default function Nodes() {
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.error);
-                return;
             }
             setNodes(data.nodes);
         }
@@ -40,6 +42,7 @@ export default function Nodes() {
 
     }
 
+    // delete node by fetching to enpoint
     async function deleteNode(id : string) {
         try {
             const res = await fetch(`/api/nodes/${id}/delete`, {
@@ -95,13 +98,16 @@ export default function Nodes() {
     )
 }
 
+// component where user can create his personal nodes
 function NodeCreatetor({ onCreate, onClose } : { onCreate : () => void, onClose : () => void }) {
     const [ desc, setDesc ] = useState<string>("");
 
+    // handle change of user input
     function handleChange(event : ChangeEvent<HTMLTextAreaElement>) {
         setDesc(event.target.value);
     }
-    // TODO : optimalizate (not refetch again just update)
+    
+    // submiting new user node to endpoint
     async function handleSubmit(event : FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget); 
@@ -149,7 +155,7 @@ function NodeCreatetor({ onCreate, onClose } : { onCreate : () => void, onClose 
 }
 
 
-
+// display info about node
 function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (id : string) => void }) {
     const ago: number = node.createdAgo;
     const agoText: string = formatAgo(ago);
@@ -172,7 +178,7 @@ function NodeComponent({ node, deleteNode } : { node : NodeInfo, deleteNode : (i
     )
 }
 
-
+// format date
 function formatAgo(time: number): string {
     const units = ['sec', 'min', 'h', 'd'];
     let unitIndex = 0;

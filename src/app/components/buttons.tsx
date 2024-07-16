@@ -44,7 +44,7 @@ function ButtonComp({ button } : { button : Button }) {
             break;
         case (ButtonType.MidDestructive):
             // TOD: fix bug with color (orange-600)
-            hoverColor = "violet-600";
+            hoverColor = "orange-600";
             break;
         case (ButtonType.Creative):
             hoverColor = "green-600";

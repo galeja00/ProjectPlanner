@@ -51,3 +51,16 @@ export function formatDate(date : Date) : string {
     return formatedDate;
 }
 
+
+// format date
+export function formatAgo(time: number): string {
+    const units = ['sec', 'min', 'h', 'd'];
+    let unitIndex = 0;
+
+    while (time >= 60 && unitIndex < units.length - 1) {
+        time /= 60;
+        unitIndex++;
+    }
+    time = Math.round(time);
+    return `${time} ${units[unitIndex]}`;
+}

@@ -1,10 +1,7 @@
 "use client"
 import Image from 'next/image'
 import { useEffect, useReducer, useRef, useState, KeyboardEvent } from "react"
-import { FilterButton, SearchInput } from '../components/filter-tables'
 import { Head } from '../components/other'
-import { User } from '@prisma/client'
-import { ButtonWithImg } from '@/app/components/other'
 import { Dialog, DialogClose } from '@/app/components/dialog'
 import { InitialLoader } from '@/app/components/other-client'
 import { ErrorBoundary, ErrorState } from '@/app/components/error-handler'
@@ -15,6 +12,7 @@ enum Load {
     high = 3
 }
 
+// type for a member 
 type MemberInfo = {
     image: string | null,
     memberId: string,
@@ -24,18 +22,19 @@ type MemberInfo = {
     surname: string,
     tasksLoad: number
 }
-
-//TODO: beter structure of code and calls
+//componenets for displaying data about users with are project memebers
 export default function Members({ params } : { params : { id : string }}) {
-    const [ members, setMembers] = useState<MemberInfo[]>([]);
-    const [ isAddDialog, toggleDialog ] = useState<boolean>(false);
-    const [ isTeamDialog, toggleTeamDialog ] = useReducer(isTeamDialog => !isTeamDialog, false);
-    const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
+    const [ members, setMembers] = useState<MemberInfo[]>([]); 
+    const [ isAddDialog, toggleDialog ] = useState<boolean>(false); // state if is adding dialog on or of
+    const [ initialLoading, setInitialLoading ] = useState<boolean>(false); // state of loading for loading circle
     const [ error, setError ] = useState<ErrorState | null>(null);
+   
+    //initial fetch of members data
     useEffect(() => {
         fetchMembers();
     }, [])
     
+    // function for fetching data of members in project
     async function fetchMembers() {
         setInitialLoading(true);
         try {
@@ -61,6 +60,7 @@ export default function Members({ params } : { params : { id : string }}) {
         }
     }
 
+    // async function for fecthiong to endpoint and deleting member from project
     async function removeMember(memberId : string) {
         try {
             const res = await fetch(`/api/projects/${params.id}/members/remove`, {
@@ -128,10 +128,8 @@ function AddMemberButton({ handleClick } : { handleClick : () => void}) {
     )
 }
 
+// display table head and map rows where rows are members of project
 function TableMembers({ members, handleRemove } : { members : MemberInfo[], handleRemove : (memberId : string) => void}) {
-    function openSettings(id : string) {
-
-    }
     return (
         <table className="bg-neutral-200 rounded flex flex-col">
             <thead className="">
@@ -154,6 +152,7 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
     )
 }
 
+// display data about member of project and cliceble button
 function MemberRow({ memberInfo, handleRemove } : { memberInfo : MemberInfo, handleRemove : () => void }) {
     let imgSrc = "/avatar.svg"; 
     if (memberInfo.image) {
@@ -174,73 +173,7 @@ function MemberRow({ memberInfo, handleRemove } : { memberInfo : MemberInfo, han
     )
 }
 
-enum LoadColors {
-    Green = "green",
-    Yellow = "yellow",
-    Red = "red",
-    Default = "#0a0a0a"
-}
-
-enum TypeOfLoad {
-    Low = "low",
-    Medium = "medium",
-    Heigh = "heigh"
-}
-
-type LoadDysplay = {
-    text : TypeOfLoad
-    color : LoadColors
-    indicatorsColor : LoadColors[]
-}
-
-
-
-function convertLoadNumToDysplay(num : number) : LoadDysplay {
-    var color : LoadColors;
-    var text : TypeOfLoad;
-    switch (num) {
-        case Load.low:
-            color = LoadColors.Green
-            text = TypeOfLoad.Low
-            break;
-        case Load.mid: 
-            color = LoadColors.Yellow
-            text = TypeOfLoad.Medium
-            break;
-        default:
-            color = LoadColors.Red
-            text = TypeOfLoad.Heigh
-    }
-    const colorsOfIndicator : LoadColors[] = [];
-    const numOfIndicators = 3;
-    for (let i = 0; i < numOfIndicators; i++) {
-        if (i < num) {
-            colorsOfIndicator.push(color);
-        } 
-        else {
-            colorsOfIndicator.push(LoadColors.Default);
-        }
-    }
-    return { text: text, color: color, indicatorsColor : colorsOfIndicator }
-}
-
-
-function MemberLoad({ load } : { load : number }) {
-    const res = convertLoadNumToDysplay(load);
-    return (
-        <td className='col-span-2'>
-            <div className='' style={{ color: res.color }}>{res.text}</div>
-            <div className='flex gap-1'>
-                {
-                    res.indicatorsColor.map((ind, i) => (
-                        <div key={i} className='w-4 h-1 rounded' style={{ backgroundColor: ind }}></div>
-                    ))
-                }
-            </div>
-        </td>
-    )
-}
-
+// types for searching user in application to add them to project
 enum TypeOfSearh {
     Id = "id",
     Name = "name"
@@ -253,12 +186,13 @@ type UserInfo = {
     image : string
 }
 
-function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
-    const [ results, setResults ] = useState<UserInfo[]>([]);
-    const [ type, setType ] = useState<TypeOfSearh>(TypeOfSearh.Id);
-    //const [ value, setValue ] = useState<String>("");
-    const typesOfSearh = [ TypeOfSearh.Id, TypeOfSearh.Name ]
+// dialog for searching users in application 
+function AddDialog({ onClose, id } : { onClose : () => void, id : string }) {
+    const [ results, setResults ] = useState<UserInfo[]>([]); // results from sreach
+    const [ type, setType ] = useState<TypeOfSearh>(TypeOfSearh.Id); // state of sreach type
+    const typesOfSearh = [ TypeOfSearh.Id, TypeOfSearh.Name ]; 
 
+    // search users by snyc cominication with enpoint
     async function searchUser(value : string) {
         try {
             const res = await fetch("/api/users/search", {
@@ -281,6 +215,7 @@ function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
         }
     }
 
+    // handle change of search type
     function handleChange(type : TypeOfSearh) {
         setType(type);
     }
@@ -296,11 +231,12 @@ function AddDialog({onClose, id } : { onClose : () => void, id : string }) {
     )
 }
 
+// display inputs to user for search users
 function AddForm(
     { actualType, types, search, handleChange } : 
     { actualType : TypeOfSearh, types : TypeOfSearh[], search : (value : string) => void, handleChange : (t : TypeOfSearh) => void }) {
     
-        function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
         const inputValue = event.currentTarget.value;
         if (inputValue.length > 0) {
             search(inputValue);
@@ -323,6 +259,7 @@ function AddForm(
     )
 }
 
+// display all finded users
 function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
     return (
         <ul className='space-y-2'>
@@ -335,9 +272,10 @@ function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
     )
 }
 
+// info about user and function to invite it
 function UsersItem({ user, id } : { user : UserInfo, id : string }) {
-    const [notif, toggle] = useReducer(notif => !notif, false);
 
+    // contact endpoint by fetching to invite user and create notification for him
     async function inviteUser() {
         try {
             const res = await fetch(`/api/projects/${id}/members/add`, {
@@ -351,9 +289,6 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
             if (!res.ok) {
                 throw new Error(data.eror);
             }
-
-            console.log(data.message);
-            //TODO: Notification of succes
         } 
         catch (error) {
             console.error(error);

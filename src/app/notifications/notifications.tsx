@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import Image from 'next/image' 
 import { ButtonWithImg, ButtonWithText, SearchInput } from "../components/other";
 import { ErrorBoundary, ErrorState } from "../components/error-handler";
+import { formatAgo } from "@/date";
 
+// type for notification to display it to user
 type Notification = {
     id : string,
     projectId : string,
@@ -15,15 +17,17 @@ type Notification = {
     displayd : boolean
 }
 
+// enum for different notiffications right now only about invite
 enum NotifictionsText {
     ProjectInvite = "You have been invited to project"
 }
 
-
+// component for diplaying user notification and accepting or removing
 export default function NotifiactionsList() {
     const [notifs, setNotifs] = useState<Notification[]>([]); 
     const [error, setError] = useState<ErrorState | null>(null); 
     
+    // get all user notifications from endpoint
     async function fetchNotifications() {
         try {
             const res = await fetch(`/api/users/notifications`, {
@@ -57,13 +61,14 @@ export default function NotifiactionsList() {
                 }
                 { notifs.length == 0 && <li>Right now you have zero notifications</li>}
             </ul>
-            
         </ErrorBoundary>
     )
 }
 
-
+// display notifications informations and handle functions with them
 function NotificationsItem({notif, updateNotif} : {notif : Notification, updateNotif : () => void}) {
+    
+    // handle click on buttons by submiting it to endpoint
     async function handleButtonClick(type : string) {
         try {
             const res = await fetch(`/api/users/projectInvites/${type}`, {
@@ -83,6 +88,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
         }
     }
     
+    // chack with type of notification it is
     var text : string;
     switch (notif.type) {
         case "ProjectInvite":
@@ -92,12 +98,9 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
             text = NotifictionsText.ProjectInvite
     }
 
+    // formats ago to readeble data for user
     var ago : number = notif.agoInHours;
-    var agoText : string = "h";
-    if (ago > 24) {
-        ago = ago / 24;
-        agoText = "d";
-    }
+    var agoText : string = formatAgo(ago);
 
     return (
         <li className='bg-neutral-200 rounded p-2 w-full flex gap-4 relative'>
