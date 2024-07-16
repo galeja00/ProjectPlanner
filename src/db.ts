@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
+// code for connecting prisma properly with nextjs
 const globalForPrisma = global as unknown as {
     prisma: PrismaClient | undefined;
 }

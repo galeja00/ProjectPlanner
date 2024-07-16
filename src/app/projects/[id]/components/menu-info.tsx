@@ -7,11 +7,7 @@ import { useEffect, useState } from 'react'
 // data displayd in project menu about project like name and image
 export function ProjectInfo( { id } : { id : string }) {
     const [info, setInfo] = useState<Project | null>(null); // save state of project info
-    if (!info || info.id != id) {
-        return (
-            <LoadingOval/>
-        )
-    }
+    
 
     // initial fetch of data
     useEffect(() => {

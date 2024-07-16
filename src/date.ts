@@ -1,3 +1,5 @@
+
+// covert Date type tu arra of numbers [ day, mounth, year ]
 export function convertDateToArray(date : Date) : number[] {
     // [day, mouth, fullyear]
     const result : number[] = new Array(3);
@@ -7,7 +9,8 @@ export function convertDateToArray(date : Date) : number[] {
     return result;
 } 
 
-export function isEarlierDate(compDate : Date, date : Date) {
+// compere two date dates and try to find out if date is earlier then compDate
+export function isEarlierDate(compDate : Date, date : Date) : boolean {
     const compArr : number[] = convertDateToArray(compDate);
     const dateArr : number[] = convertDateToArray(date);
     for (let i = 3; i >= 0; i--) {
@@ -18,6 +21,7 @@ export function isEarlierDate(compDate : Date, date : Date) {
     return true;
 }
 
+// compare two dates and try to find out if date is later then compDate
 export function isLaterDate(compDate : Date, date : Date) {
     const compArr : number[] = convertDateToArray(compDate);
     const dateArr : number[] = convertDateToArray(date);
@@ -29,19 +33,22 @@ export function isLaterDate(compDate : Date, date : Date) {
     return true;
 }
 
+// find out if date is between dates
 export function isBetweenDates(start : Date, end : Date, between : Date) : boolean {
     return isEarlierDate(end, between) && isLaterDate(start, between);
 }
 
+// get different between two dates and return it in number of days
 export function getDiffInDays(start : Date, end : Date) : number {
     return Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 ));
 }
 
-
+// convert millisecunds to days
 export function fromDayToMills(day : number) : number {
     return day * (1000 * 60 * 60 * 24);
 }
 
+// forma date to = DD.MM.YYYY
 export function formatDate(date : Date) : string {
     let formatedDate = "";
     const day = date.getDate();
@@ -52,7 +59,7 @@ export function formatDate(date : Date) : string {
 }
 
 
-// format date
+// format date from millisecunds past number to string
 export function formatAgo(time: number): string {
     const units = ['sec', 'min', 'h', 'd'];
     let unitIndex = 0;
