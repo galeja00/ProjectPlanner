@@ -52,7 +52,6 @@ export default function Backlog({ id } : { id : string }) {
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.error);
-                return;
             }
             const newGroups : GroupOfTasks[] = data.backlog
             newGroups.sort((a, b) => sortGroups(a, b));
@@ -80,7 +79,6 @@ export default function Backlog({ id } : { id : string }) {
 
             const data = await res.json();
             if (res.ok) {
-            
                 const newGroup : TasksGroup = data.group;
                 const newGroups : GroupOfTasks[] = groups;
                 newGroups.push({ id: newGroup.id, name: newGroup.name, backlogId: newGroup.backlogId, position: newGroup.position, tasks: []});
@@ -219,6 +217,7 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
 
             if (res.ok) {
                 fetchGroups(); 
+                return;
             }
             const data = await res.json();
             throw new Error(data.error);

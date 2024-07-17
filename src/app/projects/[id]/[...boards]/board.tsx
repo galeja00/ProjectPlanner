@@ -1,5 +1,5 @@
 'use client'
-import { Tag, Task, Team } from '@prisma/client'
+import { Task, Team } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { TaskInfo } from '../components/task-info'
@@ -9,7 +9,7 @@ import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
 import { LoadingOval } from '@/app/components/other'
 import { InitialLoader } from '@/app/components/other-client'
-import { ErrorBoundary, ErrorState } from '@/app/components/error-handler'
+import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler'
 
 
 // defalt type for Object for work with column and tasks
@@ -37,7 +37,7 @@ const TasksColumnsContext = createContext<ProviderColumns>({
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]); // state of or columns on board
     const [initialLoading, setInitialLoading] = useState<boolean>(true); // initial loading state
-    const [ error, setError ] = useState<ErrorState | null>(null)
+    const { submitError } = useError();
 
     // get data of all columns from REST-API endpoint
     async function fetchColumns(id : string, isInitialLoading : boolean) : Promise<void> {
@@ -58,9 +58,9 @@ export default function Board({ id } : { id : string }) {
             }
             setTaskColumns(data.data);
         }
-        catch (Error) {
-            console.error(Error);
-            setError({error, repeatFunc: () => fetchColumns(id, false)})
+        catch (error) {
+            console.error(error);
+            submitError(error, () => fetchColumns(id, false))
         }
         finally {
             setInitialLoading(false);
@@ -89,7 +89,7 @@ export default function Board({ id } : { id : string }) {
             fetchColumns(id, false);
         } catch (error) {
             console.error(error)
-            setError({ error, repeatFunc: () => handleMoveOfTask(fromColId, toColId, taskId, taskIndex)});
+            submitError(error, () => handleMoveOfTask(fromColId, toColId, taskId, taskIndex));
         }
     }
 
@@ -113,7 +113,7 @@ export default function Board({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => createColumn(name)});
+            submitError( error, () => createColumn(name));
         }
     }
 
@@ -121,10 +121,6 @@ export default function Board({ id } : { id : string }) {
     useEffect(() => {
         fetchColumns(id, false);
     }, [])
-
-    function submitError(error : unknown, repeatFunc : () => void) {
-        setError({ error, repeatFunc });
-    }
 
 
     if (initialLoading) {
@@ -135,7 +131,7 @@ export default function Board({ id } : { id : string }) {
 
 
     return (
-        <ErrorBoundary error={error}>
+        <ErrorBoundary>
             <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns, submitError }}>
                 <div className='relative'>
                     <Head text='Board'/>
@@ -592,9 +588,10 @@ function MoreMenuItems({ item } : { item : MoreMenuItem}) {
 }
 
 
-// Not implemented
+
+/*
+// Not implemented (future possible feature, not much importent)
 function TagList() {
-    // TODO: Tags and ags type
     const [tags, setTags] = useState<Tag[]>([]);
     const [adding, toggle] = useReducer(adding => !adding, false);
 
@@ -624,7 +621,7 @@ function TagList() {
         </div>
     )
 }
-
+*/
 function sortTaskByColIndex(task1 : Task, task2 : Task) : number {
     if (!task1.colIndex && !task2.colIndex) return 0; // obě hodnoty jsou null, vrátíme nulu
     if (!task1.colIndex) return 1; // task1 má null colIndex, takže ho umístíme za task2  

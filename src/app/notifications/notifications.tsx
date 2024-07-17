@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from 'next/image' 
 import { ButtonWithImg, ButtonWithText, SearchInput } from "../components/other";
-import { ErrorBoundary, ErrorState } from "../components/error-handler";
+import { ErrorBoundary, ErrorState, useError } from "../components/error-handler";
 import { formatAgo } from "@/date";
 
 // type for notification to display it to user
@@ -25,7 +25,7 @@ enum NotifictionsText {
 // component for diplaying user notification and accepting or removing
 export default function NotifiactionsList() {
     const [notifs, setNotifs] = useState<Notification[]>([]); 
-    const [error, setError] = useState<ErrorState | null>(null); 
+    const { submitError } = useError(); 
     
     // get all user notifications from endpoint
     async function fetchNotifications() {
@@ -41,7 +41,7 @@ export default function NotifiactionsList() {
         }
         catch (error) {
             console.error();
-            setError({ error, repeatFunc: fetchNotifications})
+            submitError(error, fetchNotifications);
         }
     }
 
@@ -50,7 +50,7 @@ export default function NotifiactionsList() {
     }, [])
 
     return (
-        <ErrorBoundary error={error}>
+        <>
             <section className="flex gap-4 mb-4 w-fit h-fit items-end">
             </section>
             <ul className="rounded p-1 min-h-[40rem]">
@@ -61,13 +61,14 @@ export default function NotifiactionsList() {
                 }
                 { notifs.length == 0 && <li>Right now you have zero notifications</li>}
             </ul>
-        </ErrorBoundary>
+        </>
     )
 }
 
 // display notifications informations and handle functions with them
 function NotificationsItem({notif, updateNotif} : {notif : Notification, updateNotif : () => void}) {
-    
+    const { submitError } = useError(); 
+
     // handle click on buttons by submiting it to endpoint
     async function handleButtonClick(type : string) {
         try {
@@ -85,6 +86,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => handleButtonClick(type));
         }
     }
     

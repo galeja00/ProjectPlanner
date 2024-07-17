@@ -5,7 +5,7 @@ import { Dialog, DialogClose } from "../components/dialog";
 import { ArrayButtons, Button, ButtonType, CreateButton, Lighteness } from "../components/buttons";
 import { FormItem, SubmitButton } from "../components/form";
 import { NodeInfo } from "../api/nodes/static";
-import { ErrorBoundary, ErrorState } from "../components/error-handler";
+import { useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
 import { formatAgo } from "@/date";
 
@@ -15,7 +15,7 @@ import { formatAgo } from "@/date";
 export default function Nodes() {
     const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);  // toggler between modes
     const [ nodes, setNodes ] = useState<NodeInfo[]>([]); // state of every node user have
-    const [ error, setError ] = useState<ErrorState | null>(null);
+    const { submitError } = useError(); 
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
 
     // fetch data about nodes from endpoint
@@ -35,7 +35,7 @@ export default function Nodes() {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => fetchNodes(true) });
+            submitError(error, () => fetchNodes(true));
         }
         finally {
             setInitialLoading(false);
@@ -43,7 +43,7 @@ export default function Nodes() {
 
     }
 
-    // delete node by fetching to enpoint
+    // delete node by fetching to endpoint
     async function deleteNode(id : string) {
         try {
             const res = await fetch(`/api/nodes/${id}/delete`, {
@@ -64,7 +64,7 @@ export default function Nodes() {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => deleteNode(id) });
+            submitError(error, () => deleteNode(id));
         }
     }
 
@@ -82,7 +82,7 @@ export default function Nodes() {
     }
 
     return (
-        <ErrorBoundary error={error}>
+        <>
             <section>
             { isCreator && <NodeDialog onClose={toggleCreator} onCreate={onCreate}/>}
                 <CreateButton text="Create new node" onClick={toggleCreator} />
@@ -94,7 +94,7 @@ export default function Nodes() {
                     }
                 </ul>
             </section>
-        </ErrorBoundary>
+        </>
         
     )
 }
@@ -114,6 +114,7 @@ function NodeDialog({ onCreate, onClose } : { onCreate : () => void, onClose : (
 export function NodeCreator({ onCreate, selector = false, head = true, taskId = null } : { onCreate : () => void, selector? : boolean, head? : boolean, taskId? : string | null}) {
     const [ desc, setDesc ] = useState<string>("");
     const [ selectedTask, setTask ] = useState<string | null>(taskId);
+    const { submitError } = useError();
     // handle change of user input
     function handleChange(event : ChangeEvent<HTMLTextAreaElement>) {
         setDesc(event.target.value);
@@ -143,6 +144,7 @@ export function NodeCreator({ onCreate, selector = false, head = true, taskId = 
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => handleSubmit(event));
         }
     }
     

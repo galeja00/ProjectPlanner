@@ -10,7 +10,7 @@ import { FormItem } from "@/app/components/form"
 import Image from "next/image"
 import { TeamDialog } from "./team-info"
 import { InitialLoader } from "@/app/components/other-client"
-import { ErrorBoundary, ErrorState } from "@/app/components/error-handler"
+import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler"
 
 // type for teams and with mebers are in teams
 type TeamInfo = {
@@ -47,7 +47,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); // indicate if is setting of some team open
     const [team, setTeam] = useState<TeamInfo  | null>(null); // info about team when user is adding memebrs or remuving same with task
     const [initialLoading, setInitialLoading] = useState<boolean>(false); 
-    const [ error, setError ] = useState<ErrorState | null>(null); // for errro handeling
+    const { submitError } = useError()// for errro handeling
 
     // get data about teams in project from REST-APi
     async function fetchTeams() {
@@ -65,7 +65,7 @@ export default function Teams({ projectId } : { projectId : string}) {
         }
         catch (error) {
             console.error(error);
-            setError({error, repeatFunc: fetchTeams});
+            submitError(error, fetchTeams);
         }
         finally {
             setInitialLoading(false)
@@ -96,7 +96,7 @@ export default function Teams({ projectId } : { projectId : string}) {
         }
         catch (error) {
             console.error(error);
-            setError({error, repeatFunc: fetchTeams});
+            submitError(error, fetchTeams);
         }
     }
 
@@ -121,7 +121,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     useEffect(() => { fetchTeams() }, []);
 
     return (
-        <ErrorBoundary error={error}>
+        <>
             { isSettings && team && <TeamDialog team={team} projectId={projectId} updateTeams={fetchTeams} closeSettings={closeSettings}/>}
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             <Head text="Teams" />
@@ -136,7 +136,7 @@ export default function Teams({ projectId } : { projectId : string}) {
                         <TeamsTable teams={teams} handleDelete={deleteTeam} openSettings={openSettings}/>
                 }
             </section>
-        </ErrorBoundary>
+        </>
     )
 }
 

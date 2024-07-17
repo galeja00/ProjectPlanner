@@ -4,6 +4,7 @@ import Board from "./board";
 import Backlog from "./backlog";
 import TimeTable from "./timetable";
 import { useEffect, useState } from "react";
+import { ErrorBoundary } from "@/app/components/error-handler";
 
 // defalt compenet to decide with board to display
 export default function Boards({ params } :  { params: { id : string, boards : string[]}}) {
@@ -31,8 +32,10 @@ export default function Boards({ params } :  { params: { id : string, boards : s
     
     
     return (
-        <main className="px-14 py-14  w-full overflow-x-hidden">
-            {board}
+        <main className="px-14 py-14  w-full overflow-x-hidden">¨
+            <ErrorBoundary>
+                {board}
+            </ErrorBoundary>
         </main>
         
     )

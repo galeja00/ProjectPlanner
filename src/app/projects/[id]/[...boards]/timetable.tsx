@@ -10,7 +10,7 @@ import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { InitialLoader } from "@/app/components/other-client";
-import { ErrorBoundary, ErrorState } from "@/app/components/error-handler";
+import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
 
 // here is components for TimeTable (basic Grant diagram)
 
@@ -109,7 +109,7 @@ export default function TimeTable({ id } : { id : string }) {
     const [ projectStart, setProjectStart ] = useState<Date | null>(null);
     const [ currentDate, setCurrentDate ] = useState<Date>(new Date()); 
     const [ isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false);
-    const [ error, setError ] = useState<ErrorState | null> (null);
+    const { submitError } = useError();
 
     // get all basic data from REST-API like groups and start of project
     async function fetchGroups() {
@@ -127,7 +127,7 @@ export default function TimeTable({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: fetchGroups }); 
+            submitError(error, fetchGroups); 
         } 
     }
 
@@ -152,7 +152,7 @@ export default function TimeTable({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error); 
-            setError({ error, repeatFunc: () => createGroup(name)}); 
+            submitError(error, () => createGroup(name)); 
         } 
     }
 
@@ -169,11 +169,12 @@ export default function TimeTable({ id } : { id : string }) {
             })
             if (!res.ok) {
                 const data = await res.json();
-                console.error(data.error);
+                throw new Error(data.error);
             } 
         }   
         catch (error) {
             console.error(error);
+            submitError(error, () => submitGroupDates(group));
         } 
     
     }
@@ -229,7 +230,7 @@ export default function TimeTable({ id } : { id : string }) {
     }
 
     return (
-        <ErrorBoundary error={error}>
+        <>
             <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
                 <section className="overflow-x-hidden h-full max-h-full ">
                     <Head text='Time Table'/>
@@ -240,7 +241,7 @@ export default function TimeTable({ id } : { id : string }) {
                 </section>
                 { isAdding && <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/>}
             </TimeTableContext.Provider>
-        </ErrorBoundary>
+        </>
     )
 }
 
@@ -643,7 +644,7 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
         openRangeMenu(groupRange, index);
     }
     
-    // Becouse of async fetches
+    // Becouse of async fetches we need to have date if we woant to display work range
     if (!rows[index]) {
         return (
             <></>

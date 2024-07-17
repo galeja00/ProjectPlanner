@@ -11,7 +11,7 @@ import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 import { LoadingOval } from "@/app/components/other";
 import { ButtonSideText, TeamBadge } from "./other";
-import { ErrorBoundary, ErrorState } from "@/app/components/error-handler";
+import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
 import { NodeInfo } from "@/app/api/nodes/static";
 import { FormItem, SubmitButton } from "@/app/components/form";
 import { NodeComponent, NodeCreator } from "@/app/nodes/nodes";
@@ -48,7 +48,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
     const [ tags, setTags ] = useState<Tag[]>([]);
     const [ solvers, setSolvers ] = useState<Solver[]>([]); 
     const [ team, setTeam ] = useState<TeamInfo | null>(null); 
-    const [ error, setError] = useState<ErrorState | null>(null);
+    const { submitError } = useError(); 
 
     async function fetchInfo() {
         try {
@@ -65,7 +65,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
         catch (error) {
             console.error(error);
-            setError({error, repeatFunc: fetchInfo});
+            submitError(error, fetchInfo);
         }
     }
 
@@ -87,7 +87,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
         catch (error) {
             console.error(error);
-            setError({error, repeatFunc: fetchSolvers });
+            submitError(error,  fetchSolvers);
         }
     }
 
@@ -111,7 +111,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
         catch (error) {
             console.error(error);
-            setError({error, repeatFunc: () => addSolver(memberId)});
+            submitError(error, () => addSolver(memberId));
         }
         
     }
@@ -133,7 +133,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
         catch (error) {
             console.error(error);
-            setError({error, repeatFunc: () => delSolver(memberId)});
+            submitError(error,() => delSolver(memberId));
         }
     }
 
@@ -155,7 +155,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
         catch (error) {
             console.error(error);
-            setError({error, repeatFunc: fetchTeam});
+            submitError(error, fetchTeam);
         }
     }
 
@@ -193,10 +193,6 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
             delSolver(memberId);
         }
     }
-
-    function submitError(error : unknown, repeatFunc : () => void) {
-        setError({ error, repeatFunc });
-    }
  
     useEffect(() => {
         fetchInfo();
@@ -209,28 +205,26 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
     return (
         <Dialog>
-            <ErrorBoundary error={error}>
-                <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
-                    { task 
-                        ?
-                        <TaskInfoContext.Provider value={{task, team, solvers, changeTeam, changeSolvers, submitError}}>
-                            <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
-                            <div className='grid grid-cols-3 h-full'>
-                                <MainInfoContainer task={task} updateTask={updateTask}/>
-                                <section className='py-2 px-4  flex flex-col gap-4'>
-                                    <Data task={task} updateTask={updateTask}/>
-                                    <Solvers solvers={solvers} team={team}/>
-                                </section>
-                            </div>
-                        </TaskInfoContext.Provider>
-                        :
-                        <div className="h-60 w-full flex justify-center items-center">
-                            <LoadingOval/>
-                            <DialogClose handleClose={handleClose}/>
+            <div className='bg-neutral-200 rounded w-[80rem] h-fit overflow-hidden relative'>
+                { task 
+                    ?
+                    <TaskInfoContext.Provider value={{task, team, solvers, changeTeam, changeSolvers, submitError}}>
+                        <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
+                        <div className='grid grid-cols-3 h-full'>
+                            <MainInfoContainer task={task} updateTask={updateTask}/>
+                            <section className='py-2 px-4  flex flex-col gap-4'>
+                                <Data task={task} updateTask={updateTask}/>
+                                <Solvers solvers={solvers} team={team}/>
+                            </section>
                         </div>
-                    }
-                </div>
-            </ErrorBoundary>
+                    </TaskInfoContext.Provider>
+                    :
+                    <div className="h-60 w-full flex justify-center items-center">
+                        <LoadingOval/>
+                        <DialogClose handleClose={handleClose}/>
+                    </div>
+                }
+            </div>
         </Dialog>
     ) 
 }  

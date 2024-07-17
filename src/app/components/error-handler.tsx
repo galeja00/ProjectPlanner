@@ -1,11 +1,11 @@
 "use client"
 
 import { ButtonWithText } from "./other"
-import { createContext, useState } from "react"
+import { createContext, useContext, useState } from "react"
 
 // komponent for simple Error handling by displaying message to user with button to try again
 
-// for state of components witch is using tyhs Error boundery
+// for state of components witch is using this Error boundary
 export type ErrorState = {
     error : unknown,
     repeatFunc : () => void
@@ -17,12 +17,20 @@ type ErrorInfo = {
 }
 
 interface ErrorContextType {
-    submitError : (error : unknown, repeatFunc : () => void) => void
+    submitError : (error : unknown, calbackFunc : () => void) => void
 }
 
-export const ErrroContext = createContext<ErrorContextType | null>(null);
+const ErrorContext = createContext<ErrorContextType | null>(null);
 
-// extract from error messaage or change to default value
+export function useError() {
+    const context = useContext(ErrorContext);
+    if (context === null) {
+        throw new Error("useError must be used within an ErrorBoundary");
+    }
+    return context;
+}
+
+// extract from error message or change to default value
 function extractErrorMessage(error: unknown): string {
     if (error instanceof Error) {
         return error.message;
@@ -33,32 +41,33 @@ function extractErrorMessage(error: unknown): string {
     }
 }
 
-export function ErrorBoundary({ children, error }: { children: React.ReactNode, error : ErrorState | null }) {
-    //const [error, setError] = useState<ErrorState | null>(null);
+export function ErrorBoundary({ children }: { children: React.ReactNode}) {
+    const [error, setError] = useState<ErrorInfo | null>(null);
 
-    if (!error) {
-        return <>{children}</>;
+    function submitError(error : unknown, calbackFunc : () => void) {
+        setError({ msg: extractErrorMessage(error), repeatFunc: calbackFunc });
     }
-    const extractedError = extractErrorMessage(error.error);
-    const errorInfo: ErrorInfo = { msg: extractedError, repeatFunc: error.repeatFunc };
+
+    function closeError() {
+        setError(null);
+    }
 
     return (
-        <>
+        <ErrorContext.Provider value={{ submitError }}>
             {children}
-            <ErrorPopUp error={errorInfo} />
-        </>
+            {error && <ErrorPopUp error={error} closeError={closeError} />}
+        </ErrorContext.Provider>
     );
 }
 
-function ErrorPopUp({ error }: { error: ErrorInfo }) {
+function ErrorPopUp({ error, closeError }: { error: ErrorInfo, closeError : () => void }) {
     return (
         <div className="fixed bottom-0 right-0 mb-4 mr-4 bg-red-600 bg-opacity-40 border border-red-600 text-red-600 p-4 rounded  space-y-4">
+            <button className="top-0 right-0 m-2" onClick={closeError}><img src={'/x.svg'} alt={'close'} className="w-5 h-5"></img></button>
             <p>{error.msg}</p>
             <div className="w-full flex justify-end">
                 <ButtonWithText text="Try again" handle={error.repeatFunc} type="primary" />
             </div>
-            
         </div>
     );
 }
-
