@@ -6,6 +6,7 @@ export enum BoardsTypes {
     Backlog = "backlog"
 }
 
+// temporary solution for chack if task is in done state
 export function isDoneCol(col : TaskColumn) {
     return col.name == "Done";
 }

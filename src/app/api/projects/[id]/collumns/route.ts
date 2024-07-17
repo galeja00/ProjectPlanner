@@ -2,7 +2,9 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { prisma } from "@/db";
 import { Board, TaskColumn } from "@prisma/client";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
+// return data abou collumns in project
 export async function POST(req : Request, { params } : { params: { id : string }}) {
     try {
         const email = await authorize(req);
@@ -33,6 +35,6 @@ export async function POST(req : Request, { params } : { params: { id : string }
         return Response.json({ collumns: cols }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "Somting wentt wrong on server" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

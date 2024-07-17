@@ -2,14 +2,16 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { Team } from "@prisma/client";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
+// funcs with can handle this REST-APi endpoints
 enum Funcs {
     addMember = "addMember",
     removeMember = "removeMember",
     update = "update"
 }
-// TODO : Error on server status: 500, bad request: 400
-// TODO : Refactor
+
+// handle basic funcktions with team
 export async function POST(req : Request, { params } : { params: { id: string, team : string, func : string } }) {
     try {
         const email = await authorize(req);
@@ -38,7 +40,7 @@ export async function POST(req : Request, { params } : { params: { id: string, t
         if (Funcs.addMember == params.func) {
             teamId = data.teamId;
         }
-        //TODO: chack if member is in project
+
         await prisma.projectMember.update({
             where: {
                 id: data.memberId
@@ -52,7 +54,7 @@ export async function POST(req : Request, { params } : { params: { id: string, t
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: "Error"}, {status: 500});
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }
 
@@ -74,12 +76,12 @@ export async function GET(req : Request, { params } : { params: { id: string, te
         })
 
         if (!team) {
-            return Response.json({ error: "" }, {status : 400});
+            return Response.json({ error: "This team dont exist" }, {status : 400});
         }
 
         return Response.json({ team : team }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ status: 500 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 } 

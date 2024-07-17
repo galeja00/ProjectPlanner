@@ -2,18 +2,19 @@ import { prisma } from "@/db";
 import { TasksGroup } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
-
+// delete group of tasks from project
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {
     try {
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         const { id } = await req.json();
@@ -25,7 +26,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         })
 
         if (!group) {
-            return Response.json({ status: 400 });
+            return Response.json({ error: ErrorMessagges.BadRequest },{ status: 400 });
         }
         
         await prisma.tasksGroup.updateMany({
@@ -62,6 +63,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: "" }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }

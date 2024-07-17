@@ -1,6 +1,7 @@
 import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { prisma } from "@/db";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 export async function POST(req : Request, { params } : { params: { id : string }}) {
     try {
@@ -19,9 +20,9 @@ export async function POST(req : Request, { params } : { params: { id : string }
             }
         });
 
-        return Response.json({ message: ""}, { status: 200 });
+        return Response.json({ status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "Something went wron on server" }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

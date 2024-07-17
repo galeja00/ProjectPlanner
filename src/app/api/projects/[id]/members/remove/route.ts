@@ -3,7 +3,7 @@ import { getMember } from "../../static";
 import { prisma } from "@/db";
 import { ProjectInvite, ProjectMember } from "@prisma/client";
 
-
+// remove user from project by deleting member
 export async function POST(req : Request, { params } : { params: { id : string }}) {
     try {
         const email = await authorize(req);

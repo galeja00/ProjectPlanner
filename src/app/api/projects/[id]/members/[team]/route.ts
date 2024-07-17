@@ -3,7 +3,9 @@ import { Load, MemberTableInfo } from "../route"
 import { getMember } from "../../static";
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
+// response with all members of team
 export async function GET(req : Request, { params } : { params: { id : string, team : string }}) {
     try {
         const email = await authorize(req);
@@ -39,7 +41,6 @@ export async function GET(req : Request, { params } : { params: { id : string, t
                 })
             }
             if (user) {
-                //TODO: math function for load (hours, complexity, avg of members "for solo project some constant (might costumizeble)")
                 users.push({ 
                     id: user.id,
                     memberId: member.id, 
@@ -56,6 +57,6 @@ export async function GET(req : Request, { params } : { params: { id : string, t
         return Response.json({ data: users }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "Somthing went worng" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

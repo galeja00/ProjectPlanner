@@ -3,18 +3,18 @@ import { Backlog, Board, Kanban, ProjectMember, Task, TaskColumn, TasksGroup, Us
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { BoardsTypes } from "../../board";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
-
+// remove group from timetable
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {
     try {
-        
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.BadRequest }, { status: 400 });
         }
 
         const { id } = await req.json();
@@ -46,6 +46,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: "Somthing went wrong" }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }

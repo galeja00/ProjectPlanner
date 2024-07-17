@@ -1,20 +1,19 @@
 import { prisma } from "@/db";
-import { Backlog, Board, Kanban, ProjectMember, Task, TaskColumn, TasksGroup, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
-import { BoardsTypes } from "../../board";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
-
+// update on protperty value of group
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {
     try {
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.BadRequest }, { status: 400 });
         }
 
         const { id, newVal ,key }  = await req.json();

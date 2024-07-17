@@ -2,8 +2,9 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../static";
 import { prisma } from "@/db";
 import { ProjectInvite, ProjectMember } from "@prisma/client";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
-// TODO: Error catching better responses(stattus, error message)
+// create notification to user about invite to project
 export async function POST(req : Request, { params } : { params: { id : string }}) {
     try {
         const email = await authorize(req);
@@ -41,6 +42,6 @@ export async function POST(req : Request, { params } : { params: { id : string }
         return Response.json({ message: "Invite succesed" }, { status: 200 });
 
     } catch (error) {
-        return Response.json({ error: "Somthing went wrong" }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

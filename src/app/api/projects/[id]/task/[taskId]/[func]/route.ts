@@ -2,6 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { ProjectMember, Tag, Task, TaskSolver } from "@prisma/client";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 enum TaskFunctions {
     info = "info",
@@ -22,6 +23,7 @@ type TaskInfo = {
     tags: Tag[]
 }
 
+// handle basic functions about task globali
 export async function GET(req : Request, { params } : { params: { id: string, taskId : string, func: string } }) {
     try {
         const email = await authorize(req);
@@ -48,7 +50,7 @@ export async function GET(req : Request, { params } : { params: { id: string, ta
                 return Response.json({ solvers: solvers }, { status: 200});
         }
     } catch (error) {
-        return Response.json({ error: ""}, { status: 400 }); 
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }
 
@@ -63,13 +65,6 @@ async function findInfo(id : string) : Promise<TaskInfo | null> {
             taskId: id
         }
     })
-    /*
-        const issues = await prisma.issue.findMany({
-            where: {
-                taskId: params.taskId
-            }
-        })
-        */
     if (!task) {
         return null;
     }

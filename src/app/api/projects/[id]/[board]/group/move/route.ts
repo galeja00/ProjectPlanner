@@ -4,23 +4,24 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { BoardsTypes } from "../../board";
 import { group } from "console";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 type Range = {
     start : number,
     end : number,
 }
 
-
+// move index of group
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {
     try {
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         const { id, newVal } : { id : string, newVal : number }= await req.json();
@@ -46,7 +47,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         })
 
         if (groups.length < newVal) {
-            return Response.json({error: "Cant move to group out of indexis"}, { status: 400 });
+            return Response.json({error: "Cant move out of indexis"}, { status: 400 });
         }
 
         let prevG = groups.find((g) => g.id == id);
@@ -80,7 +81,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: "Somthing went wrong" }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }
 

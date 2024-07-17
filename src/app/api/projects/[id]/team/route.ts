@@ -2,6 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { Team } from "@prisma/client";
 import { prisma } from "@/db";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 type TeamInfo = {
     id : string,
@@ -76,23 +77,7 @@ export async function GET(req : Request ,{ params } : { params: { id: string } }
     }  
     catch (error) {
         console.error(error);
-        return Response.json({ status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }
 
-export async function POST(req : Request, { params } : { params: { id: string } }) {
-    try {
-        const email = await authorize(req);
-        if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
-        }
-        const member = await getMember(email, params.id);
-        if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
-        }
-        
-    }
-    catch (error) {
-
-    }
-}

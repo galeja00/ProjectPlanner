@@ -3,24 +3,25 @@ import { prisma } from "@/db";
 import { Project, TasksGroup, TimeTable } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
-
+// response with data about group dates(startAt, deadlineAt)
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {
     try {
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 400 });
         }
 
         const data = await req.json();
 
         if (!data.id || !((!data.startAt && !data.endAt) || (data.startAt && data.endAt))) {
-            return Response.json({ error: "Bad format or missing data"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.BadRequest }, { status: 400 });
         }
 
 
@@ -40,6 +41,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         return Response.json({ message: "Succesfully updated" }, { status: 200 });
 
     } catch (error) {
-        return Response.json({ error: " " }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }

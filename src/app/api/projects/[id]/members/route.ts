@@ -4,6 +4,7 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { ProjectMember, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 export enum Load {
     low = 1,
@@ -22,8 +23,7 @@ export type MemberTableInfo = {
     tasksLoad: number 
 }
 
-
-
+// response with all members of project
 export async function GET(req : Request, { params } : { params: { id : string }}) {
     try {
         const email = await authorize(req);
@@ -60,7 +60,10 @@ export async function GET(req : Request, { params } : { params: { id : string }}
             if (user) {
                 const taskLoad = await prisma.taskSolver.count({
                     where: {
-                        memberId: member.id
+                        memberId: member.id,
+                        task: {
+                            status: false
+                        }
                     }
                 })
 
@@ -80,6 +83,6 @@ export async function GET(req : Request, { params } : { params: { id : string }}
         return Response.json({ data: users }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "Somthing went worng" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

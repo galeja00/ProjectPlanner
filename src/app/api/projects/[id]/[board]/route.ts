@@ -5,8 +5,7 @@ import { getMember } from "../static";
 import { unassigned } from "@/config";
 import { Group } from "next/dist/shared/lib/router/utils/route-regex";
 import { BoardsTypes } from "./board";
-
-// TODO: defent boards need to be implement, implmenet type safe api
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 export type BoardTasksColumn = {
     id : string,
@@ -35,18 +34,16 @@ export type TimeTableGroup = {
 
 
 
-// TODO: change querys on DB for better performace 
-// TODO: change error throws when query is null
-// id: je id daného projektu v kterým 
+// response with need data for every board (Board, TimeTable, Backlog)
 export async function GET(req : Request, { params } : { params: { id: string, board: string } }) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         switch (params.board) {
@@ -76,9 +73,10 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
     } 
     catch (error) {
         console.log(error);
-        return Response.json({ error : "Error: Server error"}, { status: 500});
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }
+
 
 async function getTimeTable(projectId: string) {
     const start : { createdAt: Date } | null = await prisma.project.findFirst({
@@ -93,7 +91,6 @@ async function getTimeTable(projectId: string) {
     if (!start) {
         return null;
     }
-
 
     const groups  = await prisma.tasksGroup.findMany({
         where: {
@@ -116,6 +113,7 @@ async function getTimeTable(projectId: string) {
 
     return { startAt: start.createdAt, groups }
 }
+
 
 async function getBoard(projectId : string) : Promise<BoardTasksColumn[] | null> {
     const board : Board | null = await prisma.board.findFirst( {

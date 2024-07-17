@@ -5,7 +5,7 @@ import { Board, Project, TaskColumn, User } from "@prisma/client";
 import { getServerSession } from "next-auth/next"
 import { ErrorMessagges } from "../error-messages";
 
-// response with projects user is member in
+// response with all projects where usere is member
 export async function GET(req : Request) {
     try {
         const session = await getServerSession(options);
@@ -49,7 +49,7 @@ export async function GET(req : Request) {
         });
         return NextResponse.json({ error: "succes", projects: projects}, { status: 200 })
     } catch {
-        return NextResponse.json({ error: ErrorMessagges.Server}, { status: 400 })
+        return NextResponse.json({ error: ErrorMessagges.Server}, { status: 500 })
     }
     
     

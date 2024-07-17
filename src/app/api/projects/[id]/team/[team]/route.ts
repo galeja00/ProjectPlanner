@@ -2,6 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../static";
 import { ProjectMember, Team, User } from "@prisma/client";
 import { prisma } from "@/db";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 
 type TeamInfo = {
@@ -19,6 +20,7 @@ type MemberInfo = {
     image : string | null
 }
 
+// response with data of project
 export async function GET(req : Request, { params } : { params : { id : string, team : string}}) {
     try {
         const email = await authorize(req);
@@ -66,6 +68,6 @@ export async function GET(req : Request, { params } : { params : { id : string, 
 
     }
     catch (error) {
-        return Response.json({ status: 500 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

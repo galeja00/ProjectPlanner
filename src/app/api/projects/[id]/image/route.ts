@@ -7,8 +7,9 @@ import sharp, { Sharp } from "sharp";
 import { randomUUID } from "crypto";
 import fs from 'fs';
 import { Project } from "@prisma/client";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
-
+// save submited image on server and save path to DB
 export async function POST(req : Request, { params } : { params: { id : string }}) {
     try {
         const email = await authorize(req);
@@ -70,10 +71,10 @@ export async function POST(req : Request, { params } : { params: { id : string }
 
             return Response.json({ message: "Successful image uploud", icon: upProject.icon }, { status: 200 });
         }
-        return Response.json({status: 400});
+        return Response.json({ error: ErrorMessagges.BadRequest}, {status: 400});
 
     }
     catch (error) {
-        return Response.json({ error: "idk" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }
