@@ -10,12 +10,13 @@ import { TagList } from "./tags";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 import { LoadingOval } from "@/app/components/other";
-import { ButtonSideText, TeamBadge } from "./other";
+import { TeamBadge } from "./other";
 import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
 import { NodeInfo } from "@/app/api/nodes/static";
 import { FormItem, SubmitButton } from "@/app/components/form";
 import { NodeComponent, NodeCreator } from "@/app/nodes/nodes";
 import { formatAgo } from "@/date";
+import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from "@/app/components/buttons";
 
 enum SolverFuncs {
     Add = "add",
@@ -605,9 +606,9 @@ function Selector({ items, team = false, handleSelect } : { items : SelectionIte
 // DATA INFORMATIONS
 
 enum Colors {
-    Green = "green",
-    Yellow = "yellow",
-    Red = "red",
+    Green = "#16a34a",
+    Yellow = "#eab308",
+    Red = "#dc2626",
 }
 
 type SelectType = {
@@ -635,11 +636,20 @@ function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) =
         setEditedTask(editedTask => ({ ...editedTask, [name]: newVal }));
     }
 
+    const buttons : Button[] = [
+        {
+            onClick: changeMode, type: ButtonType.Creative, size: 6, padding: 0, lightness: Lighteness.Bright, title: "Sumbit", img: "/check.svg"
+        }
+    ]
+
     return (
         <div>
-            <div className="flex gap-4">
-                <h3 className='font-bold mb-2'>Info</h3>
-                <button onClick={changeMode} className="h-fit" title="Edit Info"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
+            <div className="flex justify-between">
+                <div className=" flex gap-4">
+                    <h3 className='font-bold mb-2'>Info</h3>
+                    <button onClick={changeMode} className="h-fit" title="Edit Info"><img src="/pencil.svg" alt="Edit Info" className="w-5 h-5"/></button>
+                </div>
+                { isEditing && <ArrayButtons buttons={buttons} gap={0}/> }
             </div>
             <ul className='bg-neutral-100 p-2 rounded w-full flex flex-col gap-2'>
                 <DataItem name="type" value={task.type} isEditing={isEditing} updateVal={(newVal : any) => updateVal("type", newVal)}></DataItem>

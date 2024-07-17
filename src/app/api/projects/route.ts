@@ -3,8 +3,9 @@ import { options } from '../auth/[...nextauth]/options'
 import { prisma } from '@/db'
 import { Board, Project, TaskColumn, User } from "@prisma/client";
 import { getServerSession } from "next-auth/next"
+import { ErrorMessagges } from "../error-messages";
 
-// GET: for user will get him all projects he worked on 
+// response with projects user is member in
 export async function GET(req : Request) {
     try {
         const session = await getServerSession(options);
@@ -48,7 +49,7 @@ export async function GET(req : Request) {
         });
         return NextResponse.json({ error: "succes", projects: projects}, { status: 200 })
     } catch {
-        return NextResponse.json({ error: "error"}, { status: 400 })
+        return NextResponse.json({ error: ErrorMessagges.Server}, { status: 400 })
     }
     
     
@@ -88,7 +89,6 @@ async function createStartingBoard(boardId : string) {
 }
 
 // POST: Create new project
-// TODO: uprovit misto returnu throw error a pokusit se opravit chybu a zaroven opravir error hlasky
 export async function POST(req : Request) {
     try {
 

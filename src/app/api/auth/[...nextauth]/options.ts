@@ -17,7 +17,7 @@ type User = {
     password: string;
   };
   
-
+// nextaouth hednling loggin and sesssion of user
 export const options: NextAuthOptions = {
     session: {
         strategy: 'jwt'

@@ -1,18 +1,19 @@
 import { prisma } from "@/db";
 import { authorize, getUserId } from "@/app/api/static";
 import { ProjectInvite } from "@prisma/client";
+import { ErrorMessagges } from "../../error-messages";
 
-
+// return all project invites
 export async function GET(req : Request) {
     try {
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "You must be authorize"}, { status: 400 });
         }
 
         const id : string | null = await getUserId(email);
         if (id == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "You must be authorize"}, { status: 400 });
         }
 
         const projectInvites : ProjectInvite[] = await prisma.projectInvite.findMany({
@@ -25,6 +26,6 @@ export async function GET(req : Request) {
 
     } catch (error) {
         console.error(error);
-        return Response.json({ error: "Somthing wen wrong on server" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 400 });
     }
 }

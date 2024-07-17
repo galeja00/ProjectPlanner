@@ -3,8 +3,9 @@ import { options } from "../../auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { authorize } from "../../static";
 import fs from "fs"
+import { ErrorMessagges } from "../../error-messages";
 
-
+// return data about user
 export async function GET(req : Request) {
     try {
         const email = await authorize(req);
@@ -23,7 +24,7 @@ export async function GET(req : Request) {
         return Response.json({ user: user }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: error }, { status: 500 })
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 })
     }
     
 } 

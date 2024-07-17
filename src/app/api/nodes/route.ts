@@ -6,7 +6,7 @@ import { Node } from "@prisma/client";
 import { NodeInfo } from "./static";
 
 
-
+// response with all nodes user have
 export async function GET(req : Request) {
     try {
         const email = await authorize(req);

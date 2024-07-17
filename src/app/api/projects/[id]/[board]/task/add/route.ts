@@ -4,6 +4,7 @@ import { Task, TaskColumn, TasksGroup, TaskSolver } from "@prisma/client";
 import { Session, User, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
+import { isDoneCol } from "../../board";
 
 //TODO: diff board and backlog in create
 //TODO: refactor
@@ -56,9 +57,15 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                     id: data.colId
                 }
             });
+            
+            
+            
+
             if (!tasksCol) {
                 return Response.json({ error: "Bad reqest: this column dosnt exist"}, { status: 400 });
             }
+
+            const isDone = isDoneCol(tasksCol);
     
             // Zvetšení a upraveni indexu tasku
             const colTasks : Task[] = await prisma.task.findMany({
@@ -80,7 +87,8 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                     type: type, 
                     taskColumnId: data.colId,
                     projectId: params.id,
-                    colIndex: index
+                    colIndex: index,
+                    status: isDone
                 }
             })
     

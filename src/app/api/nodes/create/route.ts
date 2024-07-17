@@ -1,10 +1,8 @@
 
 import { prisma } from "@/db";
 import { authorize } from "../../static";
-import { Node } from "@prisma/client";
 
-
-
+// create new node
 export async function POST(req : Request) {
     try {
         const email = await authorize(req);

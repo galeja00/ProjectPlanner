@@ -2,7 +2,7 @@
 
 import { useReducer, useState, ChangeEvent } from "react";
 import Image from 'next/image' 
-import { Issue, Tag, Task, Ranking } from "@prisma/client";
+import { Tag, Task, Ranking } from "@prisma/client";
 
 
 // TODO: submit name to upper component

@@ -4,14 +4,14 @@ import Image from "next/image"
 import { useReducer, useState, useEffect, KeyboardEvent, FormEvent } from "react"
 import DropImage from "../components/drop-image";
 import { User } from "@prisma/client";
-import { ButtonItems, ButtonList, DeleleteDialog, EditTextButton } from "../components/other";
+import {DeleleteDialog, EditTextButton } from "../components/other";
 import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react";
 import { FormItem, SubmitButton } from "../components/form";
-import { pathToImages } from "@/config";
 import { Dialog, DialogClose } from "../components/dialog";
-import { ErrorState } from "../components/error-handler";
+import { ErrorState, useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
+import { ArrayButtons, Button, ButtonItems, ButtonList, ButtonType, Lighteness } from "../components/buttons";
 
 enum UpdateTypes {
     Name = "Name",
@@ -24,7 +24,7 @@ export default function Profile() {
     const [user, setUser] = useState<User | null>(null);
     const [isPassw, togglePassw] = useReducer(isPassw => !isPassw, false);
     const [isDell, toggleDell] = useReducer(isDell => !isDell, false);
-    const [error, setError] = useState<ErrorState | null>(null);
+    const { submitError } = useError();
     const router = useRouter(); 
 
     async function fetchProfile() {
@@ -41,7 +41,7 @@ export default function Profile() {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: fetchProfile})
+            submitError( error, fetchProfile);
         }
     }
 
@@ -63,6 +63,7 @@ export default function Profile() {
         }
         catch (error) {
             console.error(error);
+            submitError( error, handleDelete);
         }
     }
 
@@ -78,11 +79,12 @@ export default function Profile() {
             if (!res.ok) {
                 throw new Error(data.error);
             }
+        
             setUser(data.user);
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => handleUpdateAcc(upUser)})
+            submitError(error, () => handleUpdateAcc(upUser));
         }
     }
 
@@ -108,13 +110,15 @@ export default function Profile() {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => fetchImage(image)});
+            submitError(error, () => fetchImage(image));
         }
     }
 
     if(!user) {
         return (
-            <InitialLoader/>
+            <div className="flex w-2/4 flex-col m-auto py-14 space-y-8" >
+                <InitialLoader/>
+            </div>
         )
     }
 
@@ -143,7 +147,7 @@ export default function Profile() {
                     <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover: w-32 h-32 cursor-pointer"></Image>
                     <div className="flex flex-col gap-4">
                         <Name user={user} handleUpdate={handleUpdateAcc}/>
-                        <Email user={user} handleUpdate={handleUpdateAcc}/>
+                        <Email user={user}/>
                         <p>{formattedDate}</p>
                     </div>
                 </section>
@@ -178,14 +182,20 @@ function Name({ user, handleUpdate } : { user : User, handleUpdate : (user : Use
         }
     }
 
+    const buttons : Button[] = [
+        { onClick: handleSubmit, img: "/check.svg", type: ButtonType.Creative, size: 8, lightness: Lighteness.Bright, title: "Create"},
+        { onClick: toggleEdit, img: "/x.svg", type: ButtonType.Destructive, size: 8, lightness: Lighteness.Bright, title: "End" }
+    ]
+
+
     return ( 
         <div className="flex gap-2">
             {
                 edit ? 
                     <div className="flex gap-2">
-                        <input type="text" defaultValue={user.name} onKeyDown={handleKeyDown} onChange={(event) => setName(event.currentTarget.value)} className="bg-neutral-200 outline-none border-b text-xl font-bold w-5/6"></input>
-                        <input type="text" defaultValue={user.surname} onKeyDown={handleKeyDown} onChange={(event) => setSurname(event.currentTarget.value)} className="bg-neutral-200 outline-none border-b text-xl font-bold w-5/6"></input>
-                        <button className="btn-primary" onClick={handleSubmit}>Submit</button>
+                        <input type="text" defaultValue={user.name} onKeyDown={handleKeyDown} onChange={(event) => setName(event.currentTarget.value)} className="border-neutral-900 bg-neutral-200 outline-none border-b text-xl font-bold w-3/6"></input>
+                        <input type="text" defaultValue={user.surname} onKeyDown={handleKeyDown} onChange={(event) => setSurname(event.currentTarget.value)} className="border-neutral-900 bg-neutral-200 outline-none border-b text-xl font-bold w-3/6"></input>
+                        <ArrayButtons buttons={buttons} gap={2}/>
                     </div>
                     :
                     <h1 className="text-xl font-bold">{user.name} {user.surname}</h1> 
@@ -195,31 +205,10 @@ function Name({ user, handleUpdate } : { user : User, handleUpdate : (user : Use
     )
 }
 
-function Email({ user, handleUpdate } : { user : User, handleUpdate : (user : User) => void }) {
-    const [ edit, toggleEdit ] = useReducer(edit => !edit, false);
-
-    function handleKayDown(event : KeyboardEvent<HTMLInputElement>) {
-        const inputValue = event.currentTarget.value;
-        if (event.key === 'Enter') {
-            if (inputValue.length > 0) {
-                user.email = inputValue;
-                handleUpdate(user);
-                toggleEdit();
-            }
-        }
-    }
+function Email({ user } : { user : User }) {
     return (
         <div className="flex gap-2">
-            {
-                edit ? 
-                    <div>
-                        <input type="email" defaultValue={user.email} onKeyDown={handleKayDown} className="bg-neutral-200 outline-none border-b w-5/6"></input>
-                    </div>
-                    :
-                    <p>{user.email}</p> 
-                    
-            }
-            <EditTextButton onClick={toggleEdit}/>
+            <p>{user.email}</p> 
         </div> 
     )
 }

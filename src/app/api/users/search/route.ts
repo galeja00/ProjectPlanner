@@ -1,6 +1,7 @@
 import { prisma } from "@/db";
 import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/options";
+import { ErrorMessagges } from "../../error-messages";
 
 enum SearchTypes {
     Id = "id",
@@ -14,10 +15,9 @@ type UserInfo = {
     image : string | null
 }
 
-// TODO: posible of differen types of search now only for for ID
+// will return searched user for invite to project by name or id
 export async function POST(req : Request) {
     try {
-       // console.log(req);
         const session = await getServerSession(options);
         if (!(session && session.user)) {
             return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
@@ -31,6 +31,7 @@ export async function POST(req : Request) {
 
         const search : string = data.value;
         let users : UserInfo[]  = [];
+        // chack type of search
         if (SearchTypes.Name == data.type) {
             const names : string[] = search.split(" ");
             let orConditions: any[] = names.flatMap(name => [
@@ -70,6 +71,6 @@ export async function POST(req : Request) {
     }
     catch (error) {
         console.error(error);
-        return Response.json({ satus: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 400 });
     }
 }

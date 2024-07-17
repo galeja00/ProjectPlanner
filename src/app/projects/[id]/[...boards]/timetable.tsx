@@ -4,13 +4,13 @@ import { Head } from "../components/other";
 import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef, RefObject, ChangeEvent } from "react";
 import { Creator } from "./components/creator";
 import { Dialog, DialogClose } from "@/app/components/dialog";
-import { ButtonWithImg, ButtonWithText } from "@/app/components/other";
 import { fromDayToMills, getDiffInDays } from "@/date";
 import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { InitialLoader } from "@/app/components/other-client";
 import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
+import { ButtonWithImg, ButtonWithText } from "@/app/components/buttons";
 
 // here is components for TimeTable (basic Grant diagram)
 

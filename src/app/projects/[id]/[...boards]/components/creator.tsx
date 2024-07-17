@@ -28,7 +28,7 @@ export function Creator({ what, handleCreate } : {what : string, handleCreate : 
         toggleCreating();
     }
 
-
+    
     return (
         <div className='h-fit'>
             { isCreating ? 

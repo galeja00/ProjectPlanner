@@ -1,6 +1,6 @@
 "use client"
 
-import { ButtonWithImg, SearchInput } from "@/app/components/other"
+import {} from "@/app/components/other"
 import { Head, TeamBadge } from "../components/other"
 import { FilterButton } from "../components/filter-tables"
 import { Task, Team } from "@prisma/client"
@@ -11,6 +11,7 @@ import Image from "next/image"
 import { TeamDialog } from "./team-info"
 import { InitialLoader } from "@/app/components/other-client"
 import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler"
+import { ButtonWithImg } from "@/app/components/buttons"
 
 // type for teams and with mebers are in teams
 type TeamInfo = {

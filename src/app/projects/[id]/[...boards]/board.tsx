@@ -3,13 +3,13 @@ import { Task, Team } from '@prisma/client'
 import Image from 'next/image' 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useReducer, useState, KeyboardEvent, useRef } from 'react'
 import { TaskInfo } from '../components/task-info'
-import { Head,  ButtonSideText, TeamBadge } from '../components/other'
+import { Head, TeamBadge } from '../components/other'
 import { PriorityImg } from './components/priority'
 import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
-import { LoadingOval } from '@/app/components/other'
 import { InitialLoader } from '@/app/components/other-client'
-import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler'
+import {  useError } from '@/app/components/error-handler'
+import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from '@/app/components/buttons'
 
 
 // defalt type for Object for work with column and tasks
@@ -131,7 +131,7 @@ export default function Board({ id } : { id : string }) {
 
 
     return (
-        <ErrorBoundary>
+        <>
             <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns, submitError }}>
                 <div className='relative'>
                     <Head text='Board'/>
@@ -151,7 +151,7 @@ export default function Board({ id } : { id : string }) {
                     </section>
                 </div>
             </TasksColumnsContext.Provider>
-        </ErrorBoundary>
+        </>
     )
 }
 
@@ -162,6 +162,7 @@ function TasksColumn(
         { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string, taskIndex : number) => void }
     ) {
     const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false); //toggle between creating of task and normal
+    const [ isSmall, toggleSmall ] = useReducer(isSmall => !isSmall, true);
     const { tasksColumns: tasksColumns, submitError } = useContext(TasksColumnsContext);
     const [ tasksCol , setTasksCol ] = useState<BoardTasksColumn>(tasksColumns[index]);
     const [ isDragetOver, setIsDragetOver ] = useState<boolean>(false); // state if user is drag over column when he wont to ove task
@@ -316,18 +317,28 @@ function TasksColumn(
         setIsDragetOver(false);
     }
 
+
+    const buttons : Button[] = [
+        { onClick: toggleSmall, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.Bright, title: "Hide Tasks" }
+    ]
+    
+    const displayed = isSmall ? "block" : "none";
+    const w = isSmall ? "20rem" : "fit-content" ; 
+
     return (
         <section 
-            className={`rounded w-80 h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-200"}`} 
+            className={`rounded h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-200"}`} 
             onDrop={handleOnDrop} 
             onDragOver={handleDragOver} 
             onDragExit={handleOnLeave} 
             onDragLeave={handleOnLeave}
+            style={{ width: w }}
         >
-            <div className="p-2 border-b border-neutral-400">
+            <div className="p-2 border-b border-neutral-400 flex justify-between gap-2">
                 <h2 className="">{tasksCol.name}</h2>
+                <ArrayButtons buttons={buttons} gap={1}/>
             </div>
-            <div className="p-2">
+            <div className="p-2" style={{ display: displayed}} >
                 <ul className={`flex flex-col gap-2 mb-2`} ref={tasksRef}>
                     { 
                         tasksCol.tasks.map((task) => (

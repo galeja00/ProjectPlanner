@@ -11,10 +11,9 @@ type UserInputs = {
 }
 
 
-//post for saving new user to DB
+// post for reggistrating new user to application
 // can be upgredet by using a system for chacking email by sanding confirm email
 export async function POST(request : Request) {
-
     try {
         const { email , name , surname, password, repeatpassword } : UserInputs = await request.json();
         if (!(email && name && surname && password && repeatpassword)) {

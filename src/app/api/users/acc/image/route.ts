@@ -6,6 +6,7 @@ import sharp, { Sharp } from 'sharp';
 import { prisma } from "@/db";
 import { User } from "@prisma/client";
 import { unlink } from "fs/promises";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 export async function GET(req : Request) {
     try {
@@ -23,8 +24,7 @@ export async function GET(req : Request) {
         return Response.json({ error: "" }, { status: 400 });
     }
 }
-
-//TODO: file size chack
+// for submiting new photo/image for user
 export async function POST(req : Request) {
     try {
         const email = await authorize(req);
@@ -45,26 +45,24 @@ export async function POST(req : Request) {
         if (image instanceof File) {
             const pathToImages = process.env.IMAGE_DIRECTORY_PATH;
             const file : File = image;
+            
+            //chack if file is image type
             if (!file || file.type != "image/png" && file.type != "image/jpeg") {
                 return Response.json({ error: "This file isnt image" }, { status: 400 })
             }
-            /*if (!chackFileSize(file)) {
-                return Response.json({ error: "File mus be smaller the 4MB" }, { status: 400 });
-            }*/
+            //if user have image delete it
             if (user.image) {
                 await unlink(`${pathToImages}user/${user.image}`);
             }
 
+            // convert file to webp for smaller size
             const fileData = await file.arrayBuffer();
-
             const imageBuffer : Buffer = Buffer.from(fileData);
             const imageSharp : Sharp = sharp(imageBuffer);
-
             const webpData : Buffer = await imageSharp.webp().toBuffer();
-
+            // change name of file and write
             const name = randomUUID() + ".webp";
             const filePath = `${pathToImages}user/${name}`; 
-            
             fs.writeFileSync(filePath, webpData);
 
             const upUser: User = await prisma.user.update({
@@ -82,12 +80,8 @@ export async function POST(req : Request) {
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: error }, { status: 400});
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
-}
-
-function chackFileSize(file : File) : boolean {
-    return file.size > 4 * 1024 * 1024;
 }
 
 

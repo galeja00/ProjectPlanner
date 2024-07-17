@@ -2,6 +2,7 @@ import { Project, ProjectInvite } from "@prisma/client";
 import { prisma } from "@/db";
 import { DateTime } from "next-auth/providers/kakao";
 import { authorize, getUserId } from "../../static";
+import { ErrorMessagges } from "../../error-messages";
 
 type Notification = {
     id : string,
@@ -16,16 +17,16 @@ type Notification = {
 enum NotificationTypes {
     ProjectInvite = "ProjectInvite"
 }
-
+// responde with all notiffications user have
 export async function GET(req : Request, { params } : { params : { id : string }}) {
     try {
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "Fail to authorize"}, { status: 400 });
         }
         const id : string | null = await getUserId(email);
         if (id == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: "Fail to authorize"}, { status: 400 });
         }
         
         const notifications : Notification[] = [];
@@ -45,8 +46,8 @@ export async function GET(req : Request, { params } : { params : { id : string }
                 throw new Error();
             }
             const currentDate: Date = new Date();
+            // converte date to Ago time in hours
             const timeDifferenceInHours = Math.floor((currentDate.getTime() - projectInvite.createAt.getTime()) / (1000 * 60 * 60));
-            //const timeDifferenceInHours = Math.floor(timeDifferenceInMillis / (1000 * 60 * 60));
             
             const notif : Notification = { 
                 id:  projectInvite.id, 
@@ -63,6 +64,6 @@ export async function GET(req : Request, { params } : { params : { id : string }
         return Response.json({ notif: notifications}, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

@@ -1,10 +1,10 @@
 
 import { prisma } from "@/db";
 import { authorize } from "../../../static";
-import { Node } from "@prisma/client";
 
 
 
+// delete node from DB 
 export async function POST(req : Request, { params } : { params: { id: string } }) {
     try {
         const email = await authorize(req);
@@ -33,7 +33,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
         return Response.json({ message: `Succefully deleted node` }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: error }, { status: 500 })
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 })
     }
     
 } 

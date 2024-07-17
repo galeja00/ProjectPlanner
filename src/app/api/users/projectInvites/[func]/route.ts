@@ -1,3 +1,4 @@
+import { ErrorMessagges } from "@/app/api/error-messages";
 import { authorize, getUserId } from "@/app/api/static";
 import { prisma } from "@/db";
 import { ProjectInvite } from "@prisma/client";
@@ -6,7 +7,7 @@ enum func {
     accept = "accept",
     decline = "decline"
 }
-
+// handle invite of user by creating notification
 export async function POST(req : Request, { params } : { params : { func : string }}) {
     try {
         // check if user is signet in
@@ -52,7 +53,7 @@ export async function POST(req : Request, { params } : { params : { func : strin
         }
     } catch (error) {
         console.error(error);
-        return Response.json({ error: "Somting went wrong on server"}, { status : 500 });
+        return Response.json({ error: ErrorMessagges.Server}, { status : 500 });
     }
 }
 

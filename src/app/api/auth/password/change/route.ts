@@ -2,6 +2,8 @@ import { authorize } from "@/app/api/static";
 import { prisma } from "@/db";
 import { hash } from "bcrypt";
 
+
+// for change user password
 export async function POST(req : Request) {
     try {
         const email = await authorize(req);

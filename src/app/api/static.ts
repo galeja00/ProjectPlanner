@@ -2,6 +2,7 @@ import { Session, getServerSession } from "next-auth";
 import { options } from "./auth/[...nextauth]/options";
 import { prisma } from "@/db";
 
+// chack if user have session
 export async function authorize(req : Request) : Promise<string | null> {
     try {
         const session : Session | null = await getServerSession(options);
@@ -23,6 +24,7 @@ export async function authorize(req : Request) : Promise<string | null> {
     
 }
 
+// return user Id if user is existing in DB
 export async function getUserId(email : string) : Promise<string | null> {
     try {
         const user = await prisma.user.findFirst({

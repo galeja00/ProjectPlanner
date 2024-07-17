@@ -29,11 +29,7 @@ export function Name({name, updateName} : {name : string, updateName : (name : s
             }
         }
     }
-    /*
-    const buttons : Button[] = [
-        { onClick: () submitName, img: "/check.svg", type: ButtonType.Creative, size: 6, lightness: Lighteness.bright, title: "Create"},
-        { onClick: endCreate, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.bright, title: "End"}
-    ]*/
+
     return (
         <div className="flex mb-4 gap-4">
             {
@@ -92,7 +88,7 @@ export function Editor({ val = "", create, endCreate, type } : { val? : string, 
 
     return (
         <div className="rounded flex gap-2 ">
-            <input type={type} className=" bg-neutral-200 outline-none border-b w-full" id="name" onKeyDown={handleKeyDown} onChange={handleChange} value={value}></input>
+            <input type={type} className=" bg-neutral-200 outline-none border-b border-neutral-900 w-full" id="name" onKeyDown={handleKeyDown} onChange={handleChange} value={value}></input>
             <ArrayButtons buttons={buttons} gap={2}/>
         </div>
     )
@@ -117,7 +113,7 @@ export function Selector({ val, options, select, endSelect } : { val : string ,o
 
     return (
         <div className="rounded flex gap-2 ">
-            <select className=" bg-neutral-200 outline-none border-b w-full" onChange={handleSelect}>
+            <select className=" bg-neutral-200 border-neutral-900 outline-none border-b w-full" onChange={handleSelect}>
             {
                 options.map((o) =>(
                     <option value={o}>{o}</option>

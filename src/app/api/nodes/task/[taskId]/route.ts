@@ -5,7 +5,7 @@ import { prisma } from "@/db";
 import { Node } from "@prisma/client";
 import { NodeInfo } from "../../static";
 
-
+// get all nodes for one task
 export async function GET(req : Request, { params } : { params: { taskId: string } })  {
     try {
         const email = await authorize(req);

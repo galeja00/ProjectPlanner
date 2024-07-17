@@ -2,6 +2,7 @@ import { ProjectInvite } from "@prisma/client";
 import { authorize, getUserId } from "../../../static";
 import { prisma } from "@/db";
 import { DateTime } from "next-auth/providers/kakao";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 
 export async function GET(req : Request, { params } : { params : { id : string }}) {
@@ -28,6 +29,6 @@ export async function GET(req : Request, { params } : { params : { id : string }
         return Response.json({ count: count }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

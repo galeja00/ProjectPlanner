@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useReducer, useState, createContext, useContext, useRef} from 'react'
-import { ButtonSideText, Head, TeamBadge } from "../components/other";
+import { Head, TeamBadge } from "../components/other";
 import { GroupOfTasks } from "@/app/api/projects/[id]/[board]/route";
 import { Task, TaskColumn, TasksGroup, Team } from "@prisma/client";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
@@ -8,12 +8,12 @@ import Image from 'next/image'
 import { TaskInfo } from "../components/task-info";
 import { PriorityText } from "./components/priority";
 import { Creator, CreatorOfTask } from './components/creator';
-import { ArrayButtons, Button, ButtonType, Lighteness } from '@/app/components/buttons';
+import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from '@/app/components/buttons';
 import { unassigned } from '@/config';
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
 import { Name } from '../components/other-client';
 import { InitialLoader } from '@/app/components/other-client';
-import { ErrorBoundary, ErrorState } from '@/app/components/error-handler';
+import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler';
 
 
 // for Context to easy use of functions and values
@@ -38,7 +38,7 @@ export default function Backlog({ id } : { id : string }) {
     const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, true);
     const [ task, setTask ] = useState<Task | null>(null); // state inf isInfo = True will display atask info about task
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false); 
-    const [ error, setError ] = useState<ErrorState | null>(null); // state if in fecth or other async comunication with server failed
+    const { submitError } = useError(); // state if in fecth or other async comunication with server failed
 
     // init fetch of gorups
     async function fetchGroups(isInitialLoading : boolean) {
@@ -60,7 +60,7 @@ export default function Backlog({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
-            setError({ error: error, repeatFunc: () => fetchGroups(isInitialLoading) });
+            submitError(error, () => fetchGroups(isInitialLoading));
         }
         finally {
             setInitialLoading(false);
@@ -90,7 +90,7 @@ export default function Backlog({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => createGroup(name)})
+            submitError(error, () => createGroup(name))
         }
     }
 
@@ -112,7 +112,7 @@ export default function Backlog({ id } : { id : string }) {
         }   
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => deleteGroup(group)});
+            submitError(error, () => deleteGroup(group));
         }
     }
 
@@ -139,7 +139,7 @@ export default function Backlog({ id } : { id : string }) {
             fetchGroups(false);
         } catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => updateTask(upTask)});
+            submitError( error, () => updateTask(upTask));
         }
     }
 
@@ -168,13 +168,10 @@ export default function Backlog({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
-            setError({ error, repeatFunc: () => updateGroup(groupId, propertyKey, val)});
+            submitError(error, () => updateGroup(groupId, propertyKey, val));
         }
     }
 
-    function submitError(error : unknown, repeatFunc: () => void) {
-        setError({error, repeatFunc});
-    }
 
     // initial fetch of basic needed data
     useEffect(() => {
@@ -188,7 +185,7 @@ export default function Backlog({ id } : { id : string }) {
     }
     const fetchGroupsProv = () => fetchGroups(false);
     return (
-        <ErrorBoundary error={error}>
+        <>
             <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups: fetchGroupsProv , openTaskInfo, submitError, projectId: id, collumns: collumns, groups: groups }}>
                 <div className="w-3/4 mx-auto relative">
                     <Head text="Backlog"/>
@@ -196,7 +193,7 @@ export default function Backlog({ id } : { id : string }) {
                     {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
                 </div>
             </FunctionsContext.Provider>
-        </ErrorBoundary>
+        </>
     )
 }
 
