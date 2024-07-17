@@ -2,7 +2,9 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { ProjectMember, Task } from "@prisma/client";
 import { prisma } from "@/db";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
+// update propertys data of task
 export async function POST(req : Request, { params } : { params : { id : string }}) {
     try {
         const email = await authorize(req);
@@ -36,9 +38,9 @@ export async function POST(req : Request, { params } : { params : { id : string 
             }
         })
 
-        return Response.json({ message: "succesfully updated task" }, { status: 200 });
+        return Response.json({ message: "Succesfully updated task" }, { status: 200 });
     } catch (error) {
         console.error(error);
-        return Response.json({ error: "Somthing went wrong" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }

@@ -4,18 +4,19 @@ import { authorize } from "@/app/api/static";
 import { Task } from "@prisma/client";
 import { movAwayColumnIndexes, movInColumnIndexes } from "../static";
 import { BoardsTypes } from "../../board";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 
-// Remove task from Board Col
+// remove task from Board Col
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         const { taskId } : { taskId : string } = await req.json();
@@ -70,12 +71,12 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             })
             return Response.json({ tasks: finalTasks }, { status : 200 });
         } else {
-            return Response.json({ error: "On this board you cant remove task" }, { status: 400 });
+            return Response.json({ error: ErrorMessagges.BadRequest }, { status: 400 });
         }
         
     } 
     catch (error) {
         console.log(error);
-        return Response.json({ error: "Somthing went worng" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 400 });
     }
 }

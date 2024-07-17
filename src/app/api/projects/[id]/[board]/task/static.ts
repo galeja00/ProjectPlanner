@@ -23,8 +23,9 @@ export async function saveTasks(tasks : Task[]) {
         })
     }
 }
-//TODO: bugs
-//TODO: pro vice sloupcu
+
+// FUNCTIONS FOR MOVING TASK INDEXIS IN COLUMNS
+
 export async function movInColumnIndexes(columnId: string, uTask: Task, index: number) {
     const tasks: Task[] = await getColumnsTasks(columnId);
 

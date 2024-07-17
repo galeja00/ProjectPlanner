@@ -2,16 +2,17 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../../static";
 import { prisma} from "@/db";
 import { TaskSolver } from "@prisma/client";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 export async function POST(req : Request, { params } : { params : { id : string }}) {
     try {
         const email = await authorize(req);
-        if (!email) {
-            return Response.json({ error: "You need to be athorize on web" }, { status: 400 });
+        if (!email) {   
+            return Response.json({ error:  ErrorMessagges.Authorize }, { status: 400 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not project member" }, { status: 400 });
+            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         const { task, memberId } = await req.json();
@@ -27,7 +28,7 @@ export async function POST(req : Request, { params } : { params : { id : string 
     }
     catch (error) {
         console.log(error);
-        return Response.json({error: "Somthing went wrong on server"}, {status: 500});
+        return Response.json({error: ErrorMessagges.Server }, {status: 500});
     }
 }
 

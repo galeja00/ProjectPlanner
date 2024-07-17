@@ -4,7 +4,9 @@ import { authorize } from "@/app/api/static";
 import { Task } from "@prisma/client";
 import { movAwayColumnIndexes, movInColumnIndexes } from "../static";
 import { BoardsTypes } from "../../board";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
+// delete task from project/DB
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
         const email = await authorize(req);
@@ -18,19 +20,24 @@ export async function POST(req : Request, { params } : { params: { id: string, b
 
         const { taskId } : { taskId : string } = await req.json();
         
-        const res = await prisma.task.delete({
+        const prevRemove = await prisma.task.findFirst({
+            where: {
+                id: taskId
+            }
+        })
+        if (!prevRemove) {
+            return Response.json({ error: "This task don't exist"}, { status: 400 });
+        } 
+
+        await prisma.task.delete({
             where: {
                id: taskId 
             }
         });
 
-        if (!res) {
-            return Response.json({ error: "This task don't exist"}, { status: 400 });
-        } 
-
-
-        if (res.taskColumnId && res.colIndex) {
-            await movAwayColumnIndexes(res.taskColumnId, res);
+    
+        if (prevRemove.taskColumnId && prevRemove.colIndex) {
+            await movAwayColumnIndexes(prevRemove.taskColumnId, prevRemove);
         }
         
 
@@ -38,7 +45,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         if (BoardsTypes.Board == params.board) {
             resTasks = await prisma.task.findMany({
                 where: {
-                    taskColumnId: res.taskColumnId
+                    taskColumnId: prevRemove.taskColumnId
                 },
                 orderBy: {
                     colIndex: "asc"
@@ -47,7 +54,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         } else{
             resTasks = await prisma.task.findMany({
                 where: {
-                    tasksGroupId: res.tasksGroupId
+                    tasksGroupId: prevRemove.tasksGroupId
                 }
             }) 
         }
@@ -57,6 +64,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     } 
     catch (error) {
         console.log(error);
-        return Response.json({ error: "Somthing went worng" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }

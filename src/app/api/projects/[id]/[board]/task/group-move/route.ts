@@ -2,7 +2,9 @@ import { prisma } from "@/db";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
 import { unassigned } from "@/config";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
+// move task between groups
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
         const email = await authorize(req);
@@ -34,6 +36,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     } 
     catch (error) {
         console.log(error);
-        return Response.json({ error: "Somthing went worng" }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }

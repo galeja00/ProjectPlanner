@@ -1,10 +1,10 @@
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { Task, TaskColumn, TasksGroup, TaskSolver } from "@prisma/client";
-import { Session, User, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
-import { isDoneCol } from "../../board";
+import { BoardsTypes, isDoneCol } from "../../board";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
 //TODO: diff board and backlog in create
 //TODO: refactor
@@ -22,8 +22,8 @@ export async function POST(req : Request, { params } : { params: { id: string, b
 
         const data = await req.json();
         const type = ""; 
-        // Kdyz je vytvorena v backlog tablu
-        if (params.board == "backlog") {
+
+        if (params.board == BoardsTypes.Backlog) {
             const tasksGroup : TasksGroup | null = await prisma.tasksGroup.findFirst({
                 where: {
                     id: data.groupId
@@ -47,9 +47,9 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             })
     
             return Response.json({ task: task }, { status: 200 });
-        } else {
+        } else if (params.board == BoardsTypes.Board) {
             if (!(data.name || data.colId)) {
-                return Response.json({ error: "Bad reqest: You need specify name and colId in data segment"}, { status: 400 });
+                return Response.json({ error: "You need specify name and colId in data segment"}, { status: 400 });
             }
     
             const tasksCol : TaskColumn | null = await prisma.taskColumn.findFirst({ 
@@ -101,9 +101,10 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     
             return Response.json({ task: task }, { status: 200 });
         }
+        return Response.json({ error: ErrorMessagges.BadRequest}, { status: 400 }); 
     }
     catch (error) {
         console.log(error);
-        return Response.json({ error : "Error on server try again"}, { status: 500});
+        return Response.json({ error : ErrorMessagges.Server }, { status: 500});
     }
 }

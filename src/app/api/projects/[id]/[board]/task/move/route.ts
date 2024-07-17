@@ -3,17 +3,18 @@ import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
 import { movAwayColumnIndexes,movInColumnIndexes, movToColumnIndexes } from "../static";
+import { ErrorMessagges } from "@/app/api/error-messages";
 
-
+// move task between to task columns and set indexes 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.MemberProject}, { status: 400 });
         }
         //taskID: task s kterou chceme prsunout,
         //fromColID: z jakeho sloupce presunujem task
@@ -50,6 +51,17 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             await movAwayColumnIndexes(fromColId, task);
             await movToColumnIndexes(toColId, task, index);
         }
+
+        const col = await prisma.taskColumn.findFirst({
+            where: {
+                id: toColId
+            }
+        })
+        let isDone = false;
+        if (col && col.name == "Done") {
+            isDone = true; 
+        }
+
         
         const updatedTask = await prisma.task.update({
             where: {
@@ -57,25 +69,16 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             },
             data: {
                 taskColumnId: toColId,
-                colIndex: taskIndex
+                colIndex: taskIndex,
+                status: isDone
             }
         })
-        /*
-        // for tests
-        const updatedColumn = await prisma.task.findMany({
-            where: {
-                taskColumnId: toColId
-            },
-            orderBy: {
-                colIndex: "asc"
-            }
-        })
-        console.log(updatedColumn);*/
-        // TODO: select column update number of tasks
+
+
         return Response.json({ task: updatedTask }, { status: 200 });
     }
     catch (error) {
-       return Response.json({ error: "Somthing went wrong on server" }, { status: 400 });  
+       return Response.json({ error: ErrorMessagges.Server }, { status: 400 });  
     }
 }
 
