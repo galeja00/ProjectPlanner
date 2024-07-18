@@ -1,6 +1,6 @@
 "use client"
 
-import { Tag, Task, Team } from "@prisma/client"
+import { Task, Team } from "@prisma/client"
 import { Component, useEffect, useReducer, useState } from "react"
 import { Dialog, DialogClose } from "@/app/components/dialog"
 import { FormItem } from "@/app/components/form"
@@ -73,7 +73,6 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
 }
 
 function TeamHead({ team, projectId, closeSettings, updateTeam } : { team : TeamInfo, projectId : string, closeSettings : () => void, updateTeam : (team : TeamInfo) => void}) {
-    const tags : Tag[] = [];
     function updateName(name : string) {
         team.name = name;
         updateTeam(team); 
@@ -82,7 +81,6 @@ function TeamHead({ team, projectId, closeSettings, updateTeam } : { team : Team
         <div className="p-4 relative w-full border-b">
             <DialogClose handleClose={closeSettings}/>
             <Name name={team.name} updateName={updateName}/>
-            <TagList tags={tags} projectId={projectId}/>
         </div>
     )
 }

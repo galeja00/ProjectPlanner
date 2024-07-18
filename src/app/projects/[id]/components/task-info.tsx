@@ -2,7 +2,7 @@
 
 import { useEffect, useReducer, useState, ChangeEvent, createContext, useContext } from "react";
 import Image from 'next/image' 
-import { Tag, Task, Ranking, Team, ProjectMember } from "@prisma/client";
+import { Task, Ranking, Team, ProjectMember } from "@prisma/client";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import { Name } from "./other-client";
@@ -46,7 +46,6 @@ const TaskInfoContext = createContext<TaskInfoContextTypes | null>(null);
 // dialog for display info and editing it
 export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : string, projectId : string, handleClose : () => void, submitTask : (task : Task) => void}) {
     const [ task, setTask ] = useState<Task | null>(null);
-    const [ tags, setTags ] = useState<Tag[]>([]);
     const [ solvers, setSolvers ] = useState<Solver[]>([]); 
     const [ team, setTeam ] = useState<TeamInfo | null>(null); 
     const { submitError } = useError(); 
@@ -62,7 +61,6 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                 throw new Error(data.error);
             }
             setTask(data.taskInfo.task);
-            setTags(data.taskInfo.tags);
         }
         catch (error) {
             console.error(error);
@@ -210,7 +208,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
                 { task 
                     ?
                     <TaskInfoContext.Provider value={{task, team, solvers, changeTeam, changeSolvers, submitError}}>
-                        <HeaderContainer task={task} tags={tags} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
+                        <HeaderContainer task={task} projectId={projectId} handleClose={() => updateAndClose(task)} updateTask={updateTask}/>
                         <div className='grid grid-cols-3 h-full'>
                             <MainInfoContainer task={task} updateTask={updateTask}/>
                             <section className='py-2 px-4  flex flex-col gap-4'>
@@ -232,8 +230,8 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
 // HEADER PART //
 function HeaderContainer(
-    {task, tags, projectId, handleClose, updateTask } : 
-    {task : Task, projectId : string,  tags : Tag[], handleClose : () => void, updateTask : (task : Task) => void}) { 
+    {task, projectId, handleClose, updateTask } : 
+    {task : Task, projectId : string,  handleClose : () => void, updateTask : (task : Task) => void}) { 
     function updateName(name : string) {
         task.name = name;
         updateTask(task);
@@ -242,7 +240,6 @@ function HeaderContainer(
     return (
         <section className='px-6 py-4 border-b border-neutral-400 relative '>
             <Name name={task.name} updateName={updateName}/>
-            <TagList tags={tags} projectId={projectId}/>
             <DialogClose handleClose={handleClose}/>
         </section>
     )

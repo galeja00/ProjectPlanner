@@ -159,7 +159,7 @@ model Task {
   complexity    Ranking?
   description   String?
 //  issues        Issue[]
-  tags          Tag[]
+//  tags          Tag[]
   nodes         Node[]
   taskSolvers   TaskSolver[]
   tasksGroupId  String?
@@ -208,21 +208,21 @@ model Team {
   project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade) 
   members   ProjectMember[]
   tasks     Task[]
-  tags      Tag[]
+//  tags      Tag[]
 }
 
 
 // systém tagu pro týmy a úkoly
-model Tag {
-  id          String   @id @default(cuid()) 
-  createdAt   DateTime @default(now())
-  taskId      String?  
-  task        Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  teamId      String?
-  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  name        String
-  color       String
-}
+//model Tag {
+//  id          String   @id @default(cuid()) 
+//  createdAt   DateTime @default(now())
+//  taskId      String?  
+//  task        Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+//  teamId      String?
+//  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+//  name        String
+//  color       String
+//}
 
 // problemy při řešení úkolů nebo jine
 //model Issue {

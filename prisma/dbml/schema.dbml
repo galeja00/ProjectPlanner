@@ -131,7 +131,6 @@ Table Task {
   estimatedHours Int
   complexity Ranking
   description String
-  tags Tag [not null]
   nodes Node [not null]
   taskSolvers TaskSolver [not null]
   tasksGroupId String
@@ -180,18 +179,6 @@ Table Team {
   project Project [not null]
   members ProjectMember [not null]
   tasks Task [not null]
-  tags Tag [not null]
-}
-
-Table Tag {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  taskId String
-  task Task
-  teamId String
-  team Team
-  name String [not null]
-  color String [not null]
 }
 
 Enum Ranking {
@@ -241,7 +228,3 @@ Ref: TasksGroup.backlogId > Backlog.id [delete: Cascade]
 Ref: TasksGroup.timeTableId > TimeTable.id
 
 Ref: Team.projectId > Project.id [delete: Cascade]
-
-Ref: Tag.taskId > Task.id [delete: Cascade]
-
-Ref: Tag.teamId > Team.id [delete: Cascade]

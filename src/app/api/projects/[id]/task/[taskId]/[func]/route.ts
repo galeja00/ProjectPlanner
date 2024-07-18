@@ -1,8 +1,9 @@
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
-import { ProjectMember, Tag, Task, TaskSolver } from "@prisma/client";
+import { ProjectMember, Task, TaskSolver } from "@prisma/client";
 import { ErrorMessagges } from "@/app/api/error-messages";
+
 
 enum TaskFunctions {
     info = "info",
@@ -19,8 +20,7 @@ export type Solver = {
 }
 
 type TaskInfo = {
-    task: Task,
-    tags: Tag[]
+    task: Task
 }
 
 // handle basic functions about task globali
@@ -60,15 +60,10 @@ async function findInfo(id : string) : Promise<TaskInfo | null> {
             id: id
         }
     })
-    const tags : Tag[] = await prisma.tag.findMany({
-        where: {
-            taskId: id
-        }
-    })
     if (!task) {
         return null;
     }
-    const taskInfo : TaskInfo = { task: task, tags: tags};
+    const taskInfo : TaskInfo = { task: task };
     return taskInfo
 }
 

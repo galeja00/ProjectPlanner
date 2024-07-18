@@ -2,7 +2,21 @@
 
 import { useReducer, useState, ChangeEvent } from "react";
 import Image from 'next/image' 
-import { Tag, Task, Ranking } from "@prisma/client";
+import { Task, Ranking } from "@prisma/client";
+import { DateTime } from "next-auth/providers/kakao";
+
+// not implemented 
+// future function in app
+// for seraching and filtering in teams and tasks
+
+type Tag = {
+    id : string,
+    name : string,
+    color : string,
+    taskId : string | null,
+    teamId : string | null,
+    createdAt : DateTime
+}
 
 
 // TODO: submit name to upper component
