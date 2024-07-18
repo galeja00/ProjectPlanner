@@ -9,6 +9,7 @@ import Image from "next/image"
 import { TeamBadge } from "../components/other"
 import { Name } from "../components/other-client"
 import { TagList } from "../components/tags"
+import { useError } from "@/app/components/error-handler"
 
 type TeamInfo = {
     id : string,
@@ -38,7 +39,8 @@ type MemberInfo = {
 
 export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { team : TeamInfo, projectId : string, closeSettings : () => void, updateTeams : () => void}) {
     const [infteam, setInfTeam] = useState<TeamInfo>(team);
-
+    const { submitError } = useError();
+    
     function close() {
         updateTeams();
         closeSettings();
@@ -58,7 +60,7 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
             }
         }
         catch (error) {
-            console.error(error);
+            submitError(error, () => updateTeam(team));
         }
     }
 
@@ -91,16 +93,12 @@ enum TypeOfInfo {
 }
 
 function Container({ team, projectId} : { team : TeamInfo, projectId : string}) {
-    const menuItems : TypeOfInfo[] = [TypeOfInfo.members, TypeOfInfo.tasks];
+    const menuItems : TypeOfInfo[] = [TypeOfInfo.members];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.members);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Members team={team} projectId={projectId}/>);
 
     function handleChangeType(type : TypeOfInfo) {
         switch (type) {
-            case TypeOfInfo.tasks:
-                setActualInfo(<Tasks/>);
-                setActualInfoType(TypeOfInfo.tasks);
-                break;
             default:
                 setActualInfo(<Members team={team} projectId={projectId}/>);
                 setActualInfoType(TypeOfInfo.members);
@@ -137,6 +135,7 @@ function MenuItem({ name, actualType, onClick } : { name : string, actualType : 
 function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
     const [ teamMembers, setTeamMembers ] = useState<MemberInfo[]>([]);
     const [ members, setMembers ] = useState<MemberInfo[]>([]);
+    const { submitError } = useError();
 
     async function fetchMembers() {
         try {
@@ -145,7 +144,7 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
             })
             const data = await res.json(); 
             if (!res.ok) {
-                console.error(data.error);
+                throw Error(data.error);
             }
             const projectMembers : MemberInfo[] = data.data;
             const sorted : MemberInfo[] = [];
@@ -158,6 +157,7 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
         }
         catch (error) {
             console.error(error);
+            submitError(error, fetchMembers);
         }
     }
 
@@ -184,10 +184,11 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
             }
 
             const data = await res.json();
-            console.error(data.error);  
+            throw Error(data.error);
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => addMember(member));
         }
     }
 
@@ -216,10 +217,11 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
             }
 
             const data = await res.json();
-            console.error(data.error);  
+            throw new Error(data.error);
         }
         catch (error) {
             console.error(error);
+            submitError(error, () => removeMember(member));
         }
     }
 
@@ -284,7 +286,7 @@ function MembersColumn({ type, members, handleMove } : { type : ColumnType, memb
             toggleDraged();
         }
     }
-    // TODO: dataTranfer to on drop
+
     function handleDrag(e : React.DragEvent, member : MemberInfo) {
         e.dataTransfer.setData("json/member", JSON.stringify(member));
     }
@@ -339,7 +341,8 @@ function convertTeamToMembers(team : TeamInfo ) {
     ))
     return conv
 }
-
+/*
+// furture functions
 function Tasks() {
     const [ tasks, setTasks ] = useState<Task[]>([]);
     return (
@@ -362,3 +365,4 @@ function TaskComp({ task } : { task : Task }) {
         </li>
     )
 }
+    */
