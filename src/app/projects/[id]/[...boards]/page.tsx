@@ -32,7 +32,7 @@ export default function Boards({ params } :  { params: { id : string, boards : s
     
     
     return (
-        <main className="px-14 py-14  w-full overflow-x-hidden">¨
+        <main className="px-14 py-14  w-full overflow-x-hidden">
             <ErrorBoundary>
                 {board}
             </ErrorBoundary>

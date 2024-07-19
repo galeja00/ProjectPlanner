@@ -1,15 +1,9 @@
 'use client'
 
-
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from "react"
 
-enum ProjectType {
-    Kanban,
-    Scrum
-}
 
-// TODO: Bug v pridavani vyhazuje error ale pritom zadny nevznikl a pri nevlozeni napriklad jmena vraci to na prvni obrazovku
 export default function Add() {
     return (
         <main className="flex flex-col items-center p-24 ">
@@ -20,18 +14,6 @@ export default function Add() {
     )
 }
 
-
-function TypeChoose({ handleTypeChouce } : { handleTypeChouce : (type : ProjectType) => void}) {
-    return (
-        <section className="bg-neutral-200 p-8 rounded">
-            <h2 className="mb-8 text-xl">Choose type of project planning</h2> 
-            <div className="flex gap-4">
-                <div onClick={() => handleTypeChouce(ProjectType.Kanban)} className="p-40 bg-neutral-800 rounded cursor-pointer hover:bg-neutral-700">Kanban</div>
-                <div onClick={() => handleTypeChouce(ProjectType.Scrum)} className="p-40 bg-neutral-800 rounded cursor-pointer hover:bg-neutral-700">Scrum</div>
-            </div>
-        </section>
-    )
-}
 
 function CreateProject() {
     const [correctName, setCorrectName] = useState<boolean>(true);
@@ -63,7 +45,6 @@ function CreateProject() {
             }
             
             const data = await res.json();
-           
             setErrorMsg(data.error); 
            
         } catch (error) {

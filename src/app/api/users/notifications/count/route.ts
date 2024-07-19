@@ -1,7 +1,6 @@
-import { ProjectInvite } from "@prisma/client";
+
 import { authorize, getUserId } from "../../../static";
 import { prisma } from "@/db";
-import { DateTime } from "next-auth/providers/kakao";
 import { ErrorMessagges } from "@/app/api/error-messages";
 
 
@@ -9,11 +8,11 @@ export async function GET(req : Request, { params } : { params : { id : string }
     try {
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ rror: "Fail to authorize" }, { status: 400 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 400 });
         }
         const id : string | null = await getUserId(email);
         if (id == null) {
-            return Response.json({ error: ""}, { status: 400 });
+            return Response.json({ error: ErrorMessagges.Authorize }, { status: 400 });
         }
         
         let count : number = 0;

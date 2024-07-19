@@ -4,7 +4,6 @@ import { signIn } from 'next-auth/react';
 import { FormEvent, useState } from 'react'
 import EmailValidator from 'email-validator';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { FormItem, SubmitButton } from '@/app/components/form';
 
 // for user to login to account
@@ -40,16 +39,16 @@ export default function LoginForm() {
             const response = await signIn('credentials', {
                 email: formData.get("email"),
                 password: formData.get("password"),
-                callbackUrl: "/"
+                redirect: false,
             });
-            
             // set errors if sign in fails
-            if (response === null || response == undefined) {
+            if (response && !response.ok) {
                 setCorrectPsw(false);
                 setCorrectEmail(false);
-                setFaildMsg("We didnt found this user credentials");
+                setFaildMsg("Your password or email is invalid");
                 return;
             }
+            router.push("/");
         }
         catch (error) {
             setFaildMsg("Somnthing went wrong");

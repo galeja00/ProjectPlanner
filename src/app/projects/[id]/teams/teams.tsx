@@ -48,7 +48,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); // indicate if is setting of some team open
     const [team, setTeam] = useState<TeamInfo  | null>(null); // info about team when user is adding memebrs or remuving same with task
     const [initialLoading, setInitialLoading] = useState<boolean>(false); 
-    const { submitError } = useError()// for errro handeling
+    const { submitError } = useError();// for errro handeling
 
     // get data about teams in project from REST-APi
     async function fetchTeams() {
@@ -341,16 +341,12 @@ function SelectMembers({ members, selected, updateSelected } : { members : Membe
 // simple display of user data in selector
 function ProjectMember({ member, active, onClick } : { member : MemberInfo, active : boolean, onClick : () => void }) {
     const [ac, setAc] = useState<boolean>(active);
-    let img = "/avatar.svg";
-    if (member.image) {
-        img = `/uploads/user/${member.image}`;
-    }
+    let img = member.image ? "/avatar.svg" : `/uploads/user/${member.image}`;
 
     function handleClick() {
         setAc(!ac);
         onClick();
     }
-    console.log(member);
     return (
         <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 ${ac && "outline outline-1 outline-green-500"} cursor-pointer`}>
             <Image src={img} alt="" height={15} width={15} className="rounded-full w-5 h-5"></Image>

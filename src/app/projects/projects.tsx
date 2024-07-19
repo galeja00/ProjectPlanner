@@ -6,14 +6,14 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image' 
 import { formatDate } from '@/date';
 import { InitialLoader } from '../components/other-client';
-import { ErrorBoundary, ErrorState } from '../components/error-handler';
+import { useError } from '../components/error-handler';
 
 
 export default function Projects() {
     const [inWorkP, setInWorkP] = useState<Project[]>([]);
     const [doneP, setDoneP] = useState<Project[]>([]);
     const [initialLoading, setInitialLoading] = useState<boolean>(false);
-    const [error, setError] = useState<ErrorState | null>(null);
+    const { submitError } = useError();
 
     useEffect(() => {
         fetchProjects();
@@ -38,11 +38,10 @@ export default function Projects() {
 
             setInWorkP(inWorkProjects);
             setDoneP(doneProjects);
-            setError(null);
         } 
         catch (error) {
             console.error(error);
-            setError({ error: error, repeatFunc: fetchProjects});
+            submitError(error, fetchProjects);
         }
         finally {
             setInitialLoading(false);
@@ -57,10 +56,10 @@ export default function Projects() {
     }
     
     return (
-        <ErrorBoundary error={error}>
+        <>
             <ProjectList name="In Work" list={inWorkP}/>
             <ProjectList name="Done" list={doneP}/>
-        </ErrorBoundary>
+        </>
     )
 }
 

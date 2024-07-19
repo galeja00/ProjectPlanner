@@ -6,6 +6,7 @@ import { compare } from 'bcrypt';
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import EmailValidator from 'email-validator';
 import NextAuth from "next-auth/next";
+import { signIn } from "next-auth/react";
 
 
 type User = {

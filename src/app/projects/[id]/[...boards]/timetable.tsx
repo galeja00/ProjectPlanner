@@ -146,6 +146,7 @@ export default function TimeTable({ id } : { id : string }) {
                 const newGroup = { id: group.id, timeTableId: group.timeTableId ?? "", name: group.name, position: group.position, startAt: group.startAt, deadlineAt: group.deadlineAt };
                 const newGroups : TimeTableGroup[] = [...groups, newGroup ];
                 setGroups([...newGroups]);
+                return;
             }
             const data = await res.json();
             throw new Error(data.error);
@@ -501,7 +502,7 @@ function DisplayRange({ col, current } : { col : number, current : boolean }) {
         <div 
             key={col} 
             data-col-id={col} 
-            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-950' : 'border-neutral-400'} ${(current ? " bg-orange-400 bg-opacity-60" : "")} cursor-pointer`}
+            className={`min-w-[15px] border-r h-10 flex items-center ${(col + 1) % mode == 0 ? 'border-neutral-950' : 'border-neutral-400'} ${(current ? " bg-orange-400 bg-opacity-60" : "")} `}
         >
         </div>
     )

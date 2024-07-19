@@ -62,7 +62,7 @@ export default function RegisterForm() {
                         setMsg({ message: "Error in communication with server, try again", type: false });
                     } else {
                         setMsg({ message: "Succesfull registration", type: true});
-                        router.push("/");
+                        router.push("/auth/signin");
                     }
                 } catch (error) {
                     setMsg({ message: "Error in communication with server, try again", type: false });

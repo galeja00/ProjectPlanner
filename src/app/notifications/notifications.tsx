@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Image from 'next/image' 
-import { ButtonWithImg, ButtonWithText, SearchInput } from "../components/other";
-import { ErrorBoundary, ErrorState, useError } from "../components/error-handler";
 import { formatAgo } from "@/date";
+import { ButtonWithText } from "../components/buttons";
+
 
 // type for notification to display it to user
 type Notification = {
@@ -25,7 +25,7 @@ enum NotifictionsText {
 // component for diplaying user notification and accepting or removing
 export default function NotifiactionsList() {
     const [notifs, setNotifs] = useState<Notification[]>([]); 
-    const { submitError } = useError(); 
+    //const { submitError } = useError(); 
     
     // get all user notifications from endpoint
     async function fetchNotifications() {
@@ -41,7 +41,7 @@ export default function NotifiactionsList() {
         }
         catch (error) {
             console.error();
-            submitError(error, fetchNotifications);
+            //submitError(error, fetchNotifications);
         }
     }
 
@@ -51,8 +51,6 @@ export default function NotifiactionsList() {
 
     return (
         <>
-            <section className="flex gap-4 mb-4 w-fit h-fit items-end">
-            </section>
             <ul className="rounded p-1 min-h-[40rem]">
                 {
                     notifs.map((notif) => (
@@ -67,7 +65,7 @@ export default function NotifiactionsList() {
 
 // display notifications informations and handle functions with them
 function NotificationsItem({notif, updateNotif} : {notif : Notification, updateNotif : () => void}) {
-    const { submitError } = useError(); 
+    //const { submitError } = useError(); 
 
     // handle click on buttons by submiting it to endpoint
     async function handleButtonClick(type : string) {
@@ -86,7 +84,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
         }
         catch (error) {
             console.error(error);
-            submitError(error, () => handleButtonClick(type));
+            //submitError(error, () => handleButtonClick(type));
         }
     }
     
