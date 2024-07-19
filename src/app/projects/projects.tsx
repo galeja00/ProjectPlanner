@@ -6,11 +6,18 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image' 
 import { formatDate } from '@/date';
 import { InitialLoader } from '../components/other-client';
-import { useError } from '../components/error-handler';
+import { ErrorBoundary, useError } from '../components/error-handler';
 import { ButtonSideText } from '../components/buttons';
 
+export default function ProjectsContainer() {
+    return (
+        <ErrorBoundary>
+            <Projects/>
+        </ErrorBoundary>
+    )
+}
 
-export default function Projects() {
+function Projects() {
     const [inWorkP, setInWorkP] = useState<Project[]>([]);
     const [doneP, setDoneP] = useState<Project[]>([]);
     const [initialLoading, setInitialLoading] = useState<boolean>(false);

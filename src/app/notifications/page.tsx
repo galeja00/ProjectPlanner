@@ -12,7 +12,7 @@ export default async function Page() {
     }
     
     return (
-        <main className="flex w-2/4 flex-col m-auto py-14">
+        <main className="w-2/4  m-auto py-14">
             <h1 className='text-2xl font-bold mb-4'>Notificationes</h1>
             <NotifiactionsList/>
         </main>

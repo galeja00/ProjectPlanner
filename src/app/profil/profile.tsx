@@ -12,14 +12,22 @@ import { Dialog, DialogClose } from "../components/dialog";
 import { ErrorState, useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
 import { ArrayButtons, Button, ButtonItems, ButtonList, ButtonType, Lighteness } from "../components/buttons";
-
+import { ErrorBoundary } from "../components/error-handler";
 enum UpdateTypes {
     Name = "Name",
     Email = "Email"
 }
 
+export default function ProfileContainer() {
+    return (
+        <ErrorBoundary>
+            <Profile/>
+        </ErrorBoundary>
+    )
+}
 
-export default function Profile() {
+
+function Profile() {
     const [isDrop, toggleDrop] = useReducer(isDrop => !isDrop, false);
     const [user, setUser] = useState<User | null>(null);
     const [isPassw, togglePassw] = useReducer(isPassw => !isPassw, false);
@@ -142,7 +150,7 @@ export default function Profile() {
             { isDrop && <DropImage closeDrop={toggleDrop} updateImg={fetchImage}/>}
             { isDell && <DeleleteDialog message="Do you realy wont to delete your account?" onClose={toggleDell} onConfirm={handleDelete}/>}
             { isPassw && <PasswordChange onClose={togglePassw}/> }
-            <div className="flex w-2/4 flex-col m-auto py-14 space-y-8" >
+            <div className="w-full m-auto space-y-8" >
                 <section className="bg-neutral-200 rounded flex gap-16 p-4">
                     <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover: w-32 h-32 cursor-pointer"></Image>
                     <div className="flex flex-col gap-4">

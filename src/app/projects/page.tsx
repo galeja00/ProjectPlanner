@@ -22,9 +22,7 @@ export default async function Projects() {
                 <h1 className='text-2xl font-bold'>Projects</h1>
                 <Link href="/projects/add" className='btn-primary w-fit'>Create new Project</Link>
             </div>
-            <ErrorBoundary>
-                <ListProjects/>
-            </ErrorBoundary>
+            <ListProjects/>
         </main>
     )
 }
