@@ -11,6 +11,7 @@ import { Name } from "../components/other-client"
 import { TagList } from "../components/tags"
 import { useError } from "@/app/components/error-handler"
 
+
 type TeamInfo = {
     id : string,
     name: string,
@@ -67,20 +68,20 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
     return (
         <Dialog>
             <div className="bg-neutral-200 w-fit rounded relative h-fit">
-                <TeamHead team={infteam} projectId={projectId} closeSettings={close} updateTeam={updateTeam}/>
+                <TeamHead team={infteam} closeSettings={close} updateTeam={updateTeam}/>
                 <Container team={infteam} projectId={projectId}/>
             </div>
         </Dialog>
     )
 }
 
-function TeamHead({ team, projectId, closeSettings, updateTeam } : { team : TeamInfo, projectId : string, closeSettings : () => void, updateTeam : (team : TeamInfo) => void}) {
+function TeamHead({ team, closeSettings, updateTeam } : { team : TeamInfo, closeSettings : () => void, updateTeam : (team : TeamInfo) => void}) {
     function updateName(name : string) {
         team.name = name;
         updateTeam(team); 
     }
     return (
-        <div className="p-4 relative w-full border-b">
+        <div className="p-4 relative w-full">
             <DialogClose handleClose={closeSettings}/>
             <Name name={team.name} updateName={updateName}/>
         </div>
@@ -108,7 +109,7 @@ function Container({ team, projectId} : { team : TeamInfo, projectId : string}) 
 
     return (
         <section className='col-span-2 h-fit w-[46rem] ralative'>
-            <menu className='flex w-full border-b'>
+            <menu className='flex w-full border-b border-t border-neutral-400'>
                 {
                     menuItems.map((type) => (
                         <MenuItem key={type} name={type} actualType={actualTypeInfo} onClick={() => handleChangeType(type)}></MenuItem>
@@ -132,7 +133,7 @@ function MenuItem({ name, actualType, onClick } : { name : string, actualType : 
     )
 }
 
-function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
+function Members({ team, projectId}  : { team : TeamInfo, projectId : string}) {
     const [ teamMembers, setTeamMembers ] = useState<MemberInfo[]>([]);
     const [ members, setMembers ] = useState<MemberInfo[]>([]);
     const { submitError } = useError();
@@ -178,8 +179,6 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
                 member.teamName = team.name;
                 newTeamMembers.push(member);
                 setTeamMembers(newTeamMembers);
-                //team.members = newTeamMembers;
-                //updateTeam(team);
                 return;
             }
 
@@ -200,8 +199,7 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
                     memberId: member.memberId
                 })
             })
-            console.log(member);
-            console.log(teamMembers);
+
             if (res.ok) {
                 fetchMembers();
                 let newTeamMembers : MemberInfo[] = [];
@@ -211,8 +209,6 @@ function Members({ team, projectId} : { team : TeamInfo, projectId : string}) {
                     }
                 }
                 setTeamMembers(newTeamMembers); 
-                //team.members = newTeamMembers;
-                //updateTeam(team);
                 return;
             }
 
@@ -341,28 +337,3 @@ function convertTeamToMembers(team : TeamInfo ) {
     ))
     return conv
 }
-/*
-// furture functions
-function Tasks() {
-    const [ tasks, setTasks ] = useState<Task[]>([]);
-    return (
-        <section>
-            <ul>
-                {
-                    tasks.map((task) => (
-                        <TaskComp key={task.id} task={task}/>
-                    ))
-                }
-            </ul>
-        </section>
-    )
-}
-
-function TaskComp({ task } : { task : Task }) {
-    return (
-        <li key={task.id}>
-
-        </li>
-    )
-}
-    */

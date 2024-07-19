@@ -17,6 +17,7 @@ import { FormItem, SubmitButton } from "@/app/components/form";
 import { NodeComponent, NodeCreator } from "@/app/nodes/nodes";
 import { formatAgo } from "@/date";
 import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from "@/app/components/buttons";
+import { InitialLoader } from "@/app/components/other-client";
 
 enum SolverFuncs {
     Add = "add",
@@ -460,8 +461,10 @@ type SelectionItem = {
 function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) {
     const [ teams, setTeams ] = useState<TeamInfo[]>([]);
     const { changeTeam, submitError } = useContext(TaskInfoContext)!; 
+    const [ intialLoading, setInitialLoading] = useState<boolean>(false);
 
     async function fetchTeams() {
+        setInitialLoading(true);
         try {
             const res = await fetch(`/api/projects/${task.projectId}/team`, {
                 method: "GET"
@@ -476,6 +479,9 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
         catch (error) {
             console.error(error);
             submitError(error, fetchTeams);
+        }
+        finally {
+            setInitialLoading(false);
         }
     }
 
@@ -494,15 +500,19 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
         <>
             <h4>Teams</h4>
             <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-1">
-                <Selector 
-                    items={teams.map(s => ({
-                        id: s.id,
-                        name: s.name,
-                        selected: s.id === team?.id,
-                        load: s.taskLoad
-                    }))} 
-                    handleSelect={handleSelect}
-                />
+                { intialLoading ?
+                    <InitialLoader/>
+                    :
+                    <Selector 
+                        items={teams.map(s => ({
+                            id: s.id,
+                            name: s.name,
+                            selected: s.id === team?.id,
+                            load: s.taskLoad
+                        }))} 
+                        handleSelect={handleSelect}
+                    />
+                }
             </ul>
         </>
     )
@@ -512,8 +522,10 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
     const [ isAll, toggleAll ] = useReducer(isAll => !isAll, true); 
     const [ members, setMembers ] = useState<MemberTableInfo[]>([]); 
     const { changeSolvers, submitError } = useContext(TaskInfoContext)!;
+    const [ intialLoading, setInitialLoading] = useState<boolean>(false);
 
     async function fetchMembers() {
+        setInitialLoading(true);
         try {
             const res = await fetch(`/api/projects/${task.projectId}/members`, {
                 method: "GET"
@@ -529,6 +541,9 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
         catch (error) {
             console.error(error);
             submitError(error, fetchMembers);
+        }
+        finally {
+            setInitialLoading(false);
         }
     }
 
@@ -570,9 +585,14 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
                 <h4>Solvers</h4>
                 <button onClick={toggleAll} className="border border-violet-600 rounded px-2 text-violet-600 hover:bg-opacity-40 hover:bg-violet-600 ">{isAll ? "Team" : "All"}</button>
             </div>
-            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-2">
-                <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
-            </ul>
+            { intialLoading ?
+                <InitialLoader/>
+                :
+                <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-2">
+                    <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
+                </ul>
+            }
+           
         </>
     )
 }

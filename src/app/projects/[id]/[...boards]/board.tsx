@@ -334,7 +334,7 @@ function TasksColumn(
             onDragLeave={handleOnLeave}
             style={{ width: w }}
         >
-            <div className="p-2 border-b border-neutral-400 flex justify-between gap-2">
+            <div className={`p-2 ${isSmall && "border-b"} border-neutral-400 flex justify-between gap-2`}>
                 <h2 className="">{tasksCol.name}</h2>
                 <ArrayButtons buttons={buttons} gap={1}/>
             </div>

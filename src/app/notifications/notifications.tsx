@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Image from 'next/image' 
 import { formatAgo } from "@/date";
 import { ButtonWithText } from "../components/buttons";
+import { ErrorBoundary, useError } from "../components/error-handler";
+import { InitialLoader } from "../components/other-client";
 
 
 // type for notification to display it to user
@@ -22,13 +24,25 @@ enum NotifictionsText {
     ProjectInvite = "You have been invited to project"
 }
 
+export default function Notifications() {
+    return ( 
+        <ErrorBoundary>
+            <NotifiactionsList/>
+        </ErrorBoundary>
+    )
+}
+
 // component for diplaying user notification and accepting or removing
-export default function NotifiactionsList() {
+function NotifiactionsList() {
     const [notifs, setNotifs] = useState<Notification[]>([]); 
-    //const { submitError } = useError(); 
+    const [initialLoading, setInitialLoading] = useState<boolean>(false);
+    const { submitError } = useError(); 
     
     // get all user notifications from endpoint
-    async function fetchNotifications() {
+    async function fetchNotifications(isInitialLoading : boolean) {
+        if (isInitialLoading) {
+            setInitialLoading(true);
+        }
         try {
             const res = await fetch(`/api/users/notifications`, {
                 method: "GET"
@@ -41,20 +55,29 @@ export default function NotifiactionsList() {
         }
         catch (error) {
             console.error();
-            //submitError(error, fetchNotifications);
+            submitError(error, () => fetchNotifications(true));
+        }
+        finally {
+            setInitialLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchNotifications();
+        fetchNotifications(true);
     }, [])
+
+    if (initialLoading) {
+        return (
+            <InitialLoader/>
+        )
+    }
 
     return (
         <>
             <ul className="rounded p-1 min-h-[40rem]">
                 {
                     notifs.map((notif) => (
-                        <NotificationsItem key={notif.id} notif={notif} updateNotif={fetchNotifications}/>
+                        <NotificationsItem key={notif.id} notif={notif} updateNotif={() => fetchNotifications(false)}/>
                     ))
                 }
                 { notifs.length == 0 && <li>Right now you have zero notifications</li>}
@@ -65,7 +88,7 @@ export default function NotifiactionsList() {
 
 // display notifications informations and handle functions with them
 function NotificationsItem({notif, updateNotif} : {notif : Notification, updateNotif : () => void}) {
-    //const { submitError } = useError(); 
+    const { submitError } = useError(); 
 
     // handle click on buttons by submiting it to endpoint
     async function handleButtonClick(type : string) {
@@ -84,7 +107,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
         }
         catch (error) {
             console.error(error);
-            //submitError(error, () => handleButtonClick(type));
+            submitError(error, () => handleButtonClick(type));
         }
     }
     
