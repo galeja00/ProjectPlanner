@@ -6,7 +6,7 @@ import { ProjectInfo } from "./menu-info";
 // menu displayed when user is in project
 export default function ProjectMenu({ id } : { id : string }) {
     return (
-        <div className="flex flex-col bg-neutral-200 min-h-screen w-48 min-w-[12rem] p-4 gap-8 border-r border-neutral-600 overflow-hidden align-middle">
+        <div className="flex flex-col bg-neutral-200 min-h-[calc(100vh-3rem)] w-48 min-w-[12rem] p-4 gap-8 border-r border-neutral-600 overflow-hidden align-middle">
             <ProjectInfo id={id}/>
             <section>
                 <h3 className="text-sm text-neutral-400 mb-2">Planning</h3>

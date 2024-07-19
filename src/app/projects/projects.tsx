@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { formatDate } from '@/date';
 import { InitialLoader } from '../components/other-client';
 import { useError } from '../components/error-handler';
+import { ButtonSideText } from '../components/buttons';
 
 
 export default function Projects() {
@@ -56,10 +57,10 @@ export default function Projects() {
     }
     
     return (
-        <>
+        <div className='h-fit'>
             <ProjectList name="In Work" list={inWorkP}/>
             <ProjectList name="Done" list={doneP}/>
-        </>
+        </div>
     )
 }
 
@@ -81,8 +82,8 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
     }
 
     return (
-        <section>
-            <div className='flex justify-between items-center mb-4'>
+        <section className='relative'>
+            <div className='flex justify-between items-center mb-4 '>
                 <h2 className='text-xl  font-bold'>{name}</h2>
                 {list.length > (top - bottom) + 1 ?
                         <div className='flex gap-4'>
@@ -93,7 +94,7 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
                         <></>
                 }
             </div>
-            <ul className='flex gap-4 mb-4 width-full overflow-hidden'>
+            <ul className='relative flex gap-4 mb-4 w-full h-64 bg-neutral-200 rounded'>
                 {list.map((p, i) => (
                     <ProjectItem key={p.id} proj={p} index={i} vis={[bottom, top]}/>
                 ))}
@@ -110,7 +111,7 @@ function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vi
     } 
     const icon = proj.icon ? `/uploads/project/${proj.icon}` : "/project.svg";
     return (
-        <li key={proj.id} className={`overflow-hidden bg-neutral-200 rounded w-96 h-50 h-auto ${visible}`}>
+        <li key={proj.id} className={`overflow-hidden bg-neutral-100 rounded w-96 h-auto m-2 ${visible}`}>
             <div className='absolute w-96 h-10' style={{backgroundColor: proj.color}}></div>
             <Image src={icon} alt="avater" width={50} height={50} className='w-12 h-12 rounded bg-neutral-50 mr-5 text-color cursor-pointer absolute z-10 left-4 top-4'></Image>
             <div className='p-4 mt-16'>

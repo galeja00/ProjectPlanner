@@ -16,11 +16,11 @@ export default async function Projects() {
     }
 
     return (
-        <main className="flex max-w-screen flex-col m-auto py-14 px-24">
+        <main className="flex max-w-screen flex-col h-auto m-auto py-14 px-24">
             
             <div className='flex justify-between mb-8'>
                 <h1 className='text-2xl font-bold'>Projects</h1>
-                <Link href="/projects/add" className='btn-primary w-fit'>Add Project</Link>
+                <Link href="/projects/add" className='btn-primary w-fit'>Create new Project</Link>
             </div>
             <ErrorBoundary>
                 <ListProjects/>
