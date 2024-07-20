@@ -10,10 +10,10 @@ export function Head({ text } : { text : string }) {
 
 export function TeamBadge({ name, color} : { name : string, color : string | null }) {
     const displaydColor = color ?? "#7c3aed"
-    const opacityHex = "66";
+    const opacityHex = "28";
 
     return ( 
-        <div style={{ backgroundColor: `${displaydColor}${opacityHex}`, color: displaydColor, borderColor: displaydColor}} className='px-1 rounded border text-sm ' >
+        <div style={{ backgroundColor: `${displaydColor}${opacityHex}`, color: displaydColor, borderColor: displaydColor}} className='px-1 rounded border text-sm w-fit' >
             {name}
         </div>
     ) 

@@ -12,11 +12,13 @@ import { TeamDialog } from "./team-info"
 import { InitialLoader } from "@/app/components/other-client"
 import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler"
 import { ButtonWithImg } from "@/app/components/buttons"
+import { getImage, ImageTypes } from "@/images"
 
 // type for teams and with mebers are in teams
 type TeamInfo = {
     id : string,
     name: string,
+    color: string | null,
     taskLoad: number,
     members: TeamMemberInfo[]
 }
@@ -122,7 +124,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     useEffect(() => { fetchTeams() }, []);
 
     return (
-        <>
+        <main className="max-w-screen-lg w-full mx-auto">
             { isSettings && team && <TeamDialog team={team} projectId={projectId} updateTeams={fetchTeams} closeSettings={closeSettings}/>}
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             <Head text="Teams" />
@@ -137,7 +139,7 @@ export default function Teams({ projectId } : { projectId : string}) {
                         <TeamsTable teams={teams} handleDelete={deleteTeam} openSettings={openSettings}/>
                 }
             </section>
-        </>
+        </main>
     )
 }
 
@@ -146,11 +148,11 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
     return (
         <table className="bg-neutral-200 rounded flex flex-col">
             <thead className="">
-                <tr className='py-2 px-3 grid grid-cols-9 gap-2 justify-items-left items-center'>
+                <tr className='py-2 px-3 grid grid-cols-10 gap-2 justify-items-left items-center'>
                     <th className='w-fit col-span-2'>Name</th>
-                    <th className="w-fit col-span-2">Members</th>
+                    <th className="w-fit col-span-3">Members</th>
                     <th className='w-fit col-span-2'>Count Of Members</th>
-                    <th className='w-fit col-sapn-2'>Tasks Load</th>
+                    <th className='w-fit col-sapn-2'>Task Load</th>
                     <th></th>
                 </tr>
             </thead>
@@ -170,8 +172,8 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
 function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInfo, handleDelete : () => void, openSettings : () => void}) {
     const count = teamInfo.members.length;
     return (
-        <tr key={teamInfo.id} className='bg-neutral-100 rounded py-2 px-3 grid grid-cols-9 gap-2 justify-items-left items-center'>
-            <td className="col-span-2">{teamInfo.name}</td>
+        <tr key={teamInfo.id} className='bg-neutral-100 rounded py-2 px-3 grid grid-cols-10 gap-2 justify-items-left items-center'>
+            <td className="col-span-2"><TeamBadge name={teamInfo.name} color={teamInfo.color} /></td>
             <Members members={teamInfo.members}/>
             <td className="col-span-2">{count}</td>
             <td className="col-span-2">{teamInfo.taskLoad}</td> {/*TODO: fetch info about number of tasks*/} 
@@ -192,7 +194,7 @@ function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInf
 function Members({ members } : { members : TeamMemberInfo[] }) {
     const displayNum = 10;
     return (
-        <td className="flex col-span-2">
+        <td className="flex col-span-3">
             <ul className="flex gap-1">
             {
                 members.slice(0, displayNum).map((member, index) => {
@@ -341,7 +343,7 @@ function SelectMembers({ members, selected, updateSelected } : { members : Membe
 // simple display of user data in selector
 function ProjectMember({ member, active, onClick } : { member : MemberInfo, active : boolean, onClick : () => void }) {
     const [ac, setAc] = useState<boolean>(active);
-    let img = member.image ? "/avatar.svg" : `/uploads/user/${member.image}`;
+    let img = getImage(member.image, ImageTypes.User); 
 
     function handleClick() {
         setAc(!ac);

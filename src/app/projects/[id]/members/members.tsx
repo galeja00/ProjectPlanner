@@ -1,7 +1,7 @@
 "use client"
 import Image from 'next/image'
 import { useEffect, useReducer, useRef, useState, KeyboardEvent } from "react"
-import { Head } from '../components/other'
+import { Head, TeamBadge } from '../components/other'
 import { Dialog, DialogClose } from '@/app/components/dialog'
 import { InitialLoader } from '@/app/components/other-client'
 import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler'
@@ -13,8 +13,9 @@ type MemberInfo = {
     image: string | null,
     memberId: string,
     name: string,
-    teamId: string | null
+    teamId: string | null,
     teamName: string | null,
+    teamColor: string | null,
     surname: string,
     tasksLoad: number
 }
@@ -94,6 +95,9 @@ export default function Members({ id } : { id : string}) {
 
     return (
         <main className="py-14 px-14 relative w-full">
+            <div className='max-w-screen-lg w-full mx-auto'>
+
+            
                 <Head text="Members"/>
                 <section className='flex gap-4 mb-4 w-full h-fit items-end'>
 
@@ -108,6 +112,7 @@ export default function Members({ id } : { id : string}) {
                 }
                 </section>
                 { isAddDialog && <AddDialog onClose={handleAddButton} id={id} />}
+            </div>
         </main>
     )
 }
@@ -131,7 +136,7 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
                     <th className='w-fit col-span-2'>Image</th>
                     <th className='w-fit col-span-2'>Name</th>
                     <th className='w-fit col-span-2'>Team</th>
-                    <th className='w-fit col-span-2'>Tasks Load</th>
+                    <th className='w-fit col-span-2'>Task Load</th>
                     <th></th>
                 </tr>
             </thead>
@@ -156,7 +161,7 @@ function MemberRow({ memberInfo, handleRemove } : { memberInfo : MemberInfo, han
         <tr key={memberInfo.memberId} className='bg-neutral-100 rounded grid grid-cols-9 p-2 gap-2 justify-items-left items-center'>
             <td className='col-span-2'><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-400'/></td>
             <td className='col-span-2'>{memberInfo.name} {memberInfo.surname}</td>
-            <td className='col-span-2'>{memberInfo.teamName}</td>
+            <td className='col-span-2'>{memberInfo.teamName && memberInfo.teamColor && <TeamBadge name={memberInfo.teamName} color={memberInfo.teamColor}/>}</td>
             <td className='col-span-2'>{memberInfo.tasksLoad}</td>
             <td className='flex gap-1 justify-end col-span-1'>
                 <button onClick={handleRemove} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">

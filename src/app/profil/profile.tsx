@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useReducer, useState, useEffect, KeyboardEvent, FormEvent } from "react"
 import DropImage from "../components/drop-image";
 import { User } from "@prisma/client";
-import {DeleleteDialog, EditTextButton } from "../components/other";
+import {DeleteDialog, EditTextButton } from "../components/other";
 import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react";
 import { FormItem, SubmitButton } from "../components/form";
@@ -146,9 +146,10 @@ function Profile() {
         image = `/uploads/user/${user.image}`;
     }
     return ( 
-        <>
+        <div className='max-w-screen-lg w-full mx-auto'>
+            <h1 className='text-2xl font-bold mb-4'>Your Profile</h1>
             { isDrop && <DropImage closeDrop={toggleDrop} updateImg={fetchImage}/>}
-            { isDell && <DeleleteDialog message="Do you realy wont to delete your account?" onClose={toggleDell} onConfirm={handleDelete}/>}
+            { isDell && <DeleteDialog message="Do you realy wont to delete your account?" onClose={toggleDell} onConfirm={handleDelete}/>}
             { isPassw && <PasswordChange onClose={togglePassw}/> }
             <div className="w-full m-auto space-y-8" >
                 <section className="bg-neutral-200 rounded flex gap-16 p-4">
@@ -164,7 +165,7 @@ function Profile() {
                     <ButtonList items={buttons}/>
                 </section>
             </div> 
-        </>
+        </div>
     )
 }
 

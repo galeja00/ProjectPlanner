@@ -455,6 +455,7 @@ type SelectionItem = {
     image?: string | null,
     load?: number,
     team?: string | null,
+    teamColor?: string | null,
     selected: boolean
 }
 
@@ -463,8 +464,11 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
     const { changeTeam, submitError } = useContext(TaskInfoContext)!; 
     const [ intialLoading, setInitialLoading] = useState<boolean>(false);
 
-    async function fetchTeams() {
-        setInitialLoading(true);
+    async function fetchTeams(isInitialLoading : boolean) {
+        if (isInitialLoading) {
+            setInitialLoading(true);
+        }
+        
         try {
             const res = await fetch(`/api/projects/${task.projectId}/team`, {
                 method: "GET"
@@ -478,7 +482,7 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
         }
         catch (error) {
             console.error(error);
-            submitError(error, fetchTeams);
+            submitError(error, () => fetchTeams(true));
         }
         finally {
             setInitialLoading(false);
@@ -493,13 +497,13 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
     }
 
     useEffect(() => {
-        fetchTeams();
+        fetchTeams(true);
     }, [team])
 
     return (
         <>
             <h4>Teams</h4>
-            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-1">
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-1 overflow-y-auto">
                 { intialLoading ?
                     <InitialLoader/>
                     :
@@ -524,8 +528,11 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
     const { changeSolvers, submitError } = useContext(TaskInfoContext)!;
     const [ intialLoading, setInitialLoading] = useState<boolean>(false);
 
-    async function fetchMembers() {
-        setInitialLoading(true);
+    async function fetchMembers(isInitialLoading : boolean) {
+        if (isInitialLoading) {
+            setInitialLoading(true);
+        }
+        
         try {
             const res = await fetch(`/api/projects/${task.projectId}/members`, {
                 method: "GET"
@@ -540,7 +547,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
         }
         catch (error) {
             console.error(error);
-            submitError(error, fetchMembers);
+            submitError(error, () => fetchMembers(true));
         }
         finally {
             setInitialLoading(false);
@@ -561,7 +568,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
     }
 
     useEffect(() => {
-        fetchMembers();
+        fetchMembers(true);
     }, [solvers]);
 
     const selectItems: SelectionItem[] = members
@@ -574,6 +581,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
                 image: member.image,
                 selected: isSelected,
                 team: member.teamName,
+                teamColor: member.teamColor,
                 load: member.tasksLoad
             };
         });
@@ -585,7 +593,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
                 <h4>Solvers</h4>
                 <button onClick={toggleAll} className="border border-violet-600 rounded px-2 text-violet-600 hover:bg-opacity-40 hover:bg-violet-600 ">{isAll ? "Team" : "All"}</button>
             </div>
-            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-2">
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-2 overflow-y-auto">
                 { intialLoading ?
                     <InitialLoader/>
                     :
@@ -611,7 +619,7 @@ function Selector({ items, team = false, handleSelect } : { items : SelectionIte
                         <li key={item.id} onClick={() => handleSelect(item)} className={`cursor-pointer bg-neutral-200 rounded p-1 flex items-center gap-2 ${item.selected && "outline outline-2 outline-green-500"}`}>
                             { isImage && <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="rounded-full bg-neutral-300"></Image>}
                             <div>{item.name}</div>
-                            { team && item.team && <div className="text-sm"><span className="text-neutral-600 ">team:</span> <TeamBadge name={item.team ?? ""} color={"#7c3aed"}/></div>}
+                            { team && <div className="text-sm flex gap-2"><span className="text-neutral-600 ">team:</span> <TeamBadge name={item.team ?? ""} color={item.teamColor ?? "#7c3aed"}/></div>}
                             <div className="text-sm"><span className="text-sm text-neutral-600">load:</span> {item.load}</div>
                         </li>
                     )
@@ -730,7 +738,7 @@ function SelectButtons({ items, value, changeVal } : { items : SelectType[], val
     }
 
     return (
-        <ul className="flex gap-1"> 
+        <ul className="flex gap-1 "> 
             {
                 items.map(item => (
                     <li key={item.name} id={item.name}>
@@ -770,7 +778,7 @@ function Solvers({ solvers, team} : { solvers : Solver[], team : TeamInfo | null
                     <div>team:</div>{ team && <TeamBadge name={team.name} color={team.color}/> }
                 </div>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-2 h-44 overflow-y-auto">
                 {solvers.map((solver) => {
                     const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";
                     return (

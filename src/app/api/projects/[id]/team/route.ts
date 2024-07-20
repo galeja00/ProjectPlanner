@@ -7,6 +7,7 @@ import { ErrorMessagges } from "@/app/api/error-messages";
 type TeamInfo = {
     id : string,
     name: string,
+    color: string | null,
     members: MemberInfo[],
     taskLoad: number
 }
@@ -70,7 +71,7 @@ export async function GET(req : Request ,{ params } : { params: { id: string } }
                     members.push({ id: info.id, memberId: member.id, name: info.name, surname: info.surname, image: info.image });
                 }
             }
-            teamsInfo.push({ id: team.id, name: team.name, members: members, taskLoad: load });
+            teamsInfo.push({ id: team.id, name: team.name, color: team.color, members: members, taskLoad: load });
         }
         
         return Response.json({ teams: teamsInfo }, { status: 200 }); 

@@ -158,24 +158,26 @@ export default function Settings({ id } : { id : string}) {
     return (
         <>
             {isImgDrop && <DropImage closeDrop={toggleImgDrop} updateImg={updateImg} />}
-            <main className="flex w-2/4 flex-col mx-auto py-14">
-                <Head text="Settings" />
-                <div className="space-y-8">
-                    <section className="bg-neutral-200 p-4 rounded flex gap-8">
-                        <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer" />
-                        <div className="space-y-4">
-                            <Name name={project.name} update={(val: string) => updateVal("name", val)} />
-                        </div>
-                    </section>
-                    <section className="bg-neutral-200 p-4 rounded">
-                        <ul className="space-y-4">
-                            <SettingsItem propertyKey="category" type={ItemType.Text} text="Category" value={project.category ?? ""} updateVal={updateVal} />
-                            <SettingsItem propertyKey="createdAt" type={ItemType.Date} text="Created At" value={formatDate(date)} updateVal={updateVal} />
-                            <SettingsItem propertyKey="done" type={ItemType.Select} text="State" value={state} updateVal={updateVal} options={[ Status.InWork, Status.Done ]} />
-                            <SettingsItem propertyKey="color" type={ItemType.Color} text="Color" value={project.color} updateVal={updateVal} />
-                        </ul>
-                    </section>
-                    <ButtonDel onClick={handleDelete} />
+            <main className="py-14">
+                <div className='max-w-screen-lg w-full mx-auto'>
+                    <Head text="Settings" />
+                    <div className="space-y-8">
+                        <section className="bg-neutral-200 p-4 rounded flex gap-8">
+                            <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer" />
+                            <div className="space-y-4">
+                                <Name name={project.name} update={(val: string) => updateVal("name", val)} />
+                            </div>
+                        </section>
+                        <section className="bg-neutral-200 p-4 rounded">
+                            <ul className="space-y-4">
+                                <SettingsItem propertyKey="category" type={ItemType.Text} text="Category" value={project.category ?? ""} updateVal={updateVal} />
+                                <SettingsItem propertyKey="createdAt" type={ItemType.Date} text="Created At" value={formatDate(date)} updateVal={updateVal} />
+                                <SettingsItem propertyKey="done" type={ItemType.Select} text="State" value={state} updateVal={updateVal} options={[ Status.InWork, Status.Done ]} />
+                                <SettingsItem propertyKey="color" type={ItemType.Color} text="Color" value={project.color} updateVal={updateVal} />
+                            </ul>
+                        </section>
+                        <ButtonDel onClick={handleDelete} />
+                    </div>
                 </div>
             </main>
         </>

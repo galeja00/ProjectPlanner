@@ -12,13 +12,16 @@ import { TagList } from "../components/tags"
 import { useError } from "@/app/components/error-handler"
 
 
+// type for teams and with mebers are in teams
 type TeamInfo = {
     id : string,
     name: string,
+    color: string | null,
     taskLoad: number,
     members: TeamMemberInfo[]
 }
 
+// type for members with are in team
 type TeamMemberInfo = {
     id : string,
     memberId: string,
@@ -27,6 +30,7 @@ type TeamMemberInfo = {
     image : string | null
 }
 
+// information about members with arent in team
 type MemberInfo = {
     id : string,
     memberId: string,
@@ -296,7 +300,7 @@ function MembersColumn({ type, members, handleMove } : { type : ColumnType, memb
             onDragExit={handleOnLeave}
             >
             <h3>{type} Members</h3>
-            <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[30rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-100"}`}>
+            <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[26rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-100"}`}>
                 {
                     members.map((member) => {
                         return ( 
@@ -332,7 +336,8 @@ function convertTeamToMembers(team : TeamInfo ) {
             surname: member.surname, 
             image: member.image,
             teamId: team.id,
-            teamName: team.name
+            teamName: team.name,
+            teamColor: team.color
         }
     ))
     return conv

@@ -1,5 +1,5 @@
 import { useReducer, useState, DragEvent, useRef, ChangeEvent } from "react"
-import { DialogClose } from "./dialog";
+import { Dialog, DialogClose } from "./dialog";
 
 
 // TODO: add some arg for better use
@@ -46,13 +46,13 @@ export default function DropImage({ closeDrop, updateImg } : { closeDrop : () =>
     }
 
     return (
-        <div className="w-full h-full bg-neutral-50 bg-opacity-60 absolute z-50 flex justify-center items-center"
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragExit}
-            onDrop={handleDrop}
-        >
-            <div className={` w-64 h-64 ${isOver ? "bg-violet-600" : "bg-neutral-200"} rounded flex justify-center items-center p-2`}>
-                <div className="w-full h-full border border-neutral-950 border-dashed rounded flex flex-col justify-center items-center relative">
+        <Dialog>
+            <div className={` w-64 h-64 ${isOver ? "bg-violet-600" : "bg-neutral-200"} rounded flex justify-center items-center p-2`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragExit}
+                onDrop={handleDrop}
+            >
+                <div className="w-full h-full border border-neutral-700 border-dashed rounded flex flex-col justify-center items-center relative">
                     <DialogClose handleClose={closeDrop}/>
                     <div>Drop Image <div>Or</div></div>
                     <input type="file" title="" accept="image/png, image/jpeg" hidden ref={inputRef}
@@ -62,6 +62,6 @@ export default function DropImage({ closeDrop, updateImg } : { closeDrop : () =>
                     <p className="text-red-500">{errorMsg}</p>
                 </div>
             </div>
-        </div>
+        </Dialog>
     )
 }

@@ -19,6 +19,7 @@ export type MemberTableInfo = {
     surname: string,
     teamId: string | null,
     teamName: string | null,
+    teamColor: string | null,
     image: string | null,
     tasksLoad: number 
 }
@@ -75,6 +76,7 @@ export async function GET(req : Request, { params } : { params: { id : string }}
                     surname: user.surname,
                     teamId: member.teamId,
                     teamName: team ? team.name : null,
+                    teamColor: team ? team.color : null,
                     tasksLoad: taskLoad
                 });
             } 

@@ -6,8 +6,8 @@ import Nodes from "./nodes";
 
 export default function Page() {
     return (
-        <main className="h-full w-full">
-            <div className="flex w-2/4 flex-col m-auto py-14 space-y-8">
+        <main className="h-full w-full py-14 ">
+            <div className="max-w-screen-lg w-full mx-auto space-y-8">
                 <Head text={"Nodes"}/>
                 <ErrorBoundary>
                     <Nodes/>
