@@ -187,7 +187,7 @@ export default function Backlog({ id } : { id : string }) {
     return (
         <>
             <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups: fetchGroupsProv , openTaskInfo, submitError, projectId: id, collumns: collumns, groups: groups }}>
-                <div className="w-3/4 mx-auto relative">
+                <div className="max-w-screen-lg w-11/12 mx-auto relative">
                     <Head text="Backlog"/>
                     <ListOfGroups groups={groups} />
                     {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}

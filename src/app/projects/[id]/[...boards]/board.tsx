@@ -552,16 +552,19 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
                 toggleEdit();
             }
         }
+        else if (event.key == 'Escape') {
+            toggleEdit();
+        }
     }
     return (
-        <div className='flex gap-2'>
+        <div className='flex gap-2 w-fit'>
             {
                 edit ? 
-                    <input defaultValue={name} type="text" className='w-fit bg-neutral-100 border-b outline-none' onKeyDown={handleKeyDown}></input>
+                    <input defaultValue={name} type="text" className=' w-48 bg-neutral-100 border-b border-neutral-700 outline-none' onKeyDown={handleKeyDown}></input>
                     :
                     <h3 className='w-fit'>{name}</h3>
             }
-            <button onClick={toggleEdit} className='w-fit h-fit rounded hover:bg-neutral-200 p-1' title="edit name" style={ {backgroundColor: edit ? "#0a0a0a" : ""}}>
+            <button onClick={toggleEdit} className=' w-fit h-fit rounded hover:bg-neutral-200 p-1' title="edit name">
                 <Image src="/pencil.svg" alt="more" width={2} height={2} className='w-5 h-5 rounded-full cursor-pointer'></Image>
             </button>
         </div>

@@ -26,7 +26,7 @@ export type Button = {
 export function ButtonWithImg({onClick, alt, image, title} : { onClick: () => void, alt : string, image : string, title : string}) {
     return (
         <div className='w-fit h-full'>
-            <button className='btn-primary'>
+            <button className='btn-primary' onClick={onClick}>
                 <Image src={image} alt={alt} title={title} height={25} width={25} className='h-5 w-5'/>
             </button>
         </div>

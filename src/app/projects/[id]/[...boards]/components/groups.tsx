@@ -19,7 +19,7 @@ enum ColumnType {
 }
 
 // component to add grouups to time table from backlog
-export function AddGroupToTimeTable({ projectId, groups, handleClose } : { projectId : string, groups : TimeTableGroup[], handleClose : () => void }) {
+export function AddGroupToTimeTable({ projectId, groups, handleClose, submitGroups } : { projectId : string, groups : TimeTableGroup[], handleClose : () => void, submitGroups : () => void }) {
     const [ unassignedGroups, setUnassignedGroups ] = useState<GroupBasicInfo[]>([]);
     const [ timetableGroups, setTimetableGroups] = useState<GroupBasicInfo[]>(() =>
         groups.map(g => ({ id: g.id, name: g.name, col: ColumnType.TimeTable }))
@@ -42,6 +42,7 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose } : { proje
             setTimetableGroups(data.groups
                 .filter((group : TasksGroup) => group.timeTableId !== null)
                 .map((group : TasksGroup) => ({ id: group.id, name: group.name, col: ColumnType.TimeTable})));
+            submitGroups();
         }
         catch (error) {
             console.error(error);

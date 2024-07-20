@@ -9,7 +9,7 @@ import { formatDate } from '@/date';
 import { EditTextButton } from '@/app/components/other';
 import { Editor, InputTypes, Selector } from '../components/other-client';
 import { InitialLoader } from '@/app/components/other-client';
-import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler';
+import { useError } from '@/app/components/error-handler';
 
 
 enum Status {
@@ -211,7 +211,6 @@ function SettingsItem({propertyKey, type, text, value, options, updateVal} : Set
     const [isEditing, toggle] = useReducer((isEditing) => !isEditing, false);
 
     function handleSub(val: string) {
-        toggle();
         updateVal(propertyKey, val);
     }
 

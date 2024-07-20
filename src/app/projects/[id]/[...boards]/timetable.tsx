@@ -236,11 +236,11 @@ export default function TimeTable({ id } : { id : string }) {
                 <section className="overflow-x-hidden h-full max-h-full ">
                     <Head text='Time Table'/>
                     <div className="mb-2">
-                        <ButtonWithImg onClick={handleAdd} alt="Add" image="/plus.svg" title="Add Existing Group"/>
+                        <ButtonWithImg onClick={()=>handleAdd()} alt="Add" image="/plus.svg" title="Add Existing Group"/>
                     </div>
                     <Table/>
                 </section>
-                { isAdding && <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding}/>}
+                { isAdding && <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding} submitGroups={fetchGroups}/>}
             </TimeTableContext.Provider>
         </>
     )
@@ -299,7 +299,7 @@ function Table() {
                         <Creator what="Create new group" handleCreate={createGroup}/>
                     </div>
                 </section>
-                <section className=" overflow-x-auto w-4/5 h-max rounded"> 
+                <section className="overflow-x-auto w-4/5 h-max rounded"> 
                     <TimesRanges range={count}/>
                     <GroupsRanges groupsRanges={groupsRanges} updateRanges={updateRanges} count={count}/>
                 </section>

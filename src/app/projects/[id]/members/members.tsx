@@ -216,7 +216,7 @@ function AddDialog({ onClose, id } : { onClose : () => void, id : string }) {
 
     return (
         <Dialog>
-            <search className='p-4 relative h-2/3 w-1/3 bg-neutral-200 rounded flex flex-col gap-4'>
+            <search className='p-4 relative h-2/3 w-1/3 bg-neutral-200 rounded flex flex-col gap-4 '>
                 <DialogClose handleClose={onClose}/>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser} handleChange={handleChange}/>
                 <ListUsers users={results} id={id}/>
@@ -256,7 +256,7 @@ function AddForm(
 // display all finded users
 function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
     return (
-        <ul className='space-y-2'>
+        <ul className='space-y-2 overflow-y-auto'>
             {
                 users.map((user) => (
                     <UsersItem key={user.id} user={user} id={id}/>
@@ -268,7 +268,7 @@ function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
 
 // info about user and function to invite it
 function UsersItem({ user, id } : { user : UserInfo, id : string }) {
-
+    const { submitError } = useError();
     // contact endpoint by fetching to invite user and create notification for him
     async function inviteUser() {
         try {
@@ -286,6 +286,7 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
         } 
         catch (error) {
             console.error(error);
+            submitError(error, inviteUser);
         }
     }
 

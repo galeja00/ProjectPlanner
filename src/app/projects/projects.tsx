@@ -101,7 +101,7 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
                         <></>
                 }
             </div>
-            <ul className='relative flex gap-4 mb-4 w-full h-64 bg-neutral-200 rounded'>
+            <ul className='relative flex mb-4 w-full h-64 bg-neutral-200 rounded gap-2'>
                 {list.map((p, i) => (
                     <ProjectItem key={p.id} proj={p} index={i} vis={[bottom, top]}/>
                 ))}
@@ -118,7 +118,7 @@ function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vi
     } 
     const icon = proj.icon ? `/uploads/project/${proj.icon}` : "/project.svg";
     return (
-        <li key={proj.id} className={`overflow-hidden bg-neutral-100 rounded w-96 h-auto m-2 ${visible}`}>
+        <li key={proj.id} className={`overflow-hidden bg-neutral-100 rounded w-96 h-auto my-2 mx-0 ${visible} ${index == 0 && "ml-2"}`}>
             <div className='absolute w-96 h-10' style={{backgroundColor: proj.color}}></div>
             <Image src={icon} alt="avater" width={50} height={50} className='w-12 h-12 rounded bg-neutral-50 mr-5 text-color cursor-pointer absolute z-10 left-4 top-4'></Image>
             <div className='p-4 mt-16'>
