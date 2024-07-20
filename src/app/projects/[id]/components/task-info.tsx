@@ -585,14 +585,15 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
                 <h4>Solvers</h4>
                 <button onClick={toggleAll} className="border border-violet-600 rounded px-2 text-violet-600 hover:bg-opacity-40 hover:bg-violet-600 ">{isAll ? "Team" : "All"}</button>
             </div>
-            { intialLoading ?
-                <InitialLoader/>
-                :
-                <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-2">
-                    <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
-                </ul>
-            }
-           
+            <ul className="bg-neutral-100 rounded w-full h-[21rem] p-1 space-y-2">
+                { intialLoading ?
+                    <InitialLoader/>
+                    :
+                    
+                        <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
+                    
+                }
+            </ul>
         </>
     )
 }
@@ -610,7 +611,7 @@ function Selector({ items, team = false, handleSelect } : { items : SelectionIte
                         <li key={item.id} onClick={() => handleSelect(item)} className={`cursor-pointer bg-neutral-200 rounded p-1 flex items-center gap-2 ${item.selected && "outline outline-2 outline-green-500"}`}>
                             { isImage && <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="rounded-full bg-neutral-300"></Image>}
                             <div>{item.name}</div>
-                            { team && <div className="text-sm"><span className="text-neutral-600 ">team:</span> <span className="bg-violet-600 bg-opacity-40 rounded border border-violet-600 text-violet-600 px-1">{item.team}</span></div>}
+                            { team && item.team && <div className="text-sm"><span className="text-neutral-600 ">team:</span> <TeamBadge name={item.team ?? ""} color={"#7c3aed"}/></div>}
                             <div className="text-sm"><span className="text-sm text-neutral-600">load:</span> {item.load}</div>
                         </li>
                     )

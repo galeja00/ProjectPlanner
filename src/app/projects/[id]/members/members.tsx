@@ -5,6 +5,7 @@ import { Head } from '../components/other'
 import { Dialog, DialogClose } from '@/app/components/dialog'
 import { InitialLoader } from '@/app/components/other-client'
 import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler'
+import { getImage, ImageTypes } from '@/images'
 
 
 // type for a member 
@@ -290,9 +291,11 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
         }
     }
 
+    const image = getImage(user.image, ImageTypes.User); 
+
     return (
         <li key={user.id} className='bg-neutral-100 rounded p-2 flex w-full'>
-            <Image src="/avatar.svg" alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-400 mr-5 text-color cursor-pointer'></Image>
+            <Image src={image} alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-400 mr-5 text-color cursor-pointer'></Image>
             <div className='w-full'>{user.name} {user.surname}</div>
             <div className='flex w-full flex-row-reverse'>
                 <button className='btn-primary' onClick={inviteUser}>Send</button>

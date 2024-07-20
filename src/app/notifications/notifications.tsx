@@ -6,6 +6,7 @@ import { formatAgo } from "@/date";
 import { ButtonWithText } from "../components/buttons";
 import { ErrorBoundary, useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
+import { getImage, ImageTypes } from "@/images";
 
 
 // type for notification to display it to user
@@ -80,7 +81,6 @@ function NotifiactionsList() {
                         <NotificationsItem key={notif.id} notif={notif} updateNotif={() => fetchNotifications(false)}/>
                     ))
                 }
-                { notifs.length == 0 && <li>Right now you have zero notifications</li>}
             </ul>
         </>
     )
@@ -124,14 +124,15 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
     // formats ago to readeble data for user
     var ago : number = notif.agoInHours;
     var agoText : string = formatAgo(ago);
+    var image : string = getImage(notif.icon, ImageTypes.Project);
 
     return (
         <li className='bg-neutral-200 rounded p-2 w-full flex gap-4 relative'>
-            <Image src={'/project.svg'} alt={''} width={30} height={30} className="bg-neutral-950 rounded w-20 h-fit block mt-auto mb-auto"></Image>
+            <Image src={image} alt={''} width={80} height={80} className="bg-neutral-100 rounded w-20 h-fit block mt-auto mb-auto"></Image>
             <div className="flex flex-col gap-1 w-max h-fit justify-between">
                 <h3 className="w-max">{text}</h3>
                 <p className="w-max">{notif.name}</p>
-                <time className="text-sm text-neutral-400">{notif.agoInHours} {agoText}</time>
+                <time className="text-sm text-neutral-400">{agoText}</time>
             </div>
             <div className="gap-2 flex w-full flex-row justify-end items-end">
                 <ButtonWithText text={"Accept"} type={"primary"} handle={() => handleButtonClick("accept")}/>

@@ -1,7 +1,7 @@
 'use client'
 
-import { signIn } from 'next-auth/react';
-import { FormEvent, useState } from 'react'
+import { signIn, useSession } from 'next-auth/react';
+import { FormEvent, useEffect, useState } from 'react'
 import EmailValidator from 'email-validator';
 import { useRouter } from 'next/navigation';
 import { FormItem, SubmitButton } from '@/app/components/form';
@@ -12,6 +12,12 @@ export default function LoginForm() {
     const [correctEmail, setCorrectEmail] = useState<boolean | null>(null); 
     const [faildMsg, setFaildMsg] = useState<string>("");
     const router = useRouter(); 
+    const { data: session, status } = useSession()
+
+    if (status == "authenticated") {
+        router.push('/');
+    }
+    
 
     // submiting inputs from user to endpoint
     async function handleSubmit(e : FormEvent<HTMLFormElement>) {
@@ -48,15 +54,19 @@ export default function LoginForm() {
                 setFaildMsg("Your password or email is invalid");
                 return;
             }
-            router.push("/");
+            
+            
+            window.location.reload();
         }
         catch (error) {
             setFaildMsg("Somnthing went wrong");
         }
         
     }
+
+
     return (
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8 pb-8 border-b w-96'>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8 pb-8 border-b border-neutral-700 w-96'>
             <FormItem item="Email" type="email" name="email" correct={correctPsw}></FormItem>
             <FormItem item="Password" type="password" name="password" correct={correctEmail}></FormItem>
             <SubmitButton text={"Sign in"}/>
