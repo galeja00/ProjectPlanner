@@ -62,7 +62,7 @@ export function ErrorBoundary({ children }: { children: React.ReactNode}) {
 
 function ErrorPopUp({ error, closeError }: { error: ErrorInfo, closeError : () => void }) {
     return (
-        <div className="fixed bottom-0 right-0 mb-4 mr-4 bg-red-600 bg-opacity-40 border border-red-600 text-red-600 p-4 rounded  space-y-4">
+        <div className="fixed z-50 bottom-0 right-0 mb-4 mr-4 bg-red-600 bg-opacity-40 border border-red-600 text-red-600 p-4 rounded  space-y-4">
             <button className=" absolute top-0 right-0 m-2" onClick={closeError}><img src={'/x.svg'} alt={'close'} className="w-5 h-5"></img></button>
             <p>{error.msg}</p>
             <div className="w-full flex justify-end">

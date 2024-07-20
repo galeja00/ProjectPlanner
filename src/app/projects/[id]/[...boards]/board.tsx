@@ -582,7 +582,7 @@ function MoreButton({ handleClick } : { handleClick : () => void}) {
 
 function MoreMenu({ items } : { items : MoreMenuItem[] }) {
     return (
-        <ul className='absolute w-28 bg-neutral-200 rounded p-2 right-0 top-10 z-50 shadow shadow-neutral-100 space-y-1'>
+        <ul className='absolute w-28 bg-neutral-200 rounded p-2 right-0 top-10 z-20 shadow shadow-neutral-100 space-y-1'>
             {
                 items.map((item) => (
                     <MoreMenuItems key={item.name} item={item}/>
