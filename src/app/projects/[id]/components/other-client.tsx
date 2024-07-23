@@ -20,7 +20,6 @@ export function Name({name, updateName} : {name : string, updateName : (name : s
     }
     
     function handleKeyDown(event : KeyboardEvent<HTMLInputElement>) {
-        //event.preventDefault();
         const inputValue = event.currentTarget.value;
         if (event.key === 'Enter') {
             if (inputValue.length > 0) {
@@ -35,7 +34,7 @@ export function Name({name, updateName} : {name : string, updateName : (name : s
             {
                 isEditing ? 
                     <>
-                        <input type="text" defaultValue={eName} onKeyDown={handleKeyDown} className="bg-neutral-200 outline-none border-b text-xl font-bold w-5/6"></input>
+                        <input type="text" defaultValue={eName} onKeyDown={handleKeyDown} className="bg-neutral-200 outline-none border-b border-neutral-900 text-xl font-bold w-4/6"></input>
                     </>
                     :
                     <>
@@ -65,6 +64,7 @@ export function Editor({ val = "", create, endCreate, type } : { val? : string, 
             if (event.key === 'Enter') {
                 if (inputValue.length > 0) {
                     create(inputValue);
+                    endCreate();
                 }
             } else if (event.key === 'Escape') {
                 endCreate();

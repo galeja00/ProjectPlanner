@@ -12,16 +12,16 @@ export async function GET(req : Request) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize}, { status: 401 });
         }
         const user : User | null = await prisma.user.findFirst({ where: { email: email }});    
         if (!user) {
-            return Response.json({error: "" }, { status: 400 });
+            return Response.json({error: ErrorMessagges.Authorize}, { status: 400 });
         }
         return Response.json({ image: user.image }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "" }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 400 });
     }
 }
 // for submiting new photo/image for user
@@ -29,11 +29,11 @@ export async function POST(req : Request) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ error: ErrorMessagges.Authorize}, { status: 401 });
         }
         const user : User | null = await prisma.user.findFirst({ where: { email: email }});    
         if (!user) {
-            return Response.json({error: "" }, { status: 400 });
+            return Response.json({error: ErrorMessagges.Authorize}, { status: 400 });
         }
         const formData = await req.formData();
         const image = formData.get("image");

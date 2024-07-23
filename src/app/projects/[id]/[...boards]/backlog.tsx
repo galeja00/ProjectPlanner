@@ -565,7 +565,7 @@ function SolverComp({ solver } : { solver : Solver }) {
     const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";
     return ( 
         <li key={solver.id}>
-            <Image alt="Image" src={imgSrc} width={30} height={30} title={`${solver.name} ${solver.name}`} className="rounded-full bg-neutral-300"></Image>
+            <Image alt="Image" src={imgSrc} width={30} height={30} title={`${solver.name} ${solver.name}`} className="rounded-full w-7 h-7 bg-neutral-300"></Image>
         </li>
     )
 }

@@ -151,7 +151,7 @@ function TeamsTable({ teams, handleDelete, openSettings  } : { teams : TeamInfo[
                 <tr className='py-2 px-3 grid grid-cols-10 gap-2 justify-items-left items-center'>
                     <th className='w-fit col-span-2'>Name</th>
                     <th className="w-fit col-span-3">Members</th>
-                    <th className='w-fit col-span-2'>Count Of Members</th>
+                    <th className='w-fit col-span-2'>Member Count</th>
                     <th className='w-fit col-sapn-2'>Task Load</th>
                     <th></th>
                 </tr>
@@ -203,7 +203,7 @@ function Members({ members } : { members : TeamMemberInfo[] }) {
                         img = `/uploads/user/${member.image}`
                     }
                     return (
-                        <li key={member.id}><Image title={`${member.name} ${member.surname}`} src={img} height={30} width={30} alt="member" className="rounded-full w-6 h-6"/></li>
+                        <li key={member.id}><Image title={`${member.name} ${member.surname}`} src={img} height={30} width={30} alt="member" className="rounded-full bg-neutral-300 w-7 h-7"/></li>
                     )
                 })
             }
