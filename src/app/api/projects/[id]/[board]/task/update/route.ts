@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { ProjectMember, Task } from "@prisma/client";
 import { prisma } from "@/db";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // update propertys data of task
 export async function POST(req : Request, { params } : { params : { id : string }}) {

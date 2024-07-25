@@ -1,7 +1,7 @@
 import { prisma } from "@/db";
 import { authorize, getUserId } from "@/app/api/static";
 import { ProjectInvite } from "@prisma/client";
-import { ErrorMessagges } from "../../error-messages";
+import { ErrorMessagges } from "../../../../error-messages";
 
 // return all project invites
 export async function GET(req : Request) {

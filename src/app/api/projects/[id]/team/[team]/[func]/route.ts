@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { Team } from "@prisma/client";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // funcs with can handle this REST-APi endpoints
 enum Funcs {

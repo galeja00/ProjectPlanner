@@ -5,7 +5,7 @@ import { getMember } from "../static";
 import { unassigned } from "@/config";
 import { Group } from "next/dist/shared/lib/router/utils/route-regex";
 import { BoardsTypes } from "./board";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 export type BoardTasksColumn = {
     id : string,

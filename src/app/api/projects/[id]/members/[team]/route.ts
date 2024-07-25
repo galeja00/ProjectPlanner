@@ -1,9 +1,9 @@
 import { ProjectMember } from "@prisma/client";
-import { Load, MemberTableInfo } from "../route"
+import { MemberTableInfo } from "../route"
 import { getMember } from "../../static";
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // response with all members of team
 export async function GET(req : Request, { params } : { params: { id : string, team : string }}) {
@@ -49,7 +49,8 @@ export async function GET(req : Request, { params } : { params: { id : string, t
                     surname: user.surname,
                     teamId: member.teamId,
                     teamName: team ? team.name : null,
-                    tasksLoad: Load.low 
+                    teamColor: team ? team.color : null,
+                    tasksLoad: 0
                 });
             } 
         }

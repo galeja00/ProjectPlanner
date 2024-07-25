@@ -2,7 +2,7 @@ import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { BoardsTypes } from "../../board";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // add already existed group to timetable (possible to add other board)
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {

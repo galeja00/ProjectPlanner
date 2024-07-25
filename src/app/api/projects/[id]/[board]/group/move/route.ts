@@ -4,7 +4,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { BoardsTypes } from "../../board";
 import { group } from "console";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 type Range = {
     start : number,
@@ -51,15 +51,16 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
 
         let prevG = groups.find((g) => g.id == id);
-        if (!prevG) {
+        if (prevG == undefined) {
             return Response.json({ error: "This Group don't exist."}, { status: 400 });
         }
         
         let mov = newVal > prevG.position ? -1 : 1;
         
         let searchRange = createRange(newVal, prevG.position);
+
         const moveGroups = groups
-            .filter(g => isBetweenRangeInclude(searchRange, g.position) && g.id !== prevG.id)
+            .filter(g => isBetweenRangeInclude(searchRange, g.position) && prevG && g.id !== prevG.id)
             .map(g => ({
                 ...g,
                 position: g.position + mov

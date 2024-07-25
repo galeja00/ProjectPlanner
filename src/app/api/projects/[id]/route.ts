@@ -5,6 +5,7 @@ import { options } from "../../auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { authorize } from "../../static";
 import { getMember } from "./static";
+import { ErrorMessagges } from "../../../../error-messages";
 
 export async function GET(req : Request, { params } : { params: { id: string } }) {
     try {
@@ -42,7 +43,7 @@ export async function GET(req : Request, { params } : { params: { id: string } }
         return Response.json({ message: "succes", project: project}, { status: 200 });
     } 
     catch (error) {
-        return Response.json({ error: error }, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
     
 }

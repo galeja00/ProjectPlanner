@@ -2,7 +2,7 @@ import { Project, ProjectInvite } from "@prisma/client";
 import { prisma } from "@/db";
 import { DateTime } from "next-auth/providers/kakao";
 import { authorize, getUserId } from "../../static";
-import { ErrorMessagges } from "../../error-messages";
+import { ErrorMessagges } from "../../../../error-messages";
 
 type Notification = {
     id : string,

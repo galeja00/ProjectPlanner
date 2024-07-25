@@ -4,6 +4,7 @@ import { prisma } from "@/db";
 import { authorize } from "../static";
 import { Node } from "@prisma/client";
 import { NodeInfo } from "./static";
+import { ErrorMessagges } from "@/error-messages";
 
 
 // response with all nodes user have
@@ -54,7 +55,7 @@ export async function GET(req : Request) {
         return Response.json({ nodes: resNodes }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: error }, { status: 500 })
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 })
     }
     
 } 

@@ -3,7 +3,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../static";
 import { prisma } from "@/db";
 import { ProjectInvite, ProjectMember } from "@prisma/client";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // delete team from project/database
 export async function POST(req : Request, { params } : { params: { id : string }}) {

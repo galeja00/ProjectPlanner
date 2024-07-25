@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { prisma } from "@/db";
 import { Board, TaskColumn } from "@prisma/client";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // return data abou collumns in project
 export async function POST(req : Request, { params } : { params: { id : string }}) {

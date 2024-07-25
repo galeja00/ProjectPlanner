@@ -115,8 +115,8 @@ export function Selector({ val, options, select, endSelect } : { val : string ,o
         <div className="rounded flex gap-2 ">
             <select className=" bg-neutral-200 border-neutral-900 outline-none border-b w-full" onChange={handleSelect}>
             {
-                options.map((o) =>(
-                    <option value={o}>{o}</option>
+                options.map((o, i) =>(
+                    <option key={i} value={o}>{o}</option>
                 ))
             }
             </select>

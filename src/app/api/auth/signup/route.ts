@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hash } from 'bcrypt';
 import { prisma } from '@/db'
+import { ErrorMessagges } from "../../../../error-messages";
 
 type UserInputs = {
     email : string,
@@ -40,6 +41,6 @@ export async function POST(request : Request) {
     }
     catch (e) {
         console.error(e);
-        return NextResponse.json({ massage: "Somthing went wrong"}, { status: 400 });
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

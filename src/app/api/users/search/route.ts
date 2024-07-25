@@ -1,7 +1,7 @@
 import { prisma } from "@/db";
 import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/options";
-import { ErrorMessagges } from "../../error-messages";
+import { ErrorMessagges } from "../../../../error-messages";
 
 enum SearchTypes {
     Id = "id",

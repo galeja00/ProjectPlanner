@@ -3,7 +3,7 @@ import { options } from "../../auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { authorize } from "../../static";
 import fs from "fs"
-import { ErrorMessagges } from "../../error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // return data about user
 export async function GET(req : Request) {

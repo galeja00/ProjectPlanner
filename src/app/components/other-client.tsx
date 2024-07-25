@@ -1,5 +1,6 @@
 "use client"
 import { LoadingOval } from "@/app/components/other"
+import { Dialog } from "./dialog"
 
 
 export function InitialLoader() {
@@ -9,3 +10,4 @@ export function InitialLoader() {
         </div>
     )
 }
+

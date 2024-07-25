@@ -1,9 +1,8 @@
 import { prisma } from "@/db";
-import { Backlog, Board, Kanban, ProjectMember, Task, TaskColumn, TasksGroup, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { BoardsTypes } from "../../board";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // remove group from timetable
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {

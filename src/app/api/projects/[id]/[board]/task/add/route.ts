@@ -4,10 +4,9 @@ import { Task, TaskColumn, TasksGroup, TaskSolver } from "@prisma/client";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
 import { BoardsTypes, isDoneCol } from "../../board";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
-//TODO: diff board and backlog in create
-//TODO: refactor
+
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {
     try {
         

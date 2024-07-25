@@ -218,7 +218,7 @@ export default function TimeTable({ id } : { id : string }) {
           setCurrentDate(new Date());
         }, 1000 * 60 * 60); // Update every hour
         return () => clearInterval(interval);
-    }, [groups]);
+    }, []);
 
     // init fetch of data
     useEffect(() => { fetchGroups() }, []);
@@ -259,7 +259,7 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
 // default component to convert groups and devide to smaller components for bigger abstraction
 function Table() {
     const { createGroup, updateGroups, currentDate, groups, projectStart } = useContext(TimeTableContext)!;
-    const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(new Array(groups.length));
+    const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(convertGroupsToRanges(groups, projectStart));
     const [ count , setCount ] = useState<number>(80); // count - number of weeks displayed on timetable
 
     function updateRanges(ranges : GroupRange[]) {
@@ -275,7 +275,7 @@ function Table() {
     
     // convert group to GroupRange on every update on group or in init phase
     useEffect(() => {
-        const newRanges : GroupRange[] = new Array(groups.length);
+        /*const newRanges : GroupRange[] = new Array(groups.length);
         let i = 0;
         while (i < groupsRanges.length) {
             const newR = convertGroupToRange(groups[i], projectStart);
@@ -285,9 +285,9 @@ function Table() {
                 newRanges[i] = groupsRanges[i];
             }
             i++;
-        }
-        setGroupsRanges([...newRanges]);
-    }, [groups]);
+        }*/
+        setGroupsRanges(convertGroupsToRanges(groups, projectStart));
+    }, [groups, currentDate]);
 
     return (
         <>
@@ -517,7 +517,6 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
     // handle and convert date to range for edit of len of GroupRange
     function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
         event.preventDefault();
-        console.log(event.currentTarget.value);
         let date = new Date(event.currentTarget.value);
         let val = getDiffInDays(projectStart, date);
         if (isNaN(val) || val < 0) {
@@ -534,7 +533,7 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
         }
         ranges[rangeInfo.index] = rangeInfo.groupRange;
         setLen(rangeInfo.groupRange.range.end - rangeInfo.groupRange.range.start)
-        updateRanges(ranges);
+        updateRanges([...ranges]);
     }
 
 
@@ -712,6 +711,19 @@ function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange 
     return null;
 }
 
+function convertGroupsToRanges(groups : TimeTableGroup[], projectStart : Date) : GroupRange[] {
+    const newRanges : GroupRange[] = new Array(groups.length);
+    let i = 0;
+    while (i < groups.length) {
+        const newR = convertGroupToRange(groups[i], projectStart);
+        if (newR) {
+            newRanges[i] = newR;
+        } 
+        i++;
+    }
+    return newRanges;
+}
+
 // from Range update Group dates < startAt, deadlineAt >
 function updateGroupDates(group : TimeTableGroup, range : Range, start : Date) : TimeTableGroup {
     const newDates = convertRangeToDates(range, start); 
@@ -719,6 +731,8 @@ function updateGroupDates(group : TimeTableGroup, range : Range, start : Date) :
     const endAt = newDates.end;
     return { id: group.id, timeTableId: group.timeTableId, name: group.name, startAt: startAt, deadlineAt: endAt, position: group.position };
 }
+
+
 
 // converting number in Range to actual Date
 function convertRangeToDates(range : Range, start : Date) : DateRange {
@@ -735,3 +749,4 @@ function isEqualRanges(a : Range, b : Range) {
 function convertTouchToPos(event : TouchEvent) : Position {
     return { x: event.touches[0].clientX, y: event.touches[0].clientY }
 }
+

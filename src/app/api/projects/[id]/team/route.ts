@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../static";
 import { Team } from "@prisma/client";
 import { prisma } from "@/db";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 type TeamInfo = {
     id : string,
@@ -21,7 +21,6 @@ type MemberInfo = {
 }
 
 
-// TODO: upgreade code to be better optimalized
 export async function GET(req : Request ,{ params } : { params: { id: string } }) {
     try {
         const email = await authorize(req);

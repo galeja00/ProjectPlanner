@@ -7,7 +7,7 @@ import sharp, { Sharp } from "sharp";
 import { randomUUID } from "crypto";
 import fs from 'fs';
 import { Project } from "@prisma/client";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // save submited image on server and save path to DB
 export async function POST(req : Request, { params } : { params: { id : string }}) {
@@ -53,7 +53,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
             const imageBuffer : Buffer = Buffer.from(fileData);
             const imageSharp : Sharp = sharp(imageBuffer);
 
-            const webpData : Buffer = await imageSharp.webp().toBuffer();
+            const webpData = await imageSharp.webp().toBuffer();
 
             const name = randomUUID() + ".webp";
             const filePath = `${pathToImages}project/${name}`; 
@@ -71,7 +71,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
 
             return Response.json({ message: "Successful image uploud", icon: upProject.icon }, { status: 200 });
         }
-        return Response.json({ error: ErrorMessagges.BadRequest}, {status: 400});
+        return Response.json({ error: ErrorMessagges.BadRequest }, {status: 400});
 
     }
     catch (error) {

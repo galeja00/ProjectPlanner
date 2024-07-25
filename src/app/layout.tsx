@@ -2,7 +2,6 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Menu from './components/menu'
-import { ThemeProvider } from './context/theme'
 
 
 const inter = Inter({ subsets: ['latin'], weight: [ "600", "800" ]});

@@ -4,6 +4,7 @@ import { prisma } from "@/db";
 
 import { Node } from "@prisma/client";
 import { NodeInfo } from "../../static";
+import { ErrorMessagges } from "@/error-messages";
 
 // get all nodes for one task
 export async function GET(req : Request, { params } : { params: { taskId: string } })  {
@@ -55,7 +56,7 @@ export async function GET(req : Request, { params } : { params: { taskId: string
         return Response.json({ nodes: resNodes }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: error }, { status: 500 })
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 })
     }
     
 } 

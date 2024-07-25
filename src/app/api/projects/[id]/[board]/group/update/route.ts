@@ -1,7 +1,7 @@
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // update on protperty value of group
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {
@@ -13,7 +13,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: ErrorMessagges.BadRequest }, { status: 400 });
+            return Response.json({ error: ErrorMessagges.MemberProject}, { status: 400 });
         }
 
         const { id, newVal ,key }  = await req.json();
@@ -35,6 +35,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: "Somthing went wrong" }, { status: 500 });
+        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
     }
 }

@@ -3,7 +3,7 @@ import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { authorize } from "@/app/api/static";
 import { movAwayColumnIndexes,movInColumnIndexes, movToColumnIndexes } from "../static";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // move task between to task columns and set indexes 
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {

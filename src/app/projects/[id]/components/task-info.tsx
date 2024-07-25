@@ -2,20 +2,17 @@
 
 import { useEffect, useReducer, useState, ChangeEvent, createContext, useContext } from "react";
 import Image from 'next/image' 
-import { Task, Ranking, Team, ProjectMember } from "@prisma/client";
+import { Task, Ranking } from "@prisma/client";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { Solver } from "@/app/api/projects/[id]/task/[taskId]/[func]/route";
 import { Name } from "./other-client";
-import { TagList } from "./tags";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { MemberTableInfo } from "@/app/api/projects/[id]/members/route";
 import { LoadingOval } from "@/app/components/other";
 import { TeamBadge } from "./other";
-import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
+import { useError } from "@/app/components/error-handler";
 import { NodeInfo } from "@/app/api/nodes/static";
-import { FormItem, SubmitButton } from "@/app/components/form";
 import { NoteComponent, NoteCreator } from "@/app/notes/notes";
-import { formatAgo } from "@/date";
 import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from "@/app/components/buttons";
 import { InitialLoader } from "@/app/components/other-client";
 

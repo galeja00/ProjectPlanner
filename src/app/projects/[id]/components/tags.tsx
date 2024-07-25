@@ -8,14 +8,14 @@ import { DateTime } from "next-auth/providers/kakao";
 // not implemented 
 // future function in app
 // for seraching and filtering in teams and tasks
-
+/*
 type Tag = {
     id : string,
     name : string,
     color : string,
     taskId : string | null,
     teamId : string | null,
-    createdAt : DateTime
+    createdAt : Date
 }
 
 
@@ -127,3 +127,4 @@ function TagElement({ tag, handleDeleteTag } : { tag : Tag, handleDeleteTag : (t
         </li>
     )
 }
+*/    

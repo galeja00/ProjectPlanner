@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../../static";
 import { prisma} from "@/db";
 import { TaskSolver } from "@prisma/client";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 export async function POST(req : Request, { params } : { params : { id : string }}) {
     try {

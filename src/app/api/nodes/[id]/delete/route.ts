@@ -33,7 +33,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
         return Response.json({ message: `Succefully deleted node` }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 })
+        return Response.json({ error: "Somthing wen't wrong on server"}, { status: 500 })
     }
     
 } 

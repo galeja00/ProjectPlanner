@@ -1,14 +1,10 @@
 "use client"
 
-import { Task, Team } from "@prisma/client"
-import { Component, useEffect, useReducer, useState } from "react"
+import { useEffect, useReducer, useState } from "react"
 import { Dialog, DialogClose } from "@/app/components/dialog"
-import { FormItem } from "@/app/components/form"
 import Image from "next/image"
-
 import { TeamBadge } from "../components/other"
 import { Name } from "../components/other-client"
-import { TagList } from "../components/tags"
 import { useError } from "@/app/components/error-handler"
 
 

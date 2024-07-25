@@ -46,7 +46,7 @@ export function ButtonSideText({ text, image, onClick } : { text : string, image
             <button onClick={onClick}>
                 <Image src={image} alt={text} width={10} height={10} className='w-7 h-7 rounded text-neutral-900 bg-neutral-100 cursor-pointer hover:bg-violet-600 hover:bg-opacity-60 border hover:border-violet-600'></Image>
             </button>
-            <p className='text-neutral-400 text-sm'>{text}</p>
+            <p className='text-neutral-600 text-sm'>{text}</p>
         </div>
     )
 }

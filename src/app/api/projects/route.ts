@@ -3,7 +3,7 @@ import { options } from '../auth/[...nextauth]/options'
 import { prisma } from '@/db'
 import { Board, Project, TaskColumn, User } from "@prisma/client";
 import { getServerSession } from "next-auth/next"
-import { ErrorMessagges } from "../error-messages";
+import { ErrorMessagges } from "../../../error-messages";
 
 // response with all projects where usere is member
 export async function GET(req : Request) {

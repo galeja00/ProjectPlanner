@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../static";
 import { Team } from "@prisma/client";
 import { prisma } from "@/db";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 type MemberInfo = {
     id : string,

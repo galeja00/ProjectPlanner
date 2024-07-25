@@ -1,7 +1,7 @@
 
 import { authorize, getUserId } from "../../../static";
 import { prisma } from "@/db";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 
 export async function GET(req : Request, { params } : { params : { id : string }}) {

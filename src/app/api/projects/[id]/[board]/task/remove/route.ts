@@ -4,7 +4,7 @@ import { authorize } from "@/app/api/static";
 import { Task } from "@prisma/client";
 import { movAwayColumnIndexes, movInColumnIndexes } from "../static";
 import { BoardsTypes } from "../../board";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 
 // remove task from Board Col

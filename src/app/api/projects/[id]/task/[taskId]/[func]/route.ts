@@ -2,7 +2,7 @@ import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { prisma } from "@/db";
 import { ProjectMember, Task, TaskSolver } from "@prisma/client";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 
 enum TaskFunctions {

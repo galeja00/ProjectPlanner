@@ -2,7 +2,7 @@ import { prisma } from "@/db";
 import { TasksGroup } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // delete group of tasks from project
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {

@@ -6,7 +6,7 @@ import sharp, { Sharp } from 'sharp';
 import { prisma } from "@/db";
 import { User } from "@prisma/client";
 import { unlink } from "fs/promises";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 export async function GET(req : Request) {
     try {

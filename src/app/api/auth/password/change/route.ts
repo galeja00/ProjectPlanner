@@ -1,3 +1,4 @@
+import { ErrorMessagges } from "@/error-messages";
 import { authorize } from "@/app/api/static";
 import { prisma } from "@/db";
 import { hash } from "bcrypt";
@@ -32,6 +33,6 @@ export async function POST(req : Request) {
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: "" }, {status: 400})
+        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

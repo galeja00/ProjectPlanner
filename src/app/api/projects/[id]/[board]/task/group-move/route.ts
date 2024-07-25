@@ -2,7 +2,7 @@ import { prisma } from "@/db";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
 import { unassigned } from "@/config";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // move task between groups
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {

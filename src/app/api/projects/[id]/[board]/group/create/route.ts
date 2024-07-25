@@ -3,7 +3,7 @@ import { Backlog, Board, Kanban, ProjectMember, Task, TaskColumn, TasksGroup, Us
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
 import { BoardsTypes } from "../../board";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // creator of new group in backlog
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {

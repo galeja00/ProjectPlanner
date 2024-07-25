@@ -4,7 +4,7 @@ import { Task, TaskColumn, TasksGroup, TaskSolver } from "@prisma/client";
 import { Session, User, getServerSession } from "next-auth";
 import { getMember } from "../../../static";
 import { authorize } from "@/app/api/static";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // create new column on Board to insert tasks
 export async function POST(req : Request, { params } : { params: { id: string, board: string } } ) {

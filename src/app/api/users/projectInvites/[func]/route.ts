@@ -1,4 +1,4 @@
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 import { authorize, getUserId } from "@/app/api/static";
 import { prisma } from "@/db";
 import { ProjectInvite } from "@prisma/client";

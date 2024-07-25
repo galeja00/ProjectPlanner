@@ -3,7 +3,7 @@ import { prisma } from "@/db";
 import { Project, TasksGroup, TimeTable } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
-import { ErrorMessagges } from "@/app/api/error-messages";
+import { ErrorMessagges } from "@/error-messages";
 
 // response with data about group dates(startAt, deadlineAt)
 export async function POST(req : Request, { params } : { params: { id: string, board: string} } ) {

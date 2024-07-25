@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "@/db";
 import { getMember } from "../static";
 import { Project } from "@prisma/client";
+import { ErrorMessagges } from "@/error-messages";
 
 // update project date
 export async function POST(req : Request, { params } : { params: { id: string } }) {
@@ -35,7 +36,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
         return Response.json({ project: updateProj }, { status: 200 });
     } 
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ status: 500 });
     }
     
 }
