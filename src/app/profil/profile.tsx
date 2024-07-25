@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useReducer, useState, useEffect, KeyboardEvent, FormEvent } from "react"
 import DropImage from "../components/drop-image";
 import { User } from "@prisma/client";
-import {DeleteDialog, EditTextButton } from "../components/other";
+import { DeleteDialog, EditTextButton } from "../components/other";
 import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react";
 import { FormItem, SubmitButton } from "../components/form";

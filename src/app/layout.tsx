@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Menu from './components/menu'
 
-
 const inter = Inter({ subsets: ['latin'], weight: [ "600", "800" ]});
 
 export const metadata: Metadata = {

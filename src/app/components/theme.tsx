@@ -3,9 +3,9 @@
 
 import React, { createContext, useState, useEffect } from 'react';
 
-//const ThemeContext = createContext();
+// const ThemeContext = createContext();
 // this componenet is ofr chang of theme in application
-// no is not implmented
+// now is not implmented - future function
 interface ThemeContextType {
     theme : Theme,
     toggleTheme : () => void

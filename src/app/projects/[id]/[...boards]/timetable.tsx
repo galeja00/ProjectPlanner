@@ -275,17 +275,6 @@ function Table() {
     
     // convert group to GroupRange on every update on group or in init phase
     useEffect(() => {
-        /*const newRanges : GroupRange[] = new Array(groups.length);
-        let i = 0;
-        while (i < groupsRanges.length) {
-            const newR = convertGroupToRange(groups[i], projectStart);
-            if (newR) {
-                newRanges[i] = newR;
-            } else {
-                newRanges[i] = groupsRanges[i];
-            }
-            i++;
-        }*/
         setGroupsRanges(convertGroupsToRanges(groups, projectStart));
     }, [groups, currentDate]);
 

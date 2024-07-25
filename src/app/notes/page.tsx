@@ -2,7 +2,7 @@
 
 import { ErrorBoundary } from "../components/error-handler";
 import { Head } from "../projects/[id]/components/other";
-import Nodes from "./notes";
+import Notes from "./notes";
 
 export default function Page() {
     return (
@@ -10,7 +10,7 @@ export default function Page() {
             <div className="max-w-screen-lg w-full mx-auto space-y-8">
                 <Head text={"Notes"}/>
                 <ErrorBoundary>
-                    <Nodes/>
+                    <Notes/>
                 </ErrorBoundary>
             </div>
         </main>
