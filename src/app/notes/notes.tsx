@@ -14,7 +14,7 @@ import { formatAgo } from "@/date";
 // main component
 export default function Notes() {
     const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);  // toggler between modes
-    const [ nodes, setNodes ] = useState<NodeInfo[]>([]); // state of every node user have
+    const [ notes, setNodes ] = useState<NodeInfo[]>([]); // state of every node user have
     const { submitError } = useError(); 
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
 
@@ -54,13 +54,13 @@ export default function Notes() {
                 const data = await res.json(); 
                 throw new Error(data.error);
             }
-            const newNodes : NodeInfo[] = [];
-            for (let node of nodes) {
-                if (node.id != id) {
-                    newNodes.push(node);
+            const newNotes : NodeInfo[] = [];
+            for (let note of notes) {
+                if (note.id != id) {
+                    newNotes.push(note);
                 }
             }
-            setNodes(newNodes);
+            setNodes(newNotes);
         }
         catch (error) {
             console.error(error);
@@ -88,8 +88,8 @@ export default function Notes() {
                 <CreateButton text="Create new node" onClick={toggleCreator} />
                 <ul className="grid grid-cols-2 gap-2">
                     {
-                        nodes.map((node) => (
-                            <NoteComponent key={node.id} node={node} deleteNode={deleteNode} />
+                        notes.map((note) => (
+                            <NoteComponent key={note.id} note={note} deleteNode={deleteNode} />
                         ))
                     }
                 </ul>
@@ -99,7 +99,7 @@ export default function Notes() {
     )
 }
 
-// open dialog where user can create his personal nodes
+// open dialog where user can create his personal notes
 function NoteDialog({ onCreate, onClose } : { onCreate : () => void, onClose : () => void }) {
     return (
         <Dialog>
@@ -120,7 +120,7 @@ export function NoteCreator({ onCreate, selector = false, head = true, taskId = 
         setDesc(event.target.value);
     }
     
-    // submiting new user node to endpoint
+    // submiting new user note to endpoint
     async function handleSubmit(event : FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget); 
@@ -170,15 +170,15 @@ function SelectorTask() {
 
 
 // display info about node
-export function NoteComponent({ node, deleteNode, colorMode = 200 } : { node : NodeInfo, deleteNode : (id : string) => void, colorMode? : number }) {
-    const ago: number = node.createdAgo;
+export function NoteComponent({ note, deleteNode, colorMode = 200 } : { note : NodeInfo, deleteNode : (id : string) => void, colorMode? : number }) {
+    const ago: number = note.createdAgo;
     const agoText: string = formatAgo(ago);
 
-    const buttons : Button[] = [{ onClick: () => deleteNode(node.id), img: "/x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
+    const buttons : Button[] = [{ onClick: () => deleteNode(note.id), img: "/x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
     return ( 
-        <li key={node.id} className={`bg-neutral-${colorMode} rounded min-h-[8rem]`}>
+        <li key={note.id} className={`bg-neutral-${colorMode} rounded min-h-[8rem]`}>
             <div className="flex justify-between border-b border-neutral-900 p-4 items-center">
-                <h3>{node.name}</h3>
+                <h3>{note.name}</h3>
                 <div className="flex gap-4">
                     <div className="text-neutral-600">
                         {agoText}
@@ -187,7 +187,7 @@ export function NoteComponent({ node, deleteNode, colorMode = 200 } : { node : N
                 </div>
                 
             </div>
-            <p className="p-4">{node.text}</p>
+            <p className="p-4">{note.text}</p>
         </li>
     )
 }

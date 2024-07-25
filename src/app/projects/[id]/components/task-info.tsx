@@ -351,7 +351,7 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
 
 
 function Notes({ task } : { task : Task }) {
-    const [ nodes, setNodes ] = useState<NodeInfo[]>([]); 
+    const [ notes, setNodes ] = useState<NodeInfo[]>([]); 
     const [ isCreating, toggleCreating ]= useReducer(isCreating => !isCreating, false); 
     const { submitError } = useContext(TaskInfoContext)!;
 
@@ -385,13 +385,13 @@ function Notes({ task } : { task : Task }) {
                 const data = await res.json(); 
                 throw new Error(data.error);
             }
-            const newNodes : NodeInfo[] = [];
-            for (let node of nodes) {
-                if (node.id != id) {
-                    newNodes.push(node);
+            const newNotes : NodeInfo[] = [];
+            for (let note of notes) {
+                if (note.id != id) {
+                    newNotes.push(note);
                 }
             }
-            setNodes(newNodes);
+            setNodes(newNotes);
         }
         catch (error) {
             console.error(error);
@@ -422,8 +422,8 @@ function Notes({ task } : { task : Task }) {
             <ButtonSideText text={"Create new Node"} image={"/plus.svg"} onClick={toggleCreating}/>
             <ul className=" grid auto-cols-fr gap-2">
                 {
-                    nodes.map((node) => (
-                        <NoteComponent key={node.id} node={node} deleteNode={deleteNode} colorMode={100}/>
+                    notes.map((note) => (
+                        <NoteComponent key={note.id} note={note} deleteNode={deleteNode} colorMode={100}/>
                     ))
                 }
             </ul>  
