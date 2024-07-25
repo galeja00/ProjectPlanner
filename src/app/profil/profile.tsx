@@ -9,10 +9,11 @@ import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react";
 import { FormItem, SubmitButton } from "../components/form";
 import { Dialog, DialogClose } from "../components/dialog";
-import { ErrorState, useError } from "../components/error-handler";
+import { useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
 import { ArrayButtons, Button, ButtonItems, ButtonList, ButtonType, Lighteness } from "../components/buttons";
 import { ErrorBoundary } from "../components/error-handler";
+
 enum UpdateTypes {
     Name = "Name",
     Email = "Email"
@@ -44,7 +45,6 @@ function Profile() {
             if (!res.ok) {
                 throw new Error(data.error);
             }
-            console.log(data);
             setUser(data.user);
         }
         catch (error) {
@@ -153,7 +153,7 @@ function Profile() {
             { isPassw && <PasswordChange onClose={togglePassw}/> }
             <div className="w-full m-auto space-y-8" >
                 <section className="bg-neutral-200 rounded flex gap-16 p-4">
-                    <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover: w-32 h-32 cursor-pointer"></Image>
+                    <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover: w-32 h-32 cursor-pointer object-cover"></Image>
                     <div className="flex flex-col gap-4">
                         <Name user={user} handleUpdate={handleUpdateAcc}/>
                         <Email user={user}/>
@@ -241,7 +241,6 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
         const password = formData.get("password");
         const repeatpassword = formData.get("repeatpassword");
         try {
-            console.log(password, repeatpassword);
             const res = await fetch("/api/auth/password/change" , {
                 method: "POST", 
                 body: JSON.stringify({

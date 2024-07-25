@@ -6,10 +6,11 @@ import { useEffect, useReducer, useState } from 'react';
 import DropImage from '@/app/components/drop-image';
 import { Project } from '@prisma/client';
 import { formatDate } from '@/date';
-import { EditTextButton } from '@/app/components/other';
+import { DeleteDialog, EditTextButton } from '@/app/components/other';
 import { Editor, InputTypes, Selector } from '../components/other-client';
 import { InitialLoader } from '@/app/components/other-client';
 import { useError } from '@/app/components/error-handler';
+import { ButtonWithText } from '@/app/components/buttons';
 
 
 enum Status {
@@ -28,6 +29,7 @@ enum ItemType {
 export default function Settings({ id } : { id : string}) {
     const router = useRouter();
     const [ isImgDrop, toggleImgDrop ] = useReducer(isImgDrop => !isImgDrop, false); // state if dialog for drop img is open or not
+    const [ isDell, toggleDell ] = useReducer(isDell => !isDell, false);
     const [ project, setProject ] = useState<Project | null>(null); //date of project
     const { submitError } = useError() //error state
 
@@ -158,6 +160,7 @@ export default function Settings({ id } : { id : string}) {
     return (
         <>
             {isImgDrop && <DropImage closeDrop={toggleImgDrop} updateImg={updateImg} />}
+            {isDell && <DeleteDialog message="Do you wan't delete this project" onConfirm={handleDelete} onClose={toggleDell}/>}
             <main className="py-14">
                 <div className='max-w-screen-lg w-full mx-auto'>
                     <Head text="Settings" />
@@ -176,7 +179,7 @@ export default function Settings({ id } : { id : string}) {
                                 <SettingsItem propertyKey="color" type={ItemType.Color} text="Color" value={project.color} updateVal={updateVal} />
                             </ul>
                         </section>
-                        <ButtonDel onClick={handleDelete} />
+                        <ButtonWithText text={"Delete"} handle={toggleDell} type='destructive'/>
                     </div>
                 </div>
             </main>

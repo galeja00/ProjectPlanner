@@ -4,7 +4,7 @@ import { Head } from "../components/other";
 import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, TouchEvent, useRef, RefObject, ChangeEvent } from "react";
 import { Creator } from "./components/creator";
 import { Dialog, DialogClose } from "@/app/components/dialog";
-import { fromDayToMills, getDiffInDays } from "@/date";
+import { formatDate, fromDayToMills, getDiffInDays } from "@/date";
 import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
@@ -345,7 +345,7 @@ function TimesRanges({ range } : { range : number }) {
 function DisplayDate({ date } : { date : Date}) {
     return (
         <div className="w-fit text-sm text-neutral-600">
-            {date.getDate()}.{date.getMonth() + 1}.{date.getFullYear()}
+            {formatDate(date)}
         </div>
     )
 }
@@ -517,6 +517,7 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
     // handle and convert date to range for edit of len of GroupRange
     function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
         event.preventDefault();
+        console.log(event.currentTarget.value);
         let date = new Date(event.currentTarget.value);
         let val = getDiffInDays(projectStart, date);
         if (isNaN(val) || val < 0) {
@@ -531,7 +532,6 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
             if (prevStart > val) return;
             rangeInfo.groupRange.range.end = val;
         }
-
         ranges[rangeInfo.index] = rangeInfo.groupRange;
         setLen(rangeInfo.groupRange.range.end - rangeInfo.groupRange.range.start)
         updateRanges(ranges);
@@ -547,9 +547,9 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
                     <h3 className="text-sm text-neutral-400">range:</h3>
                     <div  className="grid grid-cols-2 gap-2">
                         <label htmlFor="start">start day:</label>
-                        <input type="date" id="start" name="start" min={0} defaultValue={rangeInfo.groupRange.range.start} onChange={(event) => handleChange(event, "start")} className="bg-neutral-100 rounded px-2 py-1"></input>
+                        <input type="date" id="start" name="start" min={0} onChange={(event) => handleChange(event, "start")} className="bg-neutral-100 rounded px-2 py-1"></input>
                         <label htmlFor="end">end day:</label>
-                        <input type="date" id="end" name="end" min={0} defaultValue={rangeInfo.groupRange.range.end} onChange={(event) => handleChange(event, "end")} className="bg-neutral-100 rounded px-2 py-1"></input>
+                        <input type="date" id="end" name="end" min={0} onChange={(event) => handleChange(event, "end")} className="bg-neutral-100 rounded px-2 py-1"></input>
                     </div>
                     <div>length in days: {len}</div>
                     <div className="flex justify-end">

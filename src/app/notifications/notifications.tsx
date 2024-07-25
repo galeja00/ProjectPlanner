@@ -81,6 +81,7 @@ function NotifiactionsList() {
                         <NotificationsItem key={notif.id} notif={notif} updateNotif={() => fetchNotifications(false)}/>
                     ))
                 }
+                { notifs.length == 0 && <div>Right now you have zero notifications</div>}
             </ul>
         </>
     )

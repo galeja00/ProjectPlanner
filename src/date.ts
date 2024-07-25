@@ -48,16 +48,16 @@ export function fromDayToMills(day : number) : number {
     return day * (1000 * 60 * 60 * 24);
 }
 
-// forma date to = DD.MM.YYYY
+// forma date to = MM.DD.YYYY
 export function formatDate(date : Date) : string {
     let formatedDate = "";
     const day = date.getDate();
     const month = date.getMonth() + 1; // Měsíce jsou indexovány od nuly, takže přidáme 1
     const year = date.getFullYear();
-    formatedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
+    //formatedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
+    formatedDate = `${month < 10 ? '0' : ''}${month}.${day < 10 ? '0' : ''}${day}.${year}`;
     return formatedDate;
 }
-
 
 // format date from millisecunds past number to string
 export function formatAgo(time: number): string {

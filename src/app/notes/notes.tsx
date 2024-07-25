@@ -12,7 +12,7 @@ import { formatAgo } from "@/date";
 // components to display personal user nodes
 
 // main component
-export default function Nodes() {
+export default function Notes() {
     const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);  // toggler between modes
     const [ nodes, setNodes ] = useState<NodeInfo[]>([]); // state of every node user have
     const { submitError } = useError(); 
@@ -84,12 +84,12 @@ export default function Nodes() {
     return (
         <>
             <section>
-            { isCreator && <NodeDialog onClose={toggleCreator} onCreate={onCreate}/>}
+            { isCreator && <NoteDialog onClose={toggleCreator} onCreate={onCreate}/>}
                 <CreateButton text="Create new node" onClick={toggleCreator} />
                 <ul className="grid grid-cols-2 gap-2">
                     {
                         nodes.map((node) => (
-                            <NodeComponent key={node.id} node={node} deleteNode={deleteNode} />
+                            <NoteComponent key={node.id} node={node} deleteNode={deleteNode} />
                         ))
                     }
                 </ul>
@@ -100,18 +100,18 @@ export default function Nodes() {
 }
 
 // open dialog where user can create his personal nodes
-function NodeDialog({ onCreate, onClose } : { onCreate : () => void, onClose : () => void }) {
+function NoteDialog({ onCreate, onClose } : { onCreate : () => void, onClose : () => void }) {
     return (
         <Dialog>
             <div className="bg-neutral-200 rounded p-4 h-fit relative w-1/3">
                 <DialogClose handleClose={onClose}/>
-                <NodeCreator onCreate={onCreate}/>
+                <NoteCreator onCreate={onCreate}/>
             </div>
         </Dialog>
     )
 }
 
-export function NodeCreator({ onCreate, selector = false, head = true, taskId = null } : { onCreate : () => void, selector? : boolean, head? : boolean, taskId? : string | null}) {
+export function NoteCreator({ onCreate, selector = false, head = true, taskId = null } : { onCreate : () => void, selector? : boolean, head? : boolean, taskId? : string | null}) {
     const [ desc, setDesc ] = useState<string>("");
     const [ selectedTask, setTask ] = useState<string | null>(taskId);
     const { submitError } = useError();
@@ -170,7 +170,7 @@ function SelectorTask() {
 
 
 // display info about node
-export function NodeComponent({ node, deleteNode, colorMode = 200 } : { node : NodeInfo, deleteNode : (id : string) => void, colorMode? : number }) {
+export function NoteComponent({ node, deleteNode, colorMode = 200 } : { node : NodeInfo, deleteNode : (id : string) => void, colorMode? : number }) {
     const ago: number = node.createdAgo;
     const agoText: string = formatAgo(ago);
 

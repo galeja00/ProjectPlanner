@@ -16,7 +16,7 @@ export default async function Menu() {
                     <ul className='flex flex-row flex-1 gap-4'>
                         <LinkTo href="/projects" text="Projects"></LinkTo>
                         {/*<LinkTo href="/issues" text="Issues"></LinkTo>*/}
-                        <LinkTo href="/nodes" text="Nodes"></LinkTo>
+                        <LinkTo href="/notes" text="Notes"></LinkTo>
                     </ul>
                 </nav>
             ) : (

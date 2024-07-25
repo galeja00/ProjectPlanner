@@ -510,7 +510,7 @@ function Solver({ handleSolversMenu, solvers} : { handleSolversMenu : () => void
     
     return (
         <button className='w-fit h-fit rounded-full hover:bg-neutral-200 p-1' title={solver ? `${solver.name} ${solver.surname}` : "add solver"} onClick={handleSolversMenu}>
-            <Image src={img} alt="avatar" width={10} height={10} className='w-6 h-6 rounded-full bg-neutral-400 cursor-pointer'></Image>
+            <Image src={img} alt="picture" width={10} height={10} className='w-6 h-6 rounded-full bg-neutral-400 cursor-pointer object-cover'></Image>
         </button>    
     )
 }
@@ -529,7 +529,7 @@ function SolversMenu({ solvers} : { solvers : Solver[] }) {
                 return (
                     <li key={user.memberId} 
                         className={`flex gap-2 m-1 p-1 rounded relative`} >
-                        <Image src={imgSrc} alt="avatar" height={5} width={5} className='w-6 h-6 rounded-full'/>
+                        <Image src={imgSrc} alt="picture" height={10} width={10} className='object-cover w-6 h-6 rounded-full '/>
                         <h5>{user.name} {user.surname}</h5>
                     </li>
                     );

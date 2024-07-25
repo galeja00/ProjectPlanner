@@ -14,7 +14,7 @@ import { TeamBadge } from "./other";
 import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
 import { NodeInfo } from "@/app/api/nodes/static";
 import { FormItem, SubmitButton } from "@/app/components/form";
-import { NodeComponent, NodeCreator } from "@/app/nodes/nodes";
+import { NoteComponent, NoteCreator } from "@/app/notes/notes";
 import { formatAgo } from "@/date";
 import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from "@/app/components/buttons";
 import { InitialLoader } from "@/app/components/other-client";
@@ -251,20 +251,20 @@ function HeaderContainer(
 enum TypeOfInfo {
     description = "Description",
     issues = "Issues",
-    nodes = "Nodes",
+    notes = "Notes",
     settings = "Settings"
 }
 
 function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
-    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.nodes, TypeOfInfo.settings];
+    const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.notes, TypeOfInfo.settings];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
     const [actualInfo, setActualInfo] = useState<JSX.Element>(<Description task={task} updateTask={updateTask}/>);
 
     function handleChangeType(type : TypeOfInfo) {
         switch (type) {
-            case TypeOfInfo.nodes:
-                setActualInfo(<Nodes task={task}/>);
-                setActualInfoType(TypeOfInfo.nodes);
+            case TypeOfInfo.notes:
+                setActualInfo(<Notes task={task}/>);
+                setActualInfoType(TypeOfInfo.notes);
                 break;
             case TypeOfInfo.settings: 
                 setActualInfo(<Settings task={task}/>)
@@ -350,7 +350,7 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
 }
 
 
-function Nodes({ task } : { task : Task }) {
+function Notes({ task } : { task : Task }) {
     const [ nodes, setNodes ] = useState<NodeInfo[]>([]); 
     const [ isCreating, toggleCreating ]= useReducer(isCreating => !isCreating, false); 
     const { submitError } = useContext(TaskInfoContext)!;
@@ -412,7 +412,7 @@ function Nodes({ task } : { task : Task }) {
         return (
             <div className="m-4 space-y-4">
                 <ButtonSideText text={"Create new Node"} image={"/plus.svg"} onClick={toggleCreating}/>
-                <NodeCreator onCreate={onCreate} head={false} taskId={task.id}/>
+                <NoteCreator onCreate={onCreate} head={false} taskId={task.id}/>
             </div>
         )
     }
@@ -423,7 +423,7 @@ function Nodes({ task } : { task : Task }) {
             <ul className=" grid auto-cols-fr gap-2">
                 {
                     nodes.map((node) => (
-                        <NodeComponent key={node.id} node={node} deleteNode={deleteNode} colorMode={100}/>
+                        <NoteComponent key={node.id} node={node} deleteNode={deleteNode} colorMode={100}/>
                     ))
                 }
             </ul>  
@@ -613,11 +613,11 @@ function Selector({ items, team = false, handleSelect } : { items : SelectionIte
         <>
             {
                 items.map((item) => { 
-                    const isImage = item.image != null || item.image != undefined;
-                    const pathToImage = item.image ? `/uploads/user/${item.image}` : "/avatar.svg";
+                    const isImage = item.image != undefined;
+                    const pathToImage = item.image ? `/uploads/user/${item.image}` : `/avatar.svg`;
                     return (
                         <li key={item.id} onClick={() => handleSelect(item)} className={`cursor-pointer bg-neutral-200 rounded p-1 flex items-center gap-2 ${item.selected && "outline outline-2 outline-green-500"}`}>
-                            { isImage && <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="rounded-full bg-neutral-300"></Image>}
+                            { isImage && <Image alt="Image" src={pathToImage} width={20} height={20} title={item.name} className="w-6 h-6 rounded-full bg-neutral-300 object-cover"></Image>}
                             <div>{item.name}</div>
                             { team && <div className="text-sm flex gap-2"><span className="text-neutral-600 ">team:</span> <TeamBadge name={item.team ?? ""} color={item.teamColor ?? "#7c3aed"}/></div>}
                             <div className="text-sm"><span className="text-sm text-neutral-600">load:</span> {item.load}</div>
@@ -783,8 +783,8 @@ function Solvers({ solvers, team} : { solvers : Solver[], team : TeamInfo | null
                     const imgSrc = solver.image ? `/uploads/user/${solver.image}` : "/avatar.svg";
                     return (
                         <li key={solver.id} className='bg-neutral-100 p-2 rounded w-full flex flex-row gap-1 relative items-center'>
-                            <Image src={imgSrc} alt="avater" width={15} height={15} className='w-8 h-8 rounded-full bg-neutral-400 mr-2 text-color cursor-pointer'></Image>
-                            <div className="bg-">{solver.name} {solver.surname}</div>
+                            <Image src={imgSrc} alt="picture" width={50} height={50} className='w-8 h-8 rounded-full bg-neutral-400 mr-2 text-color cursor-pointe object-cover'></Image>
+                            <div className="">{solver.name} {solver.surname}</div>
                         </li>
                     )
                 })}

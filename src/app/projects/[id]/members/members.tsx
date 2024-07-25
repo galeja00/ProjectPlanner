@@ -159,7 +159,7 @@ function MemberRow({ memberInfo, handleRemove } : { memberInfo : MemberInfo, han
     }
     return (
         <tr key={memberInfo.memberId} className='bg-neutral-100 rounded grid grid-cols-9 p-2 gap-2 justify-items-left items-center'>
-            <td className='col-span-2'><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-400'/></td>
+            <td className='col-span-2'><Image src={imgSrc} height={20} width={20} alt="image" className='w-8 h-8 rounded-full bg-neutral-400 object-cover'/></td>
             <td className='col-span-2'>{memberInfo.name} {memberInfo.surname}</td>
             <td className='col-span-2'>{memberInfo.teamName && memberInfo.teamColor && <TeamBadge name={memberInfo.teamName} color={memberInfo.teamColor}/>}</td>
             <td className='col-span-2'>{memberInfo.tasksLoad}</td>
@@ -272,7 +272,7 @@ function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
     )
 }
 
-// info about user and function to invite it
+// info about user and function to invite him
 function UsersItem({ user, id } : { user : UserInfo, id : string }) {
     const { submitError } = useError();
     // contact endpoint by fetching to invite user and create notification for him
@@ -300,7 +300,7 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
 
     return (
         <li key={user.id} className='bg-neutral-100 rounded p-2 flex w-full'>
-            <Image src={image} alt="avater" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-400 mr-5 text-color cursor-pointer'></Image>
+            <Image src={image} alt="picture" width={2} height={2} className='w-8 h-8 rounded-full bg-neutral-400 mr-5 text-color cursor-pointer object-cover'></Image>
             <div className='w-full'>{user.name} {user.surname}</div>
             <div className='flex w-full flex-row-reverse'>
                 <button className='btn-primary' onClick={inviteUser}>Send</button>

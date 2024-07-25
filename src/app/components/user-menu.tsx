@@ -47,7 +47,7 @@ export default function UserInfo() {
     return (
         <>
             <NotificationIcon/>
-            <Image onClick={toggleUserMenu} src={userImg} alt="avater" width={30} height={30} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer'></Image>
+            <Image onClick={toggleUserMenu} src={userImg} alt="avater" width={30} height={30} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer object-cover'></Image>
             { menu ? <UserMenu/> : <></> }
         </>
         
