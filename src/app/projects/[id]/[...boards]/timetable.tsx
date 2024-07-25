@@ -1,7 +1,7 @@
 "use client"
 import { TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
 import { Head } from "../components/other";
-import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, useRef, RefObject, ChangeEvent } from "react";
+import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, TouchEvent, useRef, RefObject, ChangeEvent } from "react";
 import { Creator } from "./components/creator";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { fromDayToMills, getDiffInDays } from "@/date";
@@ -596,40 +596,65 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     const { changeUserMode, updateRanges, openRangeMenu, ranges } = useContext(RangesContext)!;
 
     // handle start of moving with GroupRange
-    function handleGrap(event: MouseEvent) {
-        event.stopPropagation();
+    function handleMouseGrap(event: MouseEvent) {
         if (!isGrabed && event.button !== 2) {
-            changeUserMode(UserMode.Moving);
-            toggleGrab();
-            setMovPos({ x: event.clientX, y: event.clientY });
+            submitGrap({ x: event.clientX, y: event.clientY });
         }
     }
 
+    function handleTouchGrap(event : TouchEvent) {
+        if (!isGrabed) {
+            submitGrap(convertTouchToPos(event));
+        }
+    }
+
+    function submitGrap(pos : Position) {
+        changeUserMode(UserMode.Moving);
+        toggleGrab();
+        setMovPos(pos);
+    }
+
+    function handleTouchMove(event : TouchEvent) {
+        handleMove(convertTouchToPos(event));
+    }
+
+    function handleMouseMove(event: MouseEvent) {
+        handleMove({ x: event.clientX, y: event.clientY });
+    }
+
     // handler when user wont to move with GroupRange
-    function handleMove(event: MouseEvent) {
-        event.stopPropagation();
+    function handleMove(pos : Position) {
         if (isGrabed && movPos) {
-            const pos : Position = { x: event.clientX, y: event.clientY };
             const row = rows[index];
             const widthDay = row.children[0].getBoundingClientRect().width;
             const difference = pos.x - movPos.x;
             if (Math.abs(difference) % widthDay === 0) {
-                if (range.start + difference / widthDay < 0) {
-                    range.end = range.end - range.start;
-                    range.start = 0;
-                } else {
-                    range.start += difference / widthDay;
-                    range.end += difference / widthDay;
-                }   
-                setRange(range);
+                setRange(prevRange => {
+                    // Create a new range object to avoid mutating state directly
+                    const newRange = { ...prevRange };
+                    
+                    // Calculate the new start and end positions
+                    const shift = difference / widthDay;
+                    
+                    // Adjust the range based on the shift
+                    if (newRange.start + shift < 0) {
+                        newRange.end -= newRange.start;
+                        newRange.start = 0;
+                    } else {
+                        newRange.start += shift;
+                        newRange.end += shift;
+                    }
+                    
+                    return newRange;
+                });
+                // Update the movement position
                 setMovPos(pos);
             }
         }
     }
 
     // handle when user stop moves with GroupRange
-    function handleDrop(event: MouseEvent) {
-        event.stopPropagation();
+    function handleDrop(event: MouseEvent | TouchEvent) {
         if (isGrabed) {
             ranges[index].range = range;
             updateRanges(ranges);
@@ -655,14 +680,19 @@ function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, gro
     const row = rows[index].getBoundingClientRect();
     const startbox = boxs[range.start].getBoundingClientRect();
     const endbox = boxs[range.end].getBoundingClientRect();
+
+    /**/
     return (
         <div 
             className={`bg-violet-500 absolute z-100 rounded border border-neutral-600 bg-opacity-70 flex justify-between  ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
-            onMouseDown={handleGrap}
+            onMouseDown={handleMouseGrap}
             onMouseUp={handleDrop}
-            onMouseMove={handleMove}
+            onMouseMove={handleMouseMove}
             onMouseLeave={handleDrop}
             onContextMenu={handleMenu}
+            onTouchStart={handleTouchGrap}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleDrop}
             style={{ 
                 height: startbox.height / (3 / 2),
                 left: startbox.left - row.left,
@@ -700,4 +730,8 @@ function convertRangeToDates(range : Range, start : Date) : DateRange {
 // compering to Ranges
 function isEqualRanges(a : Range, b : Range) {
     return a.start == b.start && a.end == b.end;
+}
+
+function convertTouchToPos(event : TouchEvent) : Position {
+    return { x: event.touches[0].clientX, y: event.touches[0].clientY }
 }
