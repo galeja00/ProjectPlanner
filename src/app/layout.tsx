@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'], weight: [ "600", "800" ]});
 
 export const metadata: Metadata = {
   title: 'Project Planner',
-  description: 'Aplication for planning your teams and projects on one web side with kanban.',
+  description: "An application designed for efficient team and project planning, featuring an intuitive Kanban board, Gantt diagram and Backlog for your projects. Streamline your team's workflow and gain better visibility into project progress.",
 }
 
 export default function RootLayout({

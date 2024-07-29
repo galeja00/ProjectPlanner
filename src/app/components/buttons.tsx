@@ -42,12 +42,10 @@ export function ButtonWithText({ text, type, handle } : { text : string, type : 
 
 export function ButtonSideText({ text, image, onClick } : { text : string, image : string, onClick : () => void }) {
     return (
-        <div className='flex items-center gap-2'>
-            <button onClick={onClick}>
-                <Image src={image} alt={text} width={10} height={10} className='w-7 h-7 rounded text-neutral-900 bg-neutral-100 cursor-pointer hover:bg-violet-600 hover:bg-opacity-60 border hover:border-violet-600'></Image>
-            </button>
+        <button onClick={onClick} className='flex items-center gap-2'>
+            <Image src={image} alt={text} width={10} height={10} className='w-7 h-7 rounded text-neutral-900 bg-neutral-100 cursor-pointer hover:bg-violet-600 hover:bg-opacity-60 border hover:border-violet-600'></Image>
             <p className='text-neutral-600 text-sm'>{text}</p>
-        </div>
+        </button>
     )
 }
 
@@ -114,7 +112,7 @@ function ButtonComp({ button } : { button : Button }) {
 
 export function CreateButton({ text, onClick } : { text : string, onClick : () => void }) {
     return ( 
-        <button onClick={onClick} className="flex gap-2 items-center mb-2 text-neutral-400 cursor-pointer">
+        <button onClick={onClick} className="flex gap-2 items-center mb-2 text-neutral-600 cursor-pointer">
             <img src="/plus.svg" className="w-8 h-8 bg-neutral-200 rounded  hover:outline hover:outline-1 hover:outline-violet-600 hover:bg-violet-600 hover:bg-opacity-40"/>
             <div>{text}</div>
         </button>

@@ -105,7 +105,7 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
                 {list.map((p, i) => (
                     <ProjectItem key={p.id} proj={p} index={i} vis={[bottom, top]}/>
                 ))}
-                { list.length == 0 && <div>Right now you have zero done projects.</div>}
+                { list.length == 0 && <div>Currently, you have zero projects.</div>}
             </ul>
         </section>
     )

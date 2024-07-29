@@ -84,7 +84,7 @@ export default function Notes() {
         <>
             <section>
             { isCreator && <NoteDialog onClose={toggleCreator} onCreate={onCreate}/>}
-                <CreateButton text="Create new note" onClick={toggleCreator} />
+                <CreateButton text="Create new Note" onClick={toggleCreator} />
                 <ul className="grid grid-cols-2 gap-2">
                     {
                         notes.map((note) => (
