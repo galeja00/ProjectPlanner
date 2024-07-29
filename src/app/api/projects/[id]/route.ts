@@ -1,7 +1,4 @@
 
-
-import { getServerSession } from "next-auth/next";
-import { options } from "../../auth/[...nextauth]/options";
 import { prisma } from "@/db";
 import { authorize } from "../../static";
 import { getMember } from "./static";

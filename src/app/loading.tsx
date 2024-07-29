@@ -1,5 +1,4 @@
 "use client"
-import { Oval } from 'react-loader-spinner'
 import { LoadingOval } from './components/other'
 
 
