@@ -7,7 +7,7 @@ import Settings from "./settings"
 export default function Page({ params } : { params : { id : string }}) {
     return (
         <ErrorBoundary>
-            <Settings id={params.id}/>
+        <Settings id={params.id}/>
         </ErrorBoundary>
     )
 }

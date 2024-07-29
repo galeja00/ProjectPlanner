@@ -161,10 +161,10 @@ export default function Settings({ id } : { id : string}) {
         <>
             {isImgDrop && <DropImage closeDrop={toggleImgDrop} updateImg={updateImg} />}
             {isDell && <DeleteDialog message="Do you wan't delete this project" onConfirm={handleDelete} onClose={toggleDell}/>}
-            <main className="py-14">
+            <main className="py-14 px-14 relative w-full">
                 <div className='max-w-screen-lg w-full mx-auto'>
                     <Head text="Settings" />
-                    <div className="space-y-8">
+                    <div className="space-y-8 ">
                         <section className="bg-neutral-200 p-4 rounded flex gap-8">
                             <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer" />
                             <div className="space-y-4">
