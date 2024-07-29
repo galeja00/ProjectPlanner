@@ -275,6 +275,7 @@ function Table() {
     
     // convert group to GroupRange on every update on group or in init phase
     useEffect(() => {
+        console.log(groups);
         setGroupsRanges(convertGroupsToRanges(groups, projectStart));
     }, [groups, currentDate]);
 
@@ -707,7 +708,9 @@ function convertGroupsToRanges(groups : TimeTableGroup[], projectStart : Date) :
         const newR = convertGroupToRange(groups[i], projectStart);
         if (newR) {
             newRanges[i] = newR;
-        } 
+        } else {
+            newRanges[i] = newRanges[i];
+        }
         i++;
     }
     return newRanges;
