@@ -348,11 +348,11 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
 
 
 function Notes({ task } : { task : Task }) {
-    const [ notes, setNodes ] = useState<NodeInfo[]>([]); 
+    const [ notes, setNotes ] = useState<NodeInfo[]>([]); 
     const [ isCreating, toggleCreating ]= useReducer(isCreating => !isCreating, false); 
     const { submitError } = useContext(TaskInfoContext)!;
 
-    async function fetchNodes() {
+    async function fetchNotes() {
         try {
             const res = await fetch(`/api/nodes/task/${task.id}`, {
                 method: "GET",
@@ -364,15 +364,15 @@ function Notes({ task } : { task : Task }) {
                 throw new Error(data.error);
             }
             console.log(data);
-            setNodes(data.nodes);
+            setNotes(data.nodes);
         }
         catch(error) {
             console.error(error);
-            submitError(error, fetchNodes);
+            submitError(error, fetchNotes);
         }
     }
 
-    async function deleteNode(id : string) {
+    async function deleteNote(id : string) {
         try {
             const res = await fetch(`/api/nodes/${id}/delete`, {
                 method: "POST"
@@ -388,7 +388,7 @@ function Notes({ task } : { task : Task }) {
                     newNotes.push(note);
                 }
             }
-            setNodes(newNotes);
+            setNotes(newNotes);
         }
         catch (error) {
             console.error(error);
@@ -397,18 +397,18 @@ function Notes({ task } : { task : Task }) {
     }
 
     useEffect(() => {
-        fetchNodes()
+        fetchNotes()
     }, [])
 
     function onCreate() {
         toggleCreating();
-        fetchNodes();
+        fetchNotes();
     }
 
     if (isCreating) {
         return (
             <div className="m-4 space-y-4">
-                <ButtonSideText text={"Create new Node"} image={"/plus.svg"} onClick={toggleCreating}/>
+                <ButtonSideText text={"Create new Note"} image={"/plus.svg"} onClick={toggleCreating}/>
                 <NoteCreator onCreate={onCreate} head={false} taskId={task.id}/>
             </div>
         )
@@ -416,11 +416,11 @@ function Notes({ task } : { task : Task }) {
 
     return (
         <div className="m-4 space-y-4">
-            <ButtonSideText text={"Create new Node"} image={"/plus.svg"} onClick={toggleCreating}/>
+            <ButtonSideText text={"Create new Note"} image={"/plus.svg"} onClick={toggleCreating}/>
             <ul className=" grid auto-cols-fr gap-2">
                 {
                     notes.map((note) => (
-                        <NoteComponent key={note.id} note={note} deleteNode={deleteNode} colorMode={100}/>
+                        <NoteComponent key={note.id} note={note} deleteNote={deleteNote} colorMode={100}/>
                     ))
                 }
             </ul>  

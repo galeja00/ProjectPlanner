@@ -1,5 +1,4 @@
 "use client"
-import { Node, Task } from "@prisma/client"
 import { ChangeEvent, FormEvent, useEffect, useReducer, useState } from "react";
 import { Dialog, DialogClose } from "../components/dialog";
 import { ArrayButtons, Button, ButtonType, CreateButton, Lighteness } from "../components/buttons";
@@ -9,17 +8,17 @@ import { useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
 import { formatAgo } from "@/date";
 
-// components to display personal user nodes
+// components to display personal user notes
 
 // main component
 export default function Notes() {
     const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);  // toggler between modes
-    const [ notes, setNodes ] = useState<NodeInfo[]>([]); // state of every node user have
+    const [ notes, setNotes ] = useState<NodeInfo[]>([]); // state of every note user have
     const { submitError } = useError(); 
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
 
-    // fetch data about nodes from endpoint
-    async function fetchNodes(isInitialLoading : boolean) {
+    // fetch data about notes from endpoint
+    async function fetchNotes(isInitialLoading : boolean) {
         if (isInitialLoading) {
             setInitialLoading(true);
         }
@@ -31,11 +30,11 @@ export default function Notes() {
             if (!res.ok) {
                 throw new Error(data.error);
             }
-            setNodes(data.nodes);
+            setNotes(data.nodes);
         }
         catch (error) {
             console.error(error);
-            submitError(error, () => fetchNodes(true));
+            submitError(error, () => fetchNotes(true));
         }
         finally {
             setInitialLoading(false);
@@ -43,8 +42,8 @@ export default function Notes() {
 
     }
 
-    // delete node by fetching to endpoint
-    async function deleteNode(id : string) {
+    // delete note by fetching to endpoint
+    async function deleteNote(id : string) {
         try {
             const res = await fetch(`/api/nodes/${id}/delete`, {
                 method: "POST"
@@ -60,20 +59,20 @@ export default function Notes() {
                     newNotes.push(note);
                 }
             }
-            setNodes(newNotes);
+            setNotes(newNotes);
         }
         catch (error) {
             console.error(error);
-            submitError(error, () => deleteNode(id));
+            submitError(error, () => deleteNote(id));
         }
     }
 
     async function onCreate() {
-        fetchNodes(false);
+        fetchNotes(false);
         toggleCreator();
     }
 
-    useEffect(() => { fetchNodes(true) }, []);
+    useEffect(() => { fetchNotes(true) }, []);
 
     if (initialLoading) {
         return (
@@ -85,11 +84,11 @@ export default function Notes() {
         <>
             <section>
             { isCreator && <NoteDialog onClose={toggleCreator} onCreate={onCreate}/>}
-                <CreateButton text="Create new node" onClick={toggleCreator} />
+                <CreateButton text="Create new note" onClick={toggleCreator} />
                 <ul className="grid grid-cols-2 gap-2">
                     {
                         notes.map((note) => (
-                            <NoteComponent key={note.id} note={note} deleteNode={deleteNode} />
+                            <NoteComponent key={note.id} note={note} deleteNote={deleteNote} />
                         ))
                     }
                 </ul>
@@ -150,14 +149,14 @@ export function NoteCreator({ onCreate, selector = false, head = true, taskId = 
     
     return ( 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            { head && <h2 className="font-bold text-xl mb-4">Create new node</h2>}
+            { head && <h2 className="font-bold text-xl mb-4">Create new note</h2>}
             <FormItem item={"Header"} type={"text"} name={"header"} correct={true}/>
             <div className="flex flex-col">
                 <label>Description</label>
                 <textarea className="input-primary h-32" onChange={handleChange} />
             </div>
             { selector && <SelectorTask/>}
-            <SubmitButton text={"Create node"}/>
+            <SubmitButton text={"Create note"}/>
         </form>
     )
 }
@@ -169,12 +168,12 @@ function SelectorTask() {
 }
 
 
-// display info about node
-export function NoteComponent({ note, deleteNode, colorMode = 200 } : { note : NodeInfo, deleteNode : (id : string) => void, colorMode? : number }) {
+// display info about note
+export function NoteComponent({ note, deleteNote, colorMode = 200 } : { note : NodeInfo, deleteNote : (id : string) => void, colorMode? : number }) {
     const ago: number = note.createdAgo;
     const agoText: string = formatAgo(ago);
 
-    const buttons : Button[] = [{ onClick: () => deleteNode(note.id), img: "/x.svg", title: "Delete Node", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
+    const buttons : Button[] = [{ onClick: () => deleteNote(note.id), img: "/x.svg", title: "Delete Note", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
     return ( 
         <li key={note.id} className={`bg-neutral-${colorMode} rounded min-h-[8rem]`}>
             <div className="flex justify-between border-b border-neutral-900 p-4 items-center">
