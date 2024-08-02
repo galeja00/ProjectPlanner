@@ -588,7 +588,10 @@ function ColInfo({ info, onClick } : { info : ColumnInfo | null, onClick : () =>
             style = "text-green-600";
     }
     return (
-        <button className={`flex items-center col-span-2 ${style} cursor-pointer`} onClick={onClick}>{text}</button>
+        <button className={`flex items-center gap-2 col-span-2 ${style} cursor-pointer`} onClick={onClick} title='Change column'>
+            {text}
+            <Image src={'/down-arrow.svg'} width={10} height={5} alt={"change"} className='bg-neutral-100 w-3 h-6'/>
+        </button>
     )
 }
 
@@ -608,7 +611,7 @@ function ColMenu({ info, handleMoveCol } : { info : ColumnInfo | null, handleMov
     }
     
     return (
-        <ul className='absolute z-10 bg-neutral-200 shadow-sm shadow-neutral-200 rounded space-y-2 p-2 left-0'>
+        <ul className='absolute z-10 bg-neutral-200 shadow-sm shadow-neutral-100 rounded space-y-2 p-2 left-0 border'>
             {
                 toSelect.map((col) => {
                     return (

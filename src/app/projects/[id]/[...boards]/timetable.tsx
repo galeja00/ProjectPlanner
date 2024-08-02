@@ -4,7 +4,7 @@ import { Head } from "../components/other";
 import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, TouchEvent, useRef, RefObject, ChangeEvent } from "react";
 import { Creator } from "./components/creator";
 import { Dialog, DialogClose } from "@/app/components/dialog";
-import { formatDate, fromDayToMills, getDiffInDays } from "@/date";
+import { formatDate, formatDate2, fromDayToMills, getDiffInDays } from "@/date";
 import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
@@ -172,6 +172,7 @@ export default function TimeTable({ id } : { id : string }) {
                 const data = await res.json();
                 throw new Error(data.error);
             } 
+            fetchGroups();
         }   
         catch (error) {
             console.error(error);
@@ -247,6 +248,7 @@ export default function TimeTable({ id } : { id : string }) {
 }
 
 // Menu for timemods not implemented in final version
+/*
 function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mode) => void }) {
     return (
         <div className="fixed m-4 z-50 right-0 bottom-0 bg-neutral-200 rounded w-50 flex">
@@ -255,6 +257,7 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
         </div>
     )
 }
+*/
 
 // default component to convert groups and devide to smaller components for bigger abstraction
 function Table() {
@@ -275,7 +278,6 @@ function Table() {
     
     // convert group to GroupRange on every update on group or in init phase
     useEffect(() => {
-        console.log(groups);
         setGroupsRanges(convertGroupsToRanges(groups, projectStart));
     }, [groups, currentDate]);
 
@@ -508,7 +510,7 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
     function handleChange(event : ChangeEvent<HTMLInputElement>, name : string) {
         event.preventDefault();
         let date = new Date(event.currentTarget.value);
-        let val = getDiffInDays(projectStart, date);
+        let val = getDiffInDays(projectStart, date) + 1;
         if (isNaN(val) || val < 0) {
             return;
         }
@@ -522,11 +524,11 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
             rangeInfo.groupRange.range.end = val;
         }
         ranges[rangeInfo.index] = rangeInfo.groupRange;
-        setLen(rangeInfo.groupRange.range.end - rangeInfo.groupRange.range.start)
+        setLen(rangeInfo.groupRange.range.end - rangeInfo.groupRange.range.start);
         updateRanges([...ranges]);
     }
 
-
+    const dates : DateRange =  convertRangeToDates(rangeInfo.groupRange.range, projectStart);
     return (
         <Dialog>
             <div className="w-max h-max bg-neutral-200 rounded flex flex-col relative p-4 gap-4">
@@ -536,9 +538,9 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
                     <h3 className="text-sm text-neutral-400">range:</h3>
                     <div  className="grid grid-cols-2 gap-2">
                         <label htmlFor="start">start day:</label>
-                        <input type="date" id="start" name="start" min={0} onChange={(event) => handleChange(event, "start")} className="bg-neutral-100 rounded px-2 py-1"></input>
+                        <input type="date" id="start" name="start" value={formatDate2(dates.start)}  onChange={(event) => handleChange(event, "start")} className="bg-neutral-100 rounded px-2 py-1"></input>
                         <label htmlFor="end">end day:</label>
-                        <input type="date" id="end" name="end" min={0} onChange={(event) => handleChange(event, "end")} className="bg-neutral-100 rounded px-2 py-1"></input>
+                        <input type="date" id="end" name="end" value={formatDate2(dates.end)} onChange={(event) => handleChange(event, "end")} className="bg-neutral-100 rounded px-2 py-1"></input>
                     </div>
                     <div>length in days: {len}</div>
                     <div className="flex justify-end">

@@ -52,11 +52,18 @@ export function fromDayToMills(day : number) : number {
 export function formatDate(date : Date) : string {
     let formatedDate = "";
     const day = date.getDate();
-    const month = date.getMonth() + 1; // Měsíce jsou indexovány od nuly, takže přidáme 1
+    const month = date.getMonth() + 1; 
     const year = date.getFullYear();
-    //formatedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
     formatedDate = `${month < 10 ? '0' : ''}${month}.${day < 10 ? '0' : ''}${day}.${year}`;
     return formatedDate;
+}
+
+// format date to = YYYY-MM-DD
+export function formatDate2(date : Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // format date from millisecunds past number to string
