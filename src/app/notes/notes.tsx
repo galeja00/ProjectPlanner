@@ -30,6 +30,7 @@ export default function Notes() {
             if (!res.ok) {
                 throw new Error(data.error);
             }
+      
             setNotes(data.nodes);
         }
         catch (error) {
@@ -186,7 +187,7 @@ export function NoteComponent({ note, deleteNote, colorMode = 200 } : { note : N
                 </div>
                 
             </div>
-            <p className="p-4">{note.text}</p>
+            <p className="p-4" style={{ whiteSpace: 'pre-line' }}>{note.text}</p>
         </li>
     )
 }

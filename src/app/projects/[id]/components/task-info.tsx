@@ -29,6 +29,7 @@ type TeamInfo = {
     taskLoad: number
 }
 
+// interface for context of task-info component
 interface TaskInfoContextTypes {
     task : Task,
     team : TeamInfo| null,
@@ -40,14 +41,14 @@ interface TaskInfoContextTypes {
 
 const TaskInfoContext = createContext<TaskInfoContextTypes | null>(null);
 
-// TODO: Error handeling
-// dialog for display info and editing it
+// initial component, handl fetching basic data and sumbiting
 export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : string, projectId : string, handleClose : () => void, submitTask : (task : Task) => void}) {
     const [ task, setTask ] = useState<Task | null>(null);
     const [ solvers, setSolvers ] = useState<Solver[]>([]); 
     const [ team, setTeam ] = useState<TeamInfo | null>(null); 
     const { submitError } = useError(); 
 
+    // fecth informations about task
     async function fetchInfo() {
         try {
             const res = await fetch(`/api/projects/${projectId}/task/${id}/info`, {
@@ -66,6 +67,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
     }
 
+    // fecth all solvers of task
     async function fetchSolvers() {
         if (!task) {
             return;
@@ -88,6 +90,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
     }
 
+    // submit new solver to server
     async function addSolver(memberId : string) {
         //task.projectMemberId =  memberId;
         try {
@@ -113,6 +116,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         
     }
 
+    // remove solver from solving a task
     async function delSolver(memberId : string) {
         try {
             const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/solver/remove`, {
@@ -134,6 +138,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
         }
     }
 
+    // get informations about a team
     async function fetchTeam() {
         if (!task || !task.teamId) {
             return;
@@ -227,6 +232,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 }  
 
 // HEADER PART //
+
 function HeaderContainer(
     {task, projectId, handleClose, updateTask } : 
     {task : Task, projectId : string,  handleClose : () => void, updateTask : (task : Task) => void}) { 
@@ -252,6 +258,7 @@ enum TypeOfInfo {
     settings = "Settings"
 }
 
+//  conteiner of main informations about task and handle menu click
 function MainInfoContainer({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
     const menuItems : TypeOfInfo[] = [TypeOfInfo.description, TypeOfInfo.notes, TypeOfInfo.settings];
     const [actualTypeInfo, setActualInfoType] = useState<TypeOfInfo>(TypeOfInfo.description);
@@ -336,7 +343,7 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
                     </div>
                     :
                     <div>
-                        <p className='px-3 py-1 bg-neutral-100 rounded '>
+                        <p className='px-3 py-1 bg-neutral-100 rounded ' style={{ whiteSpace: 'pre-line' }}>
                             {desc}
                         </p>   
                     </div>
@@ -346,7 +353,7 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
     )
 }
 
-
+// display all attached nodes for this task
 function Notes({ task } : { task : Task }) {
     const [ notes, setNotes ] = useState<NodeInfo[]>([]); 
     const [ isCreating, toggleCreating ]= useReducer(isCreating => !isCreating, false); 
@@ -392,7 +399,7 @@ function Notes({ task } : { task : Task }) {
         }
         catch (error) {
             console.error(error);
-            //setError({ error, repeatFunc: () => deleteNode(id) });
+            submitError(error, () => deleteNote(id));
         }
     }
 
@@ -430,7 +437,7 @@ function Notes({ task } : { task : Task }) {
 }
 
 
-
+// display settings of solvers and team selector
 function Settings({ task } : { task : Task }) {
     const { team, solvers } = useContext(TaskInfoContext)!;   
 
@@ -446,6 +453,7 @@ function Settings({ task } : { task : Task }) {
     )
 }
 
+// type for selection item in selector
 type SelectionItem = {
     id: string,
     name: string,
@@ -456,6 +464,7 @@ type SelectionItem = {
     selected: boolean
 }
 
+// selector fo teams (only one can be selected)
 function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) {
     const [ teams, setTeams ] = useState<TeamInfo[]>([]);
     const { changeTeam, submitError } = useContext(TaskInfoContext)!; 
@@ -519,6 +528,7 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
     )
 }
 
+// selctor of members of project
 function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo | null, solvers : Solver[] }) {
     const [ isAll, toggleAll ] = useReducer(isAll => !isAll, true); 
     const [ members, setMembers ] = useState<MemberTableInfo[]>([]); 
@@ -604,7 +614,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
 }
 
 
-
+// selector component
 function Selector({ items, team = false, handleSelect } : { items : SelectionItem[], team? : boolean, handleSelect : (item : SelectionItem) => void }) {
     return (
         <>
@@ -638,7 +648,7 @@ type SelectType = {
     name : string
 }
 
-
+// display data about task (priority, complexity, ...) and handle change of it
 function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) => void }) {
     const [isEditing, toggleEditing] = useReducer(isEditing => !isEditing, false);
     const [editedTask, setEditedTask] = useState<Task>(task);
@@ -686,7 +696,7 @@ function Data({ task, updateTask } : { task : Task, updateTask : (task : Task) =
 
 
 
-
+// display atomic data about task
 function DataItem({name, value, isEditing, updateVal } : { name: string, value : any, isEditing : boolean, updateVal : (newVal : any) => void}) {
     var displaydVal : any = "undefined";
     if (value) {
@@ -726,6 +736,7 @@ function DataItem({name, value, isEditing, updateVal } : { name: string, value :
         </li>
     )
 }
+
 
 function SelectButtons({ items, value, changeVal } : { items : SelectType[], value : string | null, changeVal : (newValue : string) => void}) {
     const [ selected, setSelected ] = useState<string | null>(value); 

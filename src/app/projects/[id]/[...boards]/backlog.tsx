@@ -344,7 +344,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
         }
         // - 2 - becouse of unassigned group
         if (pos < groups.length - 2) {
-            buttons[0] = { onClick: () => moveGroup(group.id, pos + 1), img: "/arrow-down.svg", type: ButtonType.MidDestructive, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Down" };
+            buttons[0] = { onClick: () => moveGroup(group.id, pos + 1), img: "/arrow-down.svg", type: ButtonType.Normal, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Down" };
         }
         buttons[3] = { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "Delete Group" };
     }

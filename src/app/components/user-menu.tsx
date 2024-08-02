@@ -47,7 +47,7 @@ export default function UserInfo() {
     return (
         <>
             <NotificationIcon/>
-            <Image onClick={toggleUserMenu} src={userImg} alt="avater" width={30} height={30} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer object-cover'></Image>
+            <Image onClick={toggleUserMenu} src={userImg} alt="avater" width={30} height={30} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer object-cover' title='Jakub Galeta'></Image>
             { menu ? <UserMenu/> : <></> }
         </>
         
@@ -63,7 +63,7 @@ function UserMenu() {
         return;
     }
     return (
-        <ul className='absolute z-20 flex flex-col p-4 bg-neutral-200 right-0  top-10 border border-neutral-700 rounded gap-1 shadow shadow-neutral-100'>
+        <ul className='absolute z-20 flex flex-col p-4 bg-neutral-200 right-0  top-10 border border-neutral-700  gap-1 shadow shadow-neutral-100'>
             <li><Link href="/profil" className='hover:text-violet-600 hover:border-b hover:border-violet-600 ease-in-out'>Your profile</Link></li>
             <li><button onClick={handleSignOut} className='hover:text-red-600 hover:border-b text-red-500 hover:border-red-600 ease-in-out'>Sign Out</button></li>
         </ul>
@@ -107,8 +107,8 @@ function NotificationIcon() {
     }, []);
 
     return (
-        <Link href="/notifications" className='relative'>
-            <Image src="/bell.svg" alt="notification" width={8} height={8} className='w-7 h-7 cursor-pointer rounded-full hover:bg-neutral-50 '></Image>
+        <Link href="/notifications" className='relative' title='Notifications'>
+            <Image src="/bell.svg" alt="notification" width={8} height={8} className='w-7 h-7 cursor-pointer'></Image>
             <div className='absolute rounded-full right-0 top-0 bg-red-600 w-4 h-4 text-xs justify-center' style={ {display: ring ? "flex" : "none"}}>{count}</div> 
         </Link>
     )

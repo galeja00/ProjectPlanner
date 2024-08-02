@@ -147,7 +147,7 @@ export default function Board({ id } : { id : string }) {
                                 
                             ))
                         }
-                        <Creator what={"Create new column"} handleCreate={createColumn}/>
+                        <Creator what={"Create new Column"} handleCreate={createColumn}/>
                     </section>
                 </div>
             </TasksColumnsContext.Provider>
