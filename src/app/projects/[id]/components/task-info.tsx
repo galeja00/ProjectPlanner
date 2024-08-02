@@ -737,7 +737,7 @@ function DataItem({name, value, isEditing, updateVal } : { name: string, value :
     )
 }
 
-
+// selector for ranking of property in task
 function SelectButtons({ items, value, changeVal } : { items : SelectType[], value : string | null, changeVal : (newValue : string) => void}) {
     const [ selected, setSelected ] = useState<string | null>(value); 
     function select(value : string) {
@@ -763,6 +763,7 @@ function SelectButtons({ items, value, changeVal } : { items : SelectType[], val
     )
 }
 
+// input for canhging string data of property in task 
 function DataEditInput({ value, name, changeVal } : { value : string, name : string, changeVal : (newVal : any) => void }) {
     const type = name === "estimated hours" ? "number" : "text";
     function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -774,7 +775,7 @@ function DataEditInput({ value, name, changeVal } : { value : string, name : str
 }
 
 
-
+// display info who is solver and with team is selected for this task
 function Solvers({ solvers, team} : { solvers : Solver[], team : TeamInfo | null }) {
     return (
         <div className="space-y-2">
