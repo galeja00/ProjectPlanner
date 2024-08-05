@@ -1,6 +1,6 @@
 "use client"
 import Image from 'next/image'
-import { useEffect, useReducer, useRef, useState, KeyboardEvent } from "react"
+import { useEffect, useReducer, useRef, useState, KeyboardEvent, ChangeEvent } from "react"
 import { Head, TeamBadge } from '../components/other'
 import { Dialog, DialogClose } from '@/app/components/dialog'
 import { InitialLoader } from '@/app/components/other-client'
@@ -236,11 +236,9 @@ function AddForm(
     { actualType, types, search, handleChange } : 
     { actualType : TypeOfSearh, types : TypeOfSearh[], search : (value : string) => void, handleChange : (t : TypeOfSearh) => void }) {
     
-    function handleKeyDown(event :  KeyboardEvent<HTMLInputElement>) {
+    function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
         const inputValue = event.currentTarget.value;
-        if (inputValue.length > 0) {
-            search(inputValue);
-        }
+        search(inputValue);
     }
 
     return (
@@ -253,7 +251,7 @@ function AddForm(
                 }
             </div>
             <div className='py-2 px-4 bg-neutral-100 rounded-tr rounded-br rounded-bl w-full'>
-                <input className="bg-neutral-100 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-200 w-full" type="text" onKeyDown={handleKeyDown}></input>
+                <input className="bg-neutral-100 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-200 w-full" type="text" onChange={handleInputChange}></input>
             </div>
         </div>
     )
