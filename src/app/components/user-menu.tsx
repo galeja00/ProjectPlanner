@@ -30,18 +30,7 @@ export default function UserInfo() {
         }
     }
 
-
-    function toggleUserMenu() {
-        if (menu) {
-            setMenu(false);
-        } else {
-            setMenu(true);
-        }
-    }
-
     useEffect(() => {fetchUser()}, []);
-
-    
 
     return (
         <>
