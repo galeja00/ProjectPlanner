@@ -6,6 +6,7 @@ import { Dialog, DialogClose } from '@/app/components/dialog'
 import { InitialLoader } from '@/app/components/other-client'
 import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler'
 import { getImage, ImageTypes } from '@/images'
+import { DeleteDialog } from '@/app/components/other'
 
 
 // type for a member 
@@ -24,6 +25,7 @@ export default function Members({ id } : { id : string}) {
     const [ members, setMembers] = useState<MemberInfo[]>([]); 
     const [ isAddDialog, toggleDialog ] = useState<boolean>(false); // state if is adding dialog on or of
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false); // state of loading for loading circle
+    const [ delMember, setDelMember] = useState<string | null>(null);
     const { submitError } = useError();
    
     //initial fetch of members data
@@ -108,11 +110,12 @@ export default function Members({ id } : { id : string}) {
                     initialLoading ? 
                         <InitialLoader/>
                         :
-                        <TableMembers members={members} handleRemove={removeMember}/>
+                        <TableMembers members={members} handleRemove={(id : string) => setDelMember(id)}/>
                 }
                 </section>
                 { isAddDialog && <AddDialog onClose={handleAddButton} id={id} />}
             </div>
+            { delMember && <DeleteDialog message="Do you really won't to delete this Member" onClose={() => setDelMember(null)} onConfirm={() => removeMember(delMember)}/>}
         </main>
     )
 }
@@ -153,6 +156,7 @@ function TableMembers({ members, handleRemove } : { members : MemberInfo[], hand
 
 // display data about member of project and cliceble button
 function MemberRow({ memberInfo, handleRemove } : { memberInfo : MemberInfo, handleRemove : () => void }) {
+
     let imgSrc = "/avatar.svg"; 
     if (memberInfo.image) {
         imgSrc = `/uploads/user/${memberInfo.image}`;

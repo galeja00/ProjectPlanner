@@ -133,6 +133,10 @@ export default function TimeTable({ id } : { id : string }) {
 
     // thrue REST API create new group
     async function createGroup(name : string) {
+        if (name.length == 0) {
+            submitError("Your input for name of Group is empty", () => createGroup(name));
+            return;
+        }
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}/group/create`, {
                 method: "POST",
@@ -149,7 +153,7 @@ export default function TimeTable({ id } : { id : string }) {
                 return;
             }
             const data = await res.json();
-            throw new Error(data.error);
+            throw new Error(data.message);
         }
         catch (error) {
             console.error(error); 

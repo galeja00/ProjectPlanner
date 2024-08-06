@@ -1,6 +1,6 @@
 "use client"
 
-import {} from "@/app/components/other"
+import { DeleteDialog } from "@/app/components/other"
 import { Head, TeamBadge } from "../components/other"
 import { FilterButton } from "../components/filter-tables"
 import { Task, Team } from "@prisma/client"
@@ -40,6 +40,7 @@ type MemberInfo = {
     surname: string,
     teamId: string | null,
     teamName: string | null,
+    teamColor: string | null,
     image: string | null,
 }
 
@@ -50,6 +51,7 @@ export default function Teams({ projectId } : { projectId : string}) {
     const [isSettings, toggleSettings] = useReducer(isSettings => !isSettings, false); // indicate if is setting of some team open
     const [team, setTeam] = useState<TeamInfo  | null>(null); // info about team when user is adding memebrs or remuving same with task
     const [initialLoading, setInitialLoading] = useState<boolean>(false); 
+    const [delTeam, setDelTeam] = useState<string | null>(null);
     const { submitError } = useError();// for errro handeling
 
     // get data about teams in project from REST-APi
@@ -92,6 +94,7 @@ export default function Teams({ projectId } : { projectId : string}) {
                     }
                 }
                 setTeams(newTeams);
+                setDelTeam(null);
                 return;
             }
             const data = await res.json(); 
@@ -127,6 +130,7 @@ export default function Teams({ projectId } : { projectId : string}) {
         <main className="max-w-screen-lg w-full mx-auto">
             { isSettings && team && <TeamDialog team={team} projectId={projectId} updateTeams={fetchTeams} closeSettings={closeSettings}/>}
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
+            { delTeam && <DeleteDialog message="Do you really want to delete this Team?" onClose={() => setDelTeam(null)} onConfirm={() => deleteTeam(delTeam)}/>}
             <Head text="Teams" />
             <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
                 <ButtonWithImg image="/person-add.svg" alt="team" title="Create Team" onClick={toggleAdding}/>
@@ -136,7 +140,7 @@ export default function Teams({ projectId } : { projectId : string}) {
                     initialLoading ? 
                         <InitialLoader/>
                         :
-                        <TeamsTable teams={teams} handleDelete={deleteTeam} openSettings={openSettings}/>
+                        <TeamsTable teams={teams} handleDelete={(id: string) => setDelTeam(id)} openSettings={openSettings}/>
                 }
             </section>
         </main>
@@ -353,7 +357,7 @@ function ProjectMember({ member, active, onClick } : { member : MemberInfo, acti
         <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 ${ac && "outline outline-1 outline-green-500"} cursor-pointer`}>
             <Image src={img} alt="picture" height={15} width={15} className="rounded-full w-5 h-5 object-cover"></Image>
             <p>{member.name} {member.surname}</p>
-            { member.teamName && <TeamBadge name={member.teamName} color={""}/>}
+            { member.teamName && <TeamBadge name={member.teamName} color={member.teamColor}/>}
         </li>
     )
 }

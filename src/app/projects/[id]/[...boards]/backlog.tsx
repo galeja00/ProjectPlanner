@@ -14,6 +14,7 @@ import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
 import { Name } from '../components/other-client';
 import { InitialLoader } from '@/app/components/other-client';
 import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler';
+import { DeleteDialog } from '@/app/components/other';
 
 
 // for Context to easy use of functions and values
@@ -69,6 +70,10 @@ export default function Backlog({ id } : { id : string }) {
 
     // handle create of Group by submiting to RESP-API endpoint
     async function createGroup(name : string) {
+        if (name.length == 0) {
+            submitError("Your input for name of Group is empty", () => createGroup(name));
+            return;
+        }
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.Backlog}/group/create`, {
                 method: "POST",
@@ -90,7 +95,7 @@ export default function Backlog({ id } : { id : string }) {
         }
         catch (error) {
             console.error(error);
-            submitError(error, () => createGroup(name))
+            submitError(error, () => createGroup(name));
         }
     }
 
@@ -253,11 +258,16 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
     const [ displayd, setDisplayd ] = useState<string>("block"); // to toggle diaplay mode of group tasks
     const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false);
     const [ isDragOver, toggleDragOver ] = useReducer(isDragOver => !isDragOver, false);  
+    const [ isDel, toggleDel ] = useReducer(isDel => !isDel, false);    
     
     const { deleteGroup, updateGroup, fetchGroups, submitError, projectId, groups } = useContext(FunctionsContext)!;
 
     // handle create of task by fecth to endpoint
     async function createTask(name : string) {
+        if (name.length == 0) {
+            submitError("Your input for name of Task is empty", () => createTask(name));
+            return;
+        }
         try {
             const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/add`, {
                 method: "POST",
@@ -347,32 +357,37 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
         if (pos < groups.length - 2) {
             buttons[0] = { onClick: () => moveGroup(group.id, pos + 1), img: "/arrow-down.svg", type: ButtonType.Normal, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Down" };
         }
-        buttons[3] = { onClick: () => deleteGroup(group), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "Delete Group" };
+        buttons[3] = { onClick: () => toggleDel(), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "Delete Group" };
     }
     
 
     return (
-        <li key={group.id} 
-            className={`w-full rounded p-2 space-y-2 relative ${isDragOver ? "bg-neutral-400" : "bg-neutral-200"}`}
+        <>
+            <li key={group.id} 
+            className={`w-full rounded p-2 space-y-2 ${isDragOver ? "bg-neutral-400" : "bg-neutral-200"}`}
             onDrop={handleDropTask}
             onDragOver={handleDragOver} 
             onDragExit={handleOnLeave} 
             onDragLeave={handleOnLeave}
-        >
-            <Name name={group.name} updateName={updateName}></Name>
-            <div className='absolute right-2 top-0 '>
-                <ArrayButtons buttons={buttons} gap={1}/>
-            </div>
-            <ul className="space-y-2" style={{ display: displayd }}>
-                {
-                    group.tasks.map((task) => (
-                        <GroupTask key={task.id} task={task} handleOnDrag={(e) => handleOnDragTask(e, task)}/>
-                    ))
-                }
-                { isCreating && <CreatorOfTask createTask={createTask} endCreate={toggleCreating} />}
-            </ul>
-            { displayd == "block" && <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={toggleCreating}/>}
-        </li> 
+            >
+                <div className='flex justify-between'>
+                    <Name name={group.name} updateName={updateName}></Name>
+                    <ArrayButtons buttons={buttons} gap={1}/>
+                </div>
+                
+                <ul className="space-y-2" style={{ display: displayd }}>
+                    {
+                        group.tasks.map((task) => (
+                            <GroupTask key={task.id} task={task} handleOnDrag={(e) => handleOnDragTask(e, task)}/>
+                        ))
+                    }
+                    { isCreating && <CreatorOfTask createTask={createTask} endCreate={toggleCreating} />}
+                </ul>
+                { displayd == "block" && <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={toggleCreating}/>}
+            </li> 
+            { isDel && <DeleteDialog message={`Do you really want to delete this Group?`} onClose={toggleDel} onConfirm={() => deleteGroup(group)}/>}
+        </>
+        
     )
 }
 
@@ -389,10 +404,8 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
     const [ team, setTeam ] = useState<Team | null>(null);
     const [ colInfo, setColInfo ] = useState<ColumnInfo | null>(null);
-    
+    const [ isDel, toggleDel ] = useReducer(isDel => !isDel, false);
     const { collumns, projectId, fetchGroups, openTaskInfo, submitError } = useContext(FunctionsContext)!;
-
-
 
     async function fetchSolversAndTeam() {
         try {
@@ -529,7 +542,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
 
     
     const buttons : Button[] = new Array(3);
-    buttons[0] = { onClick: () => deleteTask(task), img: "/trash.svg", size: 8, padding: 2, type: ButtonType.Destructive, lightness: Lighteness.Dark, title: "Delete Task"}
+    buttons[0] = { onClick: () => toggleDel(), img: "/trash.svg", size: 8, padding: 2, type: ButtonType.Destructive, lightness: Lighteness.Dark, title: "Delete Task"}
     if (task.tasksGroupId) {
         buttons[1] = { onClick: () => removeTask(task), img: "/x.svg", size: 8, type: ButtonType.MidDestructive, lightness: Lighteness.Dark, title: "Remove Task"}
     }
@@ -556,7 +569,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                     <ArrayButtons buttons={buttons} gap={1}/>
                 </div>
             </li>
-            
+            { isDel && <DeleteDialog message={`Do you really want to delete this Task?`} onClose={toggleDel} onConfirm={() => deleteTask(task)}/>}
         </>
     )
 }

@@ -42,10 +42,10 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             }
         })
 
-        return Response.json({ message: "Sucesfully added group" }, { status: 200 });
+        return Response.json({ message: "Sucesfully added group." }, { status: 200 });
     }
     catch (error) {
         console.error(error);
-        return Response.json({  message: ErrorMessagges.Server }, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server }, { status: 500 });
     }
 }

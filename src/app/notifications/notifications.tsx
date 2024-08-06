@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import Image from 'next/image' 
 import { formatAgo } from "@/date";
 import { ButtonWithText } from "../components/buttons";
 import { ErrorBoundary, useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
 import { getImage, ImageTypes } from "@/images";
+import { DeleteDialog } from "../components/other";
 
 
 // type for notification to display it to user
@@ -89,10 +90,11 @@ function NotifiactionsList() {
 
 // display notifications informations and handle functions with them
 function NotificationsItem({notif, updateNotif} : {notif : Notification, updateNotif : () => void}) {
+    const [ isDecline, toggleIsDecline ] = useReducer(isDecline => !isDecline, false);
     const { submitError } = useError(); 
 
     // handle click on buttons by submiting it to endpoint
-    async function handleButtonClick(type : string) {
+    async function handleSubmitRes(type : string) {
         try {
             const res = await fetch(`/api/users/projectInvites/${type}`, {
                 method: "POST",
@@ -108,7 +110,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
         }
         catch (error) {
             console.error(error);
-            submitError(error, () => handleButtonClick(type));
+            submitError(error, () =>  handleSubmitRes(type));
         }
     }
     
@@ -123,22 +125,25 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
     }
 
     // formats ago to readeble data for user
-    var ago : number = notif.agoInHours;
-    var agoText : string = formatAgo(ago);
-    var image : string = getImage(notif.icon, ImageTypes.Project);
+    let ago : number = notif.agoInHours;
+    let agoText : string = formatAgo(ago);
+    let image : string = getImage(notif.icon, ImageTypes.Project);
 
     return (
-        <li className='bg-neutral-200 rounded p-2 w-full flex gap-4 relative'>
-            <Image src={image} alt={''} width={80} height={80} className="bg-neutral-100 rounded w-20 h-fit block mt-auto mb-auto"></Image>
-            <div className="flex flex-col gap-1 w-max h-fit justify-between">
-                <h3 className="w-max">{text}</h3>
-                <p className="w-max">{notif.name}</p>
-                <time className="text-sm text-neutral-400">{agoText}</time>
-            </div>
-            <div className="gap-2 flex w-full flex-row justify-end items-end">
-                <ButtonWithText text={"Accept"} type={"primary"} handle={() => handleButtonClick("accept")}/>
-                <ButtonWithText text={"Decline"} type={"destructive"} handle={() => handleButtonClick("decline")}/>
-            </div>
-        </li>
+        <>
+            { isDecline && <DeleteDialog message="" onClose={toggleIsDecline} onConfirm={() => handleSubmitRes("decline")}/>}
+            <li className='bg-neutral-200 rounded p-2 w-full flex gap-4 relative'>
+                <Image src={image} alt={''} width={80} height={80} className="bg-neutral-100 rounded w-20 h-fit block mt-auto mb-auto"></Image>
+                <div className="flex flex-col gap-1 w-max h-fit justify-between">
+                    <h3 className="w-max">{text}</h3>
+                    <p className="w-max">{notif.name}</p>
+                    <time className="text-sm text-neutral-400">{agoText}</time>
+                </div>
+                <div className="gap-2 flex w-full flex-row justify-end items-end">
+                    <ButtonWithText text={"Accept"} type={"primary"} handle={() =>  handleSubmitRes("accept")}/>
+                    <ButtonWithText text={"Decline"} type={"destructive"} handle={toggleIsDecline}/>
+                </div>
+            </li>
+        </>
     )
 } 

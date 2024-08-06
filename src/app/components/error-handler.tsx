@@ -46,7 +46,6 @@ export function ErrorBoundary({ children }: { children: React.ReactNode}) {
     const [error, setError] = useState<ErrorInfo | null>(null);
 
     function submitError(error : unknown, calbackFunc : () => void) {
-        console.log(error.message);
         setError({ msg: extractErrorMessage(error), repeatFunc: calbackFunc });
     }
 

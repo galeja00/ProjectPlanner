@@ -19,6 +19,10 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         }
 
         const data = await req.json();
+
+        if (data.name.length == 0) {
+            return Response.json({ message: "Name of Group can't be empty" }, { status: 400});
+        }
         
         const kanban : Kanban | null = await prisma.kanban.findFirst({
             where: {

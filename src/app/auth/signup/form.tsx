@@ -44,9 +44,17 @@ export default function RegisterForm() {
                 return;
             }
 
-            if (password.toString().length < 10) {
+            if (name.toString.toString().length || surname.toString().length == 0) {
+                setCorrectName(false);
+                setCorrectName(false);
+                setMsg({ message: "You need to insert name and surname.", type: false});
+                return;
+            }
+
+            if (password.toString().length < 8) {
                 setCorrectPsw(false);
-                setMsg({ message: "Your password is too short, it needs to be at least 10 characters long.", type: false });
+                setMsg({ message: "Your password is too short, it needs to be at least 8 characters long.", type: false });
+                return;
             } 
             // chack if passwords are same
             if (password == repeatpassword) {

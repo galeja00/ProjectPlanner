@@ -9,15 +9,28 @@ export async function POST(req : Request) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const user = await prisma.user.findFirst({ where:  { email: email }});
         if (!user) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const data = await req.json(); 
+        
+
         if(!data.password || !data.repeatPassword) {
-            return Response.json({ error: "Passwords arent same"}, { status: 400}); 
+            return Response.json({ message: "You need to submit both passwords"}, { status: 400 }); 
+        }
+
+    
+        if (data.password.length < 8) {
+            return Response.json({ message: "Your new password is too short; it needs to be at least 8 characters." }, { status: 400 });
+        }
+
+        console.log(data.password);
+        console.log(data.repeatPassword);
+        if(data.password !== data.repeatPassword) {
+            return Response.json({ message: "Passwords arent same"}, { status: 400}); 
         }
 
         const hashedPassword = await hash(data.password, 10);
@@ -33,6 +46,6 @@ export async function POST(req : Request) {
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

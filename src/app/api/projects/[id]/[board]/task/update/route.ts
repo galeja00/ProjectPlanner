@@ -17,6 +17,9 @@ export async function POST(req : Request, { params } : { params : { id : string 
         }
 
         const { task } : { task : Task } = await req.json();
+        if (task.name.length == 0) {
+            return Response.json({ message: "Name of Task can't be empty" }, { status: 400});
+        }
         if (typeof task.estimatedHours == "string") {
             task.estimatedHours = parseInt(task.estimatedHours);
             if (task.estimatedHours < 0) {

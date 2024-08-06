@@ -24,8 +24,9 @@ export function Creator({ what, handleCreate } : {what : string, handleCreate : 
     }
 
     function create(name : string) {
-        handleCreate(name); 
+        handleCreate(name);
         toggleCreating();
+        setName(""); 
     }
 
     
@@ -59,6 +60,7 @@ export function CreatorOfTask({ createTask, endCreate } : { createTask: (text : 
         if (event.key === 'Enter') {
             if (inputValue.length > 0) {
                 createTask(inputValue);
+                setName("");
             }
         } else if (event.key === 'Escape') {
             endCreate();
@@ -71,6 +73,7 @@ export function CreatorOfTask({ createTask, endCreate } : { createTask: (text : 
 
     function create() {
         createTask(name);
+        setName(""); 
     }
 
     return (

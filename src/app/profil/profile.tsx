@@ -233,7 +233,7 @@ function Id({ user } : { user : User }) {
 
 function PasswordChange({ onClose } : { onClose : () => void}) {
     const [msg, setMsg] = useState<string>("");
-    const [isCorrect, toggleCorrect] = useReducer(isCorrect => !isCorrect, true);
+    const [isCorrect, setCorrect] = useState(true);
 
     async function handleChangePassword(e : FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -250,13 +250,15 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
             })
             const data = await res.json();
             if (!res.ok) {
-                toggleCorrect();
+                setCorrect(false);
                 setMsg(data.message);
                 return;
             }
+            setCorrect(true);
             setMsg(data.message)
         }
         catch (error) {
+            setCorrect(false);
             if (error instanceof Error) {
                 setMsg(error.message);
             }  else if (typeof error === 'string') {

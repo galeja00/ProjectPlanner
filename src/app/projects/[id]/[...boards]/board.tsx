@@ -10,6 +10,7 @@ import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
 import { InitialLoader } from '@/app/components/other-client'
 import {  useError } from '@/app/components/error-handler'
 import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from '@/app/components/buttons'
+import { DeleteDialog } from '@/app/components/other'
 
 
 // defalt type for Object for work with column and tasks
@@ -95,6 +96,10 @@ export default function Board({ id } : { id : string }) {
 
     // handle create of new column by submiting data to endpoint REST-API
     async function createColumn(name : string) {
+        if (name.length == 0) {
+            submitError("Your input for name of Column is empty", () => createColumn(name));
+            return;
+        }
         try {
             const res = await fetch(`/api/projects/${id}/board/column/create`, {
                 method: "POST",
@@ -179,6 +184,10 @@ function TasksColumn(
  
     // sumbit created task to REST-API endpoint
     async function createTask(name : string) {
+        if (name.length == 0) {
+            submitError("Your input for name of Task is empty", () => createTask(name));
+            return;
+        }
         try {
             const colId = tasksCol.id;
             const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/add`, {
@@ -205,6 +214,7 @@ function TasksColumn(
             submitError(error, () => createTask(name));
         }
     }
+
 
     // delete delete from full project, removu only from board
     async function deleteTask(id : string) {
@@ -252,6 +262,9 @@ function TasksColumn(
 
     // submit new valius in task to REST-API endpoint
     async function updateTask(upTask : Task) {
+        if (upTask.name.length == 0) {
+            submitError("Your name of Task is empty", () => updateTask(upTask));
+        }
         try {
             const response = await fetch(`/api/projects/${projectId}/${BoardsTypes.Board}/task/update`, {
                 method: "POST", 
@@ -326,38 +339,41 @@ function TasksColumn(
     const w = isSmall ? "20rem" : "fit-content" ; 
 
     return (
-        <section 
-            className={`rounded h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-200"}`} 
-            onDrop={handleOnDrop} 
-            onDragOver={handleDragOver} 
-            onDragExit={handleOnLeave} 
-            onDragLeave={handleOnLeave}
-            style={{ width: w }}
-        >
-            <div className={`p-2 ${isSmall && "border-b"} border-neutral-400 flex justify-between gap-2`}>
-                <h2 className="">{tasksCol.name}</h2>
-                <ArrayButtons buttons={buttons} gap={1}/>
-            </div>
-            <div className="p-2" style={{ display: displayed}} >
-                <ul className={`flex flex-col gap-2 mb-2`} ref={tasksRef}>
-                    { 
-                        tasksCol.tasks.map((task) => (
-                            <TaskComponent 
-                                key={task.id} 
-                                projectId={projectId}
-                                task={task} 
-                                deleteTask={() => deleteTask(task.id)} 
-                                removeTask={() => removeTask(task.id)} 
-                                handleOnDrag={(e) => handleOnDrag(e, task)}
-                                updateTask={updateTask}
-                            />
-                    ))
-                    }
-                    { creating && <CreatorOfTask key={"create"} createTask={createTask} endCreate={toggle}/> }
-                </ul>
-                <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={() => handleCreateTaskForm()}/>
-            </div>
-        </section>
+        <>
+                <section 
+                className={`rounded h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-200"}`} 
+                onDrop={handleOnDrop} 
+                onDragOver={handleDragOver} 
+                onDragExit={handleOnLeave} 
+                onDragLeave={handleOnLeave}
+                style={{ width: w }}
+            >
+                <div className={`p-2 ${isSmall && "border-b"} border-neutral-400 flex justify-between gap-2`}>
+                    <h2 className="">{tasksCol.name}</h2>
+                    <ArrayButtons buttons={buttons} gap={1}/>
+                </div>
+                <div className="p-2" style={{ display: displayed}} >
+                    <ul className={`flex flex-col gap-2 mb-2`} ref={tasksRef}>
+                        { 
+                            tasksCol.tasks.map((task) => (
+                                <TaskComponent 
+                                    key={task.id} 
+                                    projectId={projectId}
+                                    task={task} 
+                                    deleteTask={() => deleteTask(task.id)} 
+                                    removeTask={() => removeTask(task.id)} 
+                                    handleOnDrag={(e) => handleOnDrag(e, task)}
+                                    updateTask={updateTask}
+                                />
+                        ))
+                        }
+                        { creating && <CreatorOfTask key={"create"} createTask={createTask} endCreate={toggle}/> }
+                    </ul>
+                    <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={() => handleCreateTaskForm()}/>
+                </div>
+            </section>
+        </>
+        
     )
 }
 // for menu on task to do diferenc funcs
@@ -387,6 +403,7 @@ function TaskComponent(
     const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isInfo, toggleInfo ] = useReducer((isInfo) => !isInfo, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
+    const [ isDel, toggleDel ] = useReducer(isDel => !isDel, false); 
     // state of solvers of task
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
 
@@ -417,15 +434,17 @@ function TaskComponent(
     }, []);
 
     function changeName(name : string) {
-        task.name = name;
-        updateTask(task);
+        if (name == task.name) return;
+        const newTask = task;
+        newTask.name = name;
+        updateTask(newTask);
     }
 
 
     const MoreMenuItems : MoreMenuItem[] = [
         { name: "Info", img: "/info.svg", p: 0, handler: toggleInfo },
         { name: "Remove", img: "/x.svg", p: 0, handler: removeTask },
-        { name: "Delete", img: "/trash.svg", p: 1,handler: deleteTask },
+        { name: "Delete", img: "/trash.svg", p: 1,handler: toggleDel },
     ];
     
     return (
@@ -449,6 +468,7 @@ function TaskComponent(
                 </div>
             </li>
             {isInfo && <TaskInfo id={task.id} projectId={projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
+            {isDel && <DeleteDialog message={`Do you really want to delete this Task?`} onClose={toggleDel} onConfirm={deleteTask}/>}
         </>
     )
 }
@@ -467,7 +487,7 @@ function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string 
 
             const data = await res.json(); 
             if (!res.ok) {
-                console.error(data.error);
+                console.error(data.message);
             }
 
             setTeam(data.team);

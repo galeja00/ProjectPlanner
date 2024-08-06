@@ -21,6 +21,10 @@ export async function POST(req : Request, { params } : { params: { id: string, b
 
         const { name } = await req.json();
 
+        if (name.length == 0) {
+            return Response.json({ message: "Name of Column can't be empty" })
+        }
+
         const board = await prisma.board.findFirst({
             where: {
                 projectId: params.id

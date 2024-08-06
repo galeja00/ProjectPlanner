@@ -7,6 +7,7 @@ import { NodeInfo } from "../api/nodes/static";
 import { useError } from "../components/error-handler";
 import { InitialLoader } from "../components/other-client";
 import { formatAgo } from "@/date";
+import { DeleteDialog } from "../components/other";
 
 // components to display personal user notes
 
@@ -14,6 +15,7 @@ import { formatAgo } from "@/date";
 export default function Notes() {
     const [ isCreator, toggleCreator ] = useReducer(isCreator => !isCreator, false);  // toggler between modes
     const [ notes, setNotes ] = useState<NodeInfo[]>([]); // state of every note user have
+    const [ delNote, setDelNote ] = useState<string | null>(null);
     const { submitError } = useError(); 
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false);
 
@@ -61,6 +63,7 @@ export default function Notes() {
                 }
             }
             setNotes(newNotes);
+            setDelNote(null);
         }
         catch (error) {
             console.error(error);
@@ -85,11 +88,12 @@ export default function Notes() {
         <>
             <section>
             { isCreator && <NoteDialog onClose={toggleCreator} onCreate={onCreate}/>}
+            { delNote && <DeleteDialog message="Do you really want to delete this Note?" onClose={() => setDelNote(null)} onConfirm={() => deleteNote(delNote)}/>}
                 <CreateButton text="Create new Note" onClick={toggleCreator} />
                 <ul className="grid grid-cols-2 gap-2">
                     {
                         notes.map((note) => (
-                            <NoteComponent key={note.id} note={note} deleteNote={deleteNote} />
+                            <NoteComponent key={note.id} note={note} deleteNote={(id : string) => setDelNote(id)} />
                         ))
                     }
                 </ul>
@@ -114,6 +118,7 @@ function NoteDialog({ onCreate, onClose } : { onCreate : () => void, onClose : (
 export function NoteCreator({ onCreate, selector = false, head = true, taskId = null } : { onCreate : () => void, selector? : boolean, head? : boolean, taskId? : string | null}) {
     const [ desc, setDesc ] = useState<string>("");
     const [ selectedTask, setTask ] = useState<string | null>(taskId);
+    
     const { submitError } = useError();
     // handle change of user input
     function handleChange(event : ChangeEvent<HTMLTextAreaElement>) {
@@ -125,7 +130,11 @@ export function NoteCreator({ onCreate, selector = false, head = true, taskId = 
         event.preventDefault();
         const formData = new FormData(event.currentTarget); 
         const header = formData.get("header");
-        console.log(header + " " + desc + " " + selectedTask);
+
+        if (!header || header.toString().length == 0) {
+            submitError("Your input for header of Task is empty", () => handleSubmit(event));
+            return
+        }
         try {
             const res = await fetch("/api/nodes/create", {
                 method: "POST",
