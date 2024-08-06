@@ -15,7 +15,6 @@ export default async function Menu() {
                 <nav className='flex flex-row flex-1'>
                     <ul className='flex flex-row flex-1 gap-4'>
                         <LinkTo href="/projects" text="Projects"></LinkTo>
-                        {/*<LinkTo href="/issues" text="Issues"></LinkTo>*/}
                         <LinkTo href="/notes" text="Notes"></LinkTo>
                     </ul>
                 </nav>
@@ -29,7 +28,6 @@ export default async function Menu() {
                 <div className='w-full flex flex-row-reverse'>
                     <Link href="/auth/signin" className='mr-4 link'>Sign in</Link> 
                 </div>
-                
             )}
         </header>
     )
