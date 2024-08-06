@@ -207,7 +207,7 @@ function TasksColumn(
     // update column every time when all columns changed
     useEffect(() => {
         setTasksCol(tasksColumns[index]);
-    }, []);
+    }, [tasksColumns]);
 
     
  
@@ -475,7 +475,8 @@ function TaskComponent(
         { name: "Remove", img: "/x.svg", p: 0, handler: removeTask },
         { name: "Delete", img: "/trash.svg", p: 1,handler: toggleDel },
     ];
-    
+
+
     return (
         <>
             <li className="rounded bg-neutral-100 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} data-task-id={task.id}>
@@ -625,19 +626,19 @@ function MoreMenu({ items }: { items: MoreMenuItem[] }) {
     const menuRef = useRef<HTMLUListElement | null>(null);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
   
-    function isClickedOutside(event: MouseEvent) {
-        const target = event.target as Node;
+    const isClickedOutside = (event: MouseEvent) => {
         if (menuRef.current && buttonRef.current) {
-            return !menuRef.current.contains(target) && !buttonRef.current.contains(target);
+            return !menuRef.current.contains(event.target as Node) && !buttonRef.current.contains(event.target as Node);
         }
+        return false;
       };
     
-    function handleClickOutside(event: MouseEvent) {
+      function handleClickOutside(event: MouseEvent) {
         event.stopPropagation();
         if (isClickedOutside(event)) {
             setMenu(false);
         }
-    }
+      }
   
     function handleClickButton(event: React.MouseEvent) {
         event.stopPropagation();
@@ -660,7 +661,7 @@ function MoreMenu({ items }: { items: MoreMenuItem[] }) {
             {isMenu && (
                 <ul ref={menuRef} className='absolute w-28 bg-neutral-200 rounded p-2 right-0 top-10 z-20 shadow shadow-neutral-100 space-y-1'>
                     {items.map((item) => (
-                        <MoreMenuItems key={item.name} item={item} />
+                        <MoreMenuItem key={item.name} item={item} />
                     ))}
           </ul>
         )}
@@ -668,7 +669,7 @@ function MoreMenu({ items }: { items: MoreMenuItem[] }) {
     );
 }
 
-function MoreMenuItems({ item } : { item : MoreMenuItem}) {
+function MoreMenuItem({ item } : { item : MoreMenuItem}) {
     return (
         <li className='flex gap-2'>
             <Image src={item.img} width={15} height={15} alt="" className={`w-6 p-${item.p}`}></Image>
@@ -718,7 +719,8 @@ function sortTaskByColIndex(task1 : Task, task2 : Task) : number {
     if (!task2.colIndex) return -1; // task2 má null colIndex, takže ho umístíme za task2
     return task2.colIndex - task1.colIndex;
 }
-function submitError(error: unknown, arg1: () => void) {
+
+function submitError(error: unknown, arg1: () => Promise<void>) {
     throw new Error('Function not implemented.')
 }
 

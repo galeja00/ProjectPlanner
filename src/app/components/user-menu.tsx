@@ -56,14 +56,12 @@ function UserMenu({ userImg } : { userImg : string }) {
       };
     
     function handleClickOutside(event: MouseEvent) {
-        event.stopPropagation();
         if (isClickedOutside(event)) {
             setMenu(false);
         }
     }
   
     function handleClickButton(event: React.MouseEvent) {
-        event.stopPropagation();
         setMenu(isMenu => !isMenu); 
     }
 

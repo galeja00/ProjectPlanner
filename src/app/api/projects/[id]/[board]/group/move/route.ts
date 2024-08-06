@@ -17,18 +17,18 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         const { id, newVal } : { id : string, newVal : number }= await req.json();
          
         
         if (newVal < 0) {
-            return Response.json({error: "Cant move to possition to neggative numbers"}, { status: 400 });
+            return Response.json({ message: "Cant move to possition to neggative numbers"}, { status: 400 });
         }
         const backlog = await prisma.backlog.findFirst({
             where: {
@@ -37,7 +37,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         })
 
         if (!backlog) {
-            return Response.json({ error: "This Time Table don't exist."}, { status: 400 });
+            return Response.json({ message: "This Time Table don't exist."}, { status: 400 });
         }
 
         const groups = await prisma.tasksGroup.findMany({
@@ -47,12 +47,12 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         })
 
         if (groups.length < newVal) {
-            return Response.json({error: "Cant move out of indexis"}, { status: 400 });
+            return Response.json({ message: "Cant move out of indexis"}, { status: 400 });
         }
 
         let prevG = groups.find((g) => g.id == id);
         if (prevG == undefined) {
-            return Response.json({ error: "This Group don't exist."}, { status: 400 });
+            return Response.json({ message: "This Group don't exist."}, { status: 400 });
         }
         
         let mov = newVal > prevG.position ? -1 : 1;
@@ -82,7 +82,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server }, { status: 500 });
     }
 }
 
