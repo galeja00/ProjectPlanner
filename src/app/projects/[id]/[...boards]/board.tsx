@@ -430,7 +430,6 @@ function TaskComponent(
         { task, projectId, removeTask, deleteTask, handleOnDrag, updateTask } : 
         { projectId : string, task : Task, removeTask : () => void, deleteTask : () => void, handleOnDrag : (e : React.DragEvent) => void , updateTask : (task : Task) => void}) {
     // reducers for pop up menus and dialog for task-info (true = on, false = off)
-    const [ isMenu, toggleMenu ] = useReducer((isMenu) => !isMenu, false);
     const [ isInfo, toggleInfo ] = useReducer((isInfo) => !isInfo, false);
     const [ isSolversMenu, toggleSolversMenu ] = useReducer((isSolversMenu) => !isSolversMenu, false);
     const [ isDel, toggleDel ] = useReducer(isDel => !isDel, false); 
@@ -482,10 +481,7 @@ function TaskComponent(
             <li className="rounded bg-neutral-100 p-2 flex flex-col gap-2 relative" draggable onDragStart={handleOnDrag} data-task-id={task.id}>
                 <div className='flex w-full justify-between gap-1'>
                     <Name name={task.name} submitName={changeName}/>
-                    <MoreButton handleClick={toggleMenu}/>
-                    {
-                        isMenu && <MoreMenu items={MoreMenuItems}/>
-                    }
+                    <MoreMenu items={MoreMenuItems}/>
                 </div>
                 <div className={`flex justify-between ${task.priority ? "" : "flex-row-reverse"}`}>
                     { task.priority && <PriorityImg priority={task.priority}/> }
@@ -507,6 +503,7 @@ function TaskComponent(
 // display basic info about team
 function TeamInf({ teamId, projectId } :  { projectId : string, teamId : string }) {
     const [ team, setTeam ] = useState<Team | null>(null); 
+    
 
     // fetch team witch solving this task
     async function fetchTeam(teamId : string ) {
@@ -621,25 +618,54 @@ function Name({ name, submitName } : { name : string, submitName : (name : strin
     )
 }
 
-function MoreButton({ handleClick } : { handleClick : () => void}) {
-    return (
-        <button className='h-fit rounded hover:bg-neutral-200 p-1'>
-            <Image src="/more.svg" alt="more" width={2} height={2} onClick={handleClick} className='w-5 h-5 rounded-full cursor-pointer'></Image>
-        </button>
-    )
-}
 
 
-function MoreMenu({ items } : { items : MoreMenuItem[] }) {
+function MoreMenu({ items }: { items: MoreMenuItem[] }) {
+    const [isMenu, setMenu] = useState<boolean>(false);
+    const menuRef = useRef<HTMLUListElement | null>(null);
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+  
+    function isClickedOutside(event: MouseEvent) {
+        const target = event.target as Node;
+        if (menuRef.current && buttonRef.current) {
+            return !menuRef.current.contains(target) && !buttonRef.current.contains(target);
+        }
+      };
+    
+    function handleClickOutside(event: MouseEvent) {
+        event.stopPropagation();
+        if (isClickedOutside(event)) {
+            setMenu(false);
+        }
+    }
+  
+    function handleClickButton(event: React.MouseEvent) {
+        event.stopPropagation();
+        setMenu(isMenu => !isMenu); 
+    }
+  
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+      } ;
+    }, [isMenu]);
+  
     return (
-        <ul className='absolute w-28 bg-neutral-200 rounded p-2 right-0 top-10 z-20 shadow shadow-neutral-100 space-y-1'>
-            {
-                items.map((item) => (
-                    <MoreMenuItems key={item.name} item={item}/>
-                ))
-            }
-        </ul>
-    )
+        <>
+            <button ref={buttonRef} onClick={handleClickButton} className='h-fit rounded hover:bg-neutral-200 p-1'>
+                <Image src="/more.svg" alt="more" width={20} height={20} className='w-5 h-5 rounded-full cursor-pointer' />
+            </button>
+            {isMenu && (
+                <ul ref={menuRef} className='absolute w-28 bg-neutral-200 rounded p-2 right-0 top-10 z-20 shadow shadow-neutral-100 space-y-1'>
+                    {items.map((item) => (
+                        <MoreMenuItems key={item.name} item={item} />
+                    ))}
+          </ul>
+        )}
+      </>
+    );
 }
 
 function MoreMenuItems({ item } : { item : MoreMenuItem}) {

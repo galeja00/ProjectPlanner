@@ -1,5 +1,5 @@
 'use client'
-import { useReducer, useState, useEffect } from 'react'
+import { useReducer, useState, useEffect, useRef } from 'react'
 import { signOut } from "next-auth/react"
 import Image from 'next/image'
 import Link from 'next/link'
@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation'
 // user info in right top corner of navbar
 export default function UserInfo() {
     const [userImg, setImg] = useState<string>("/avatar.svg");
-    const [menu, setMenu] = useState<boolean>(false);
 
     async function fetchUser() {
         try {
@@ -47,26 +46,64 @@ export default function UserInfo() {
     return (
         <>
             <NotificationIcon/>
-            <Image onClick={toggleUserMenu} src={userImg} alt="avater" width={30} height={30} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer object-cover' title='Jakub Galeta'></Image>
-            { menu ? <UserMenu/> : <></> }
+            <UserMenu userImg={userImg}/> 
         </>
         
     )
 }
 
 // menu fo user where he want to go
-function UserMenu() {
+function UserMenu({ userImg } : { userImg : string }) {
     const router = useRouter();
+    const [ isMenu, setMenu ] = useState<boolean>(false); 
+    const menuRef = useRef<HTMLUListElement | null>(null);
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+  
+    function isClickedOutside(event: MouseEvent) {
+        const target = event.target as Node;
+        if (menuRef.current && buttonRef.current) {
+            return !menuRef.current.contains(target) && !buttonRef.current.contains(target);
+        }
+      };
+    
+    function handleClickOutside(event: MouseEvent) {
+        event.stopPropagation();
+        if (isClickedOutside(event)) {
+            setMenu(false);
+        }
+    }
+  
+    function handleClickButton(event: React.MouseEvent) {
+        event.stopPropagation();
+        setMenu(isMenu => !isMenu); 
+    }
+
     function handleSignOut() {
         signOut();
         router.push("/auth/signin");
-        return;
     }
+  
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+      } ;
+    }, [isMenu]);
+
+    
     return (
-        <ul className='absolute z-20 flex flex-col p-4 bg-neutral-200 right-0  top-10 border border-neutral-700  gap-1 shadow shadow-neutral-100'>
-            <li><Link href="/profil" className='hover:text-violet-600 hover:border-b hover:border-violet-600 ease-in-out'>Your profile</Link></li>
-            <li><button onClick={handleSignOut} className='hover:text-red-600 hover:border-b text-red-500 hover:border-red-600 ease-in-out'>Sign Out</button></li>
-        </ul>
+        <>
+            <button ref={buttonRef} onClick={handleClickButton}>
+                <Image src={userImg} alt="avater" width={30} height={30} className='w-8 h-8 rounded-full bg-neutral-300 mr-5 text-color cursor-pointer object-cover'></Image>
+            </button>
+            { isMenu && 
+                <ul ref={menuRef} className='absolute z-20 flex flex-col p-4 bg-neutral-200 right-0  top-10 border border-neutral-700  gap-1 shadow shadow-neutral-100'>
+                    <li><Link href="/profil" className='hover:text-violet-600 hover:border-b hover:border-violet-600 ease-in-out'>Your profile</Link></li>
+                    <li><button onClick={handleSignOut} className='hover:text-red-600 hover:border-b text-red-500 hover:border-red-600 ease-in-out'>Sign Out</button></li>
+                </ul> 
+            }
+        </>
     )
 }
 
@@ -96,6 +133,7 @@ function NotificationIcon() {
             console.log(error);
         }
     }
+
 
     useEffect(() => {
         const interval = setInterval(() => {
