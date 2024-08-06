@@ -582,122 +582,115 @@ function WorkRanges({days, groupsRange} : { days : RefObject<HTMLDivElement>, gr
     )
 }
 
-
-
-function WorkRange({ parent, groupRange, index, rows } : { parent : DOMRect, groupRange : GroupRange, index : number, rows: Element[]}) {
-    const [ isGrabed, toggleGrab ] = useReducer(isGraped => !isGraped, false);
-    const [ range, setRange ] = useState<Range>(groupRange.range);
-    const [ movPos, setMovPos ] = useState<Position | null>(null); 
+function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, groupRange: GroupRange, index: number, rows: Element[] }) {
+    const [isGrabed, toggleGrab] = useReducer(isGraped => !isGraped, false);
+    const [range, setRange] = useState<Range>(groupRange.range);
+    const [startPos, setStartPos] = useState<Position | null>(null);
+    const [position, setPosition] = useState<Position | null>(null); 
     const { changeUserMode, updateRanges, openRangeMenu, ranges } = useContext(RangesContext)!;
-
-    // handle start of moving with GroupRange
+  
     function handleMouseGrap(event: MouseEvent) {
-        if (!isGrabed && event.button !== 2) {
-            submitGrap({ x: event.clientX, y: event.clientY });
-        }
+      if (!isGrabed && event.button !== 2) {
+        submitGrap({ x: event.clientX, y: event.clientY });
+      }
     }
-
-    function handleTouchGrap(event : TouchEvent) {
-        if (!isGrabed) {
-            submitGrap(convertTouchToPos(event));
-        }
+  
+    function handleTouchGrap(event: TouchEvent) {
+      if (!isGrabed) {
+        submitGrap(convertTouchToPos(event));
+      }
     }
-
-    function submitGrap(pos : Position) {
-        changeUserMode(UserMode.Moving);
-        toggleGrab();
-        setMovPos(pos);
+  
+    function submitGrap(pos: Position) {
+      changeUserMode(UserMode.Moving);
+      toggleGrab();
+      setStartPos(pos);
+      setPosition(pos);
     }
-
-    function handleTouchMove(event : TouchEvent) {
-        handleMove(convertTouchToPos(event));
+  
+    function handleTouchMove(event: TouchEvent) {
+      handleMove(convertTouchToPos(event));
     }
-
+  
     function handleMouseMove(event: MouseEvent) {
-        handleMove({ x: event.clientX, y: event.clientY });
+      handleMove({ x: event.clientX, y: event.clientY });
     }
-
-    // handler when user wont to move with GroupRange
-    function handleMove(pos : Position) {
-        if (isGrabed && movPos) {
-            const row = rows[index];
-            const widthDay = row.children[0].getBoundingClientRect().width;
-            const difference = pos.x - movPos.x;
-            if (Math.abs(difference) % widthDay === 0) {
-                setRange(prevRange => {
-                    // Create a new range object to avoid mutating state directly
-                    const newRange = { ...prevRange };
-                    
-                    // Calculate the new start and end positions
-                    const shift = difference / widthDay;
-                    
-                    // Adjust the range based on the shift
-                    if (newRange.start + shift < 0) {
-                        newRange.end -= newRange.start;
-                        newRange.start = 0;
-                    } else {
-                        newRange.start += shift;
-                        newRange.end += shift;
-                    }
-                    
-                    return newRange;
-                });
-                // Update the movement position
-                setMovPos(pos);
-            }
-        }
+  
+    function handleMove(pos: Position) {
+      if (isGrabed && startPos) {
+        setPosition(pos); 
+      }
     }
-
-    // handle when user stop moves with GroupRange
-    function handleDrop(event: MouseEvent | TouchEvent) {
-        if (isGrabed) {
-            ranges[index].range = range;
-            updateRanges(ranges);
-            toggleGrab();
-            setMovPos(null);
-            changeUserMode(UserMode.Creating);
-        }
+  
+    function handleDrop() {
+      if (isGrabed) {
+        const row = rows[index];
+        const widthDay = row.children[0].getBoundingClientRect().width;
+        const difference = position!.x - startPos!.x;
+        const shift = Math.round(difference / widthDay);
+  
+        setRange(prevRange => {
+          const newRange = { ...prevRange };
+  
+          if (newRange.start + shift < 0) {
+            newRange.end -= newRange.start;
+            newRange.start = 0;
+          } else {
+            newRange.start += shift;
+            newRange.end += shift;
+          }
+  
+          return newRange;
+        });
+  
+        ranges[index].range = range;
+        updateRanges(ranges);
+        toggleGrab();
+        setStartPos(null);
+        setPosition(null); 
+        changeUserMode(UserMode.Creating);
+      }
     }
-
-    // open menu for edit GroupRange len
+  
     function handleMenu(event: MouseEvent) {
-        event.preventDefault();
-        openRangeMenu(groupRange, index);
+      event.preventDefault();
+      openRangeMenu(groupRange, index);
     }
-    
-    // Becouse of async fetches we need to have date if we woant to display work range
+  
     if (!rows[index]) {
-        return (
-            <></>
-        )
+      return null;
     }
-    let boxs : Element[] = Array.from(rows[index].children);
+  
+    const boxs: Element[] = Array.from(rows[index].children);
     const row = rows[index].getBoundingClientRect();
     const startbox = boxs[range.start].getBoundingClientRect();
     const endbox = boxs[range.end].getBoundingClientRect();
-
-    /**/
+  
+    let currentLeft = position && startPos ? position.x - startPos.x + (startbox.left - row.left) : startbox.left - row.left;
+    //currentLeft = currentLeft < row.left ? row.left : currentLeft;
+  
     return (
-        <div 
-            className={`bg-violet-500 absolute z-100 rounded border border-neutral-600 bg-opacity-70 flex justify-between  ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
-            onMouseDown={handleMouseGrap}
-            onMouseUp={handleDrop}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleDrop}
-            onContextMenu={handleMenu}
-            onTouchStart={handleTouchGrap}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleDrop}
-            style={{ 
-                height: startbox.height / (3 / 2),
-                left: startbox.left - row.left,
-                top: startbox.top - parent.top + startbox.height / 6,
-                width: endbox.right - startbox.left  
-            }}
-        >
-        </div>
-    )
-}
+      <div
+        className={`bg-violet-500 absolute z-100 rounded border border-neutral-600 bg-opacity-70 flex justify-between ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
+        onMouseDown={handleMouseGrap}
+        onMouseUp={handleDrop}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleDrop}
+        onContextMenu={handleMenu}
+        onTouchStart={handleTouchGrap}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleDrop}
+        style={{
+          height: startbox.height / (3 / 2),
+          left: currentLeft,
+          top: startbox.top - parent.top + startbox.height / 6,
+          width: endbox.right - startbox.left
+        }}
+      >
+      </div>
+    );
+  }
+
 // convertor Group -> GroupRange
 function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange | null {
     if (group.startAt && group.deadlineAt) {
