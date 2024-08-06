@@ -590,36 +590,36 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
     const { changeUserMode, updateRanges, openRangeMenu, ranges } = useContext(RangesContext)!;
   
     function handleMouseGrap(event: MouseEvent) {
-      if (!isGrabed && event.button !== 2) {
-        submitGrap({ x: event.clientX, y: event.clientY });
-      }
+        if (!isGrabed && event.button !== 2) {
+            submitGrap({ x: event.clientX, y: event.clientY });
+        }
     }
   
     function handleTouchGrap(event: TouchEvent) {
-      if (!isGrabed) {
-        submitGrap(convertTouchToPos(event));
-      }
+        if (!isGrabed) {
+            submitGrap(convertTouchToPos(event));
+        }
     }
   
     function submitGrap(pos: Position) {
-      changeUserMode(UserMode.Moving);
-      toggleGrab();
-      setStartPos(pos);
-      setPosition(pos);
+        changeUserMode(UserMode.Moving);
+        toggleGrab();
+        setStartPos(pos);
+        setPosition(pos);
     }
   
     function handleTouchMove(event: TouchEvent) {
-      handleMove(convertTouchToPos(event));
+        handleMove(convertTouchToPos(event));
     }
   
     function handleMouseMove(event: MouseEvent) {
-      handleMove({ x: event.clientX, y: event.clientY });
+        handleMove({ x: event.clientX, y: event.clientY });
     }
   
     function handleMove(pos: Position) {
-      if (isGrabed && startPos) {
-        setPosition(pos); 
-      }
+        if (isGrabed && startPos) {
+            setPosition(pos); 
+        }
     }
   
     function handleDrop() {
@@ -653,12 +653,12 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
     }
   
     function handleMenu(event: MouseEvent) {
-      event.preventDefault();
-      openRangeMenu(groupRange, index);
+        event.preventDefault();
+        openRangeMenu(groupRange, index);
     }
   
     if (!rows[index]) {
-      return null;
+        return null;
     }
   
     const boxs: Element[] = Array.from(rows[index].children);
@@ -667,29 +667,33 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
     const endbox = boxs[range.end].getBoundingClientRect();
   
     let currentLeft = position && startPos ? position.x - startPos.x + (startbox.left - row.left) : startbox.left - row.left;
-    //currentLeft = currentLeft < row.left ? row.left : currentLeft;
-  
+    /*let zb = currentLeft % startbox.width;
+    currentLeft = zb < startbox.width / 2 ? currentLeft - zb : currentLeft + startbox.width - zb;*/
+    currentLeft = Math.max(currentLeft, 0); 
+
     return (
-      <div
-        className={`bg-violet-500 absolute z-100 rounded border border-neutral-600 bg-opacity-70 flex justify-between ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
-        onMouseDown={handleMouseGrap}
-        onMouseUp={handleDrop}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleDrop}
-        onContextMenu={handleMenu}
-        onTouchStart={handleTouchGrap}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleDrop}
-        style={{
-          height: startbox.height / (3 / 2),
-          left: currentLeft,
-          top: startbox.top - parent.top + startbox.height / 6,
-          width: endbox.right - startbox.left
-        }}
-      >
-      </div>
+        <div
+            className={`bg-violet-500 absolute z-100 rounded border border-neutral-600 bg-opacity-70 flex justify-between ${isGrabed ? "cursor-grabbing" : "cursor-grab"}`}
+            onMouseDown={handleMouseGrap}
+            onMouseUp={handleDrop}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleDrop}
+            onContextMenu={handleMenu}
+            onTouchStart={handleTouchGrap}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleDrop}
+            style={{
+            height: startbox.height / (3 / 2),
+            left: currentLeft,
+            top: startbox.top - parent.top + startbox.height / 6,
+            width: endbox.right - startbox.left
+            }}
+        >
+        </div>
     );
-  }
+}
+
+
 
 // convertor Group -> GroupRange
 function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange | null {
