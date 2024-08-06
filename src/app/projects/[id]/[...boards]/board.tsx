@@ -38,6 +38,7 @@ const TasksColumnsContext = createContext<ProviderColumns>({
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]); // state of or columns on board
     const [initialLoading, setInitialLoading] = useState<boolean>(true); // initial loading state
+    const [ delCol, setDelCol ] = useState<string | null>(null); 
     const { submitError } = useError();
 
     // get data of all columns from REST-API endpoint
@@ -122,6 +123,30 @@ export default function Board({ id } : { id : string }) {
         }
     }
 
+    async function deleteColumn(colId : string) {
+        try {
+            const res = await fetch(`/api/projects/${id}/board/column/delete`, {
+                method: "POST",
+                body: JSON.stringify({
+                    id: colId
+                })
+            })
+
+            if (!res.ok) {
+                const data = await res.json();
+                console.log(data.message);
+                return; 
+            }
+
+            fetchColumns(id, false);
+            setDelCol(null);
+        }
+        catch (error) {
+            console.error(error);
+            submitError(error, () => deleteColumn(id));
+        }
+    }
+
     // initial fetch of data when component is loaded
     useEffect(() => {
         fetchColumns(id, false);
@@ -148,12 +173,14 @@ export default function Board({ id } : { id : string }) {
                                     index={index} 
                                     projectId={id}
                                     handleMoveOfTask={handleMoveOfTask}
+                                    handleDelete={() => setDelCol(col.id)}
                                 />
                                 
                             ))
                         }
                         <Creator what={"Create new Column"} handleCreate={createColumn}/>
                     </section>
+                    { delCol && <DeleteDialog message='Do you really want to delete this Column?' onClose={() => setDelCol(null)} onConfirm={() => deleteColumn(delCol)}/>}
                 </div>
             </TasksColumnsContext.Provider>
         </>
@@ -163,8 +190,8 @@ export default function Board({ id } : { id : string }) {
 
 // component for lofi
 function TasksColumn(
-        { index, projectId, handleMoveOfTask } : 
-        { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string, taskIndex : number) => void }
+        { index, projectId, handleMoveOfTask, handleDelete } : 
+        { index : number, projectId : string, handleMoveOfTask : (fromColId : string, toColId : string, taskId : string, taskIndex : number) => void, handleDelete : () => void }
     ) {
     const [ creating, toggle ] = useReducer((creating : boolean) => !creating, false); //toggle between creating of task and normal
     const [ isSmall, toggleSmall ] = useReducer(isSmall => !isSmall, true);
@@ -180,7 +207,9 @@ function TasksColumn(
     // update column every time when all columns changed
     useEffect(() => {
         setTasksCol(tasksColumns[index]);
-    }, [tasksColumns]);
+    }, []);
+
+    
  
     // sumbit created task to REST-API endpoint
     async function createTask(name : string) {
@@ -332,7 +361,8 @@ function TasksColumn(
 
 
     const buttons : Button[] = [
-        { onClick: toggleSmall, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.Bright, title: "Hide Tasks" }
+        { onClick: toggleSmall, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.Bright, title: "Hide Tasks" },
+        { onClick: handleDelete, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "DeleteColumns" }
     ]
     
     const displayed = isSmall ? "block" : "none";
