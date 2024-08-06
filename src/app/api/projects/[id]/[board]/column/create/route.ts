@@ -12,11 +12,11 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: ErrorMessagges.MemberProject}, { status: 400 });
+            return Response.json({ message: ErrorMessagges.MemberProject}, { status: 400 });
         }
 
         const { name } = await req.json();
@@ -29,7 +29,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
 
 
         if (!board) {
-            return Response.json({ error: "This board dosn't exist"}, { status: 400 })
+            return Response.json({ message: "This board dosn't exist"}, { status: 400 })
         }
 
         const num : number = await prisma.taskColumn.count({
@@ -53,6 +53,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.log(error);
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

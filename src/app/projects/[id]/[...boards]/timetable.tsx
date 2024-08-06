@@ -119,7 +119,7 @@ export default function TimeTable({ id } : { id : string }) {
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
                 return;
             }
             setProjectStart(new Date(data.start.toString()));
@@ -170,7 +170,7 @@ export default function TimeTable({ id } : { id : string }) {
             })
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error);
+                throw new Error(data.message);
             } 
             fetchGroups();
         }   

@@ -33,7 +33,7 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose, submitGrou
             }); 
             const data = await res.json();
             if (!res.ok) {
-                throw Error(data.error);
+                throw Error(data.message);
             }
 
             setUnassignedGroups(data.groups
@@ -61,7 +61,7 @@ export function AddGroupToTimeTable({ projectId, groups, handleClose, submitGrou
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error); 
+                throw new Error(data.message); 
             }
             fetchGroups();
 

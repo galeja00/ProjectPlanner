@@ -21,11 +21,12 @@ export function ProjectInfo( { id } : { id : string }) {
                 method: "GET"
             });
 
+            const data = await response.json();
             if (!response.ok) {
-                throw new Error('Error: fatch failed to load data'); 
+                throw new Error(data.message); 
             }
 
-            const data = await response.json();
+            
             const project : Project = data.project;
 
             setInfo(project);

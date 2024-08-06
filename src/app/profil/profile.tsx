@@ -114,7 +114,7 @@ function Profile() {
                 }
                 return;
             }
-            throw new Error(data.error);
+            throw new Error(data.message);
         }
         catch (error) {
             console.error(error);
@@ -153,7 +153,7 @@ function Profile() {
             { isPassw && <PasswordChange onClose={togglePassw}/> }
             <div className="w-full m-auto space-y-8" >
                 <section className="bg-neutral-200 rounded flex gap-16 p-4">
-                    <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover: w-32 h-32 cursor-pointer object-cover"></Image>
+                    <Image src={image} onClick={toggleDrop} alt={""} height={300} width={300} className="rounded-full bg-neutral-300 hover:outline-violet-600 hover:outline w-32 h-32 cursor-pointer object-cover"></Image>
                     <div className="flex flex-col gap-4">
                         <Name user={user} handleUpdate={handleUpdateAcc}/>
                         <Email user={user}/>
@@ -251,13 +251,19 @@ function PasswordChange({ onClose } : { onClose : () => void}) {
             const data = await res.json();
             if (!res.ok) {
                 toggleCorrect();
-                setMsg(data.error);
+                setMsg(data.message);
                 return;
             }
             setMsg(data.message)
         }
         catch (error) {
-            console.error(error);
+            if (error instanceof Error) {
+                setMsg(error.message);
+            }  else if (typeof error === 'string') {
+                setMsg(error);
+            } else {
+                setMsg('An unknown error occurred');
+            }
         }
     }
 

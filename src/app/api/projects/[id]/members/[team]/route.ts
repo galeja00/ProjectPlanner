@@ -10,11 +10,11 @@ export async function GET(req : Request, { params } : { params: { id : string, t
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project"}, { status: 400 });
         }
 
         const membersOfProject : ProjectMember[] = await prisma.projectMember.findMany({
@@ -58,6 +58,6 @@ export async function GET(req : Request, { params } : { params: { id : string, t
         return Response.json({ data: users }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

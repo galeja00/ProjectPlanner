@@ -28,7 +28,7 @@ export default function Notes() {
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
       
             setNotes(data.nodes);
@@ -52,7 +52,7 @@ export default function Notes() {
             
             if (!res.ok) {
                 const data = await res.json(); 
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             const newNotes : NodeInfo[] = [];
             for (let note of notes) {
@@ -137,7 +137,7 @@ export function NoteCreator({ onCreate, selector = false, head = true, taskId = 
             })
             const data = await res.json(); 
             if (!res.ok) {
-                console.error(data.error);
+                console.error(data.message);
                 return;
             }
             onCreate();

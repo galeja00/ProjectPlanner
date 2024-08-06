@@ -54,7 +54,7 @@ export default function Board({ id } : { id : string }) {
             }
 
             if (!data.data) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             setTaskColumns(data.data);
         }
@@ -83,7 +83,7 @@ export default function Board({ id } : { id : string }) {
     
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
 
             fetchColumns(id, false);
@@ -105,7 +105,7 @@ export default function Board({ id } : { id : string }) {
 
             if (!res.ok) {
                 const data = await res.json();
-                console.log(data.error);
+                console.log(data.message);
                 return; 
             }
 
@@ -191,7 +191,7 @@ function TasksColumn(
             
             const json = await response.json();
             if (!response.ok) {
-                throw new Error(json.error);
+                throw new Error(json.message);
             }
             
             const newTask : Task = json.task;
@@ -217,7 +217,7 @@ function TasksColumn(
             });
             const json = await response.json();
             if (!response.ok) {
-                throw new Error(json.error);
+                throw new Error(json.message);
             }
 
             const newTasks : Task[] = json.tasks;
@@ -240,7 +240,7 @@ function TasksColumn(
             });
             const data = await res.json(); 
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             const newTasks : Task[] = data.tasks;            
             setTasksCol({ id: tasksCol.id, boardId: tasksCol.id, name: tasksCol.name, tasks: newTasks}); 
@@ -261,7 +261,7 @@ function TasksColumn(
             });
             const json = await response.json();
             if (!response.ok) {
-                throw new Error(json.error);
+                throw new Error(json.message);
             }
             const tasks : Task[] = tasksCol.tasks;
             const updatedTasks : Task[] = [];
@@ -401,7 +401,7 @@ function TaskComponent(
             }
             const data = await res.json();
             if (!data.solvers) {
-                throw new Error();
+                throw new Error(data.message);
             }
             setSolvers(data.solvers);
         }

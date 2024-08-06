@@ -28,18 +28,18 @@ export async function GET(req : Request, { params } : { params: { id: string, ta
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project"}, { status: 400 });
         }
 
         switch (params.func) {
             case TaskFunctions.info:
                 const taskInfo : TaskInfo | null = await findInfo(params.taskId);
                 if (!taskInfo) {
-                    return Response.json({ error: "This task dosen`t exist"}, { status: 400 });
+                    return Response.json({ message:  "This task dosen`t exist"}, { status: 400 });
                 }
                 return Response.json({ taskInfo: taskInfo }, {status: 200});
             case TaskFunctions.solver:

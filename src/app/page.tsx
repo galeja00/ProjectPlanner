@@ -9,7 +9,7 @@ export default async function Home() {
   if (session) {
     redirect("/projects");
   } else {
-    redirect("/auth/signup");
+    redirect("/auth/signin");
   }
 
   return (

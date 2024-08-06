@@ -10,17 +10,17 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         const { id } = await req.json();
         
         if (params.board != BoardsTypes.TimeTable) {
-            return Response.json({ error: "You can't add group on this board."}, { status: 400 });
+            return Response.json({  message: "You can't add group on this board."}, { status: 400 });
         }
 
         const timeTable = await prisma.timeTable.findFirst({
@@ -30,7 +30,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         })
 
         if (!timeTable) {
-            return Response.json({ error: "This Time Table don't exist."}, { status: 400 });
+            return Response.json({ message: "This Time Table don't exist."}, { status: 400 });
         }
 
         await prisma.tasksGroup.update({
@@ -46,6 +46,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
+        return Response.json({  message: ErrorMessagges.Server }, { status: 500 });
     }
 }

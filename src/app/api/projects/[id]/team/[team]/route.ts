@@ -25,11 +25,11 @@ export async function GET(req : Request, { params } : { params : { id : string, 
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project"}, { status: 400 });
         }
 
         const team : Team | null = await prisma.team.findFirst({
@@ -68,6 +68,6 @@ export async function GET(req : Request, { params } : { params : { id : string, 
 
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

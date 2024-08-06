@@ -21,6 +21,10 @@ export async function POST(request : Request) {
             return NextResponse.json({ massage: "You need to fill all inputs"} , { status: 400 })
         }
 
+        if (password.length < 10) {
+            return NextResponse.json({ message: "Your password is too short, it needs to be at least 10  characters long"}, { status: 400 });
+        }
+
         if (password !== repeatpassword) {
             return NextResponse.json({ massage: "Your passwords arent same"}, { status: 400 });
         }
@@ -40,7 +44,6 @@ export async function POST(request : Request) {
         }
     }
     catch (e) {
-        console.error(e);
         return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
     }
 }

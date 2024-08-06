@@ -145,7 +145,7 @@ function Members({ team, projectId}  : { team : TeamInfo, projectId : string}) {
             })
             const data = await res.json(); 
             if (!res.ok) {
-                throw Error(data.error);
+                throw Error(data.message);
             }
             const projectMembers : MemberInfo[] = data.data;
             const sorted : MemberInfo[] = [];

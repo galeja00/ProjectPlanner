@@ -11,16 +11,16 @@ export async function GET(req : Request) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize}, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize}, { status: 401 });
         }
         const user : User | null = await prisma.user.findFirst({ where: { email: email }});    
         if (!user) {
-            return Response.json({error: ErrorMessagges.Authorize}, { status: 400 });
+            return Response.json({message: ErrorMessagges.Authorize}, { status: 400 });
         }
         return Response.json({ image: user.image }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 400 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 400 });
     }
 }
 // for submiting new photo/image for user
@@ -28,18 +28,18 @@ export async function POST(req : Request) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize}, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize}, { status: 401 });
         }
         const user : User | null = await prisma.user.findFirst({ where: { email: email }});    
         if (!user) {
-            return Response.json({error: ErrorMessagges.Authorize}, { status: 400 });
+            return Response.json({message: ErrorMessagges.Authorize}, { status: 400 });
         }
         const formData = await req.formData();
         const image = formData.get("image");
         
         if (!image) {
             // If no file is received, return a JSON response with an error and a 400 status code
-            return Response.json({ error: "No files received." }, { status: 400 });
+            return Response.json({ message: "No files received." }, { status: 400 });
         }
         if (image instanceof File) {
             const pathToImages = process.env.IMAGE_DIRECTORY_PATH;
@@ -47,7 +47,7 @@ export async function POST(req : Request) {
             
             //chack if file is image type
             if (!file || file.type != "image/png" && file.type != "image/jpeg") {
-                return Response.json({ error: "This file isnt image" }, { status: 400 })
+                return Response.json({ message: "This file isnt image" }, { status: 400 })
             }
             //if user have image delete it
             if (user.image) {
@@ -79,7 +79,7 @@ export async function POST(req : Request) {
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }
 

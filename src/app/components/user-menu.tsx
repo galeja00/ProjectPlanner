@@ -18,7 +18,7 @@ export default function UserInfo() {
             });
             const data = await res.json();
             if (!res.ok) {
-                console.error(data.error);
+                console.error(data.message);
                 fetchUser();
             }
             if (data.image) {

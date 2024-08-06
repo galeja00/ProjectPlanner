@@ -67,13 +67,13 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
                 }
                 return Response.json({ start: timeTable.startAt, groups: timeTable.groups }, {status: 200});
             default:
-                return Response.json({ error: "Bad type of board in REST API request"}, { status: 400});
+                return Response.json({ message: "Bad type of board in REST API request"}, { status: 400});
         }
         
     } 
     catch (error) {
         console.log(error);
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }
 

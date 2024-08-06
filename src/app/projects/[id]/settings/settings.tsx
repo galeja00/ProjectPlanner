@@ -42,7 +42,7 @@ export default function Settings({ id } : { id : string}) {
 
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             
             setProject(data.project);
@@ -73,7 +73,7 @@ export default function Settings({ id } : { id : string}) {
                     toggleImgDrop();
                 }
             } else {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
         }
         catch (error) {
@@ -95,7 +95,7 @@ export default function Settings({ id } : { id : string}) {
             }
 
             const data = await res.json();
-            throw new Error(data.error);
+            throw new Error(data.message);
         }
         catch (error) {
             console.error(error);
@@ -115,7 +115,7 @@ export default function Settings({ id } : { id : string}) {
 
             if (!res.ok) {
                 const data = await res.json(); 
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             const { project } = await res.json(); 
             setProject(project);

@@ -14,11 +14,11 @@ export async function POST(req : Request, { params } : { params: { id : string }
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project"}, { status: 400 });
         }
 
         const project = await prisma.project.findFirst({
@@ -27,7 +27,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
             }
         })
         if (!project) {
-            return Response.json({ error: "This project dont exist" },{status: 400}); 
+            return Response.json({ message: "This project dont exist" },{status: 400}); 
         }
 
         const formData = await req.formData();
@@ -35,13 +35,13 @@ export async function POST(req : Request, { params } : { params: { id : string }
         
         if (!image) {
             // If no file is received, return a JSON response with an error and a 400 status code
-            return Response.json({ error: "No files received." }, { status: 400 });
+            return Response.json({ message: "No files received." }, { status: 400 });
         }
         if (image instanceof File) {
             const pathToImages = process.env.IMAGE_DIRECTORY_PATH;
             const file : File = image;
             if (!file || file.type != "image/png" && file.type != "image/jpeg") {
-                return Response.json({ error: "This file isnt image" }, { status: 400 })
+                return Response.json({ message: "This file isnt image" }, { status: 400 })
             }
 
             if (project.icon) {
@@ -71,10 +71,10 @@ export async function POST(req : Request, { params } : { params: { id : string }
 
             return Response.json({ message: "Successful image uploud", icon: upProject.icon }, { status: 200 });
         }
-        return Response.json({ error: ErrorMessagges.BadRequest }, {status: 400});
+        return Response.json({ message: ErrorMessagges.BadRequest }, {status: 400});
 
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

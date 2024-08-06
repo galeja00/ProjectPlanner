@@ -30,7 +30,7 @@ export default function RegisterForm() {
         try {
             // validet if user fild all inputs
             if (!(email && name && surname && password && repeatpassword )) {
-                setMsg({ message: "You need to fill all inputs", type: false});
+                setMsg({ message: "You need to fill all inputs.", type: false});
                 setCorrectPsw(false);
                 setCorrectEmail(false);
                 setCorrectName(false);
@@ -40,9 +40,14 @@ export default function RegisterForm() {
             // validete if email is looking like real one
             if (!EmailValidator.validate(email.toString())) {
                 setCorrectEmail(false);
-                setMsg({ message: "You need to insert valid email", type: false});
+                setMsg({ message: "You need to insert valid email.", type: false});
                 return;
             }
+
+            if (password.toString().length < 10) {
+                setCorrectPsw(false);
+                setMsg({ message: "Your password is too short, it needs to be at least 10 characters long.", type: false });
+            } 
             // chack if passwords are same
             if (password == repeatpassword) {
                 try {
@@ -59,17 +64,18 @@ export default function RegisterForm() {
 
                     // chack if response from API is OK
                     if  (!response.ok) {
-                        setMsg({ message: "Error in communication with server, try again", type: false });
+                        const data = await response.json();
+                        setMsg({ message: data.message, type: false });
                     } else {
                         setMsg({ message: "Succesfull registration", type: true});
                         router.push("/auth/signin");
                     }
                 } catch (error) {
-                    setMsg({ message: "Error in communication with server, try again", type: false });
+                    setMsg({ message: "Error in communication with server, try again.", type: false });
                 }
             } else {
                 setCorrectPsw(false);
-                setMsg({ message: "Your passwords aren't same", type: false });
+                setMsg({ message: "Your passwords aren't same.", type: false });
             }
         }
         catch (error) {

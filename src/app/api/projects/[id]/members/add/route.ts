@@ -9,11 +9,11 @@ export async function POST(req : Request, { params } : { params: { id : string }
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize" }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project" }, { status: 400 });
         }
 
         const data = await req.json();
@@ -27,7 +27,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
 
         
         if (isMember) {
-            return Response.json({ error: "User is allready member" }, { status: 400 });
+            return Response.json({ message: "User is allready member" }, { status: 400 });
         }
         const invite : ProjectInvite | null = await prisma.projectInvite.create({
             data: {
@@ -36,7 +36,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
             }
         })
         if (!invite) {
-            return Response.json({ error: "Invite failed to create" }, { status: 500 });
+            return Response.json({ message:  "Invite failed to create" }, { status: 500 });
         }
 
         return Response.json({ message: "Invite succesed" }, { status: 200 });

@@ -37,7 +37,7 @@ function CreateProject() {
                     name: name
                 })   
             })
-            console.log(res);
+
             if (res.ok) {
                 setCorrectName(true);
                 router.push("/projects");
@@ -45,10 +45,17 @@ function CreateProject() {
             }
             
             const data = await res.json();
-            setErrorMsg(data.error); 
+            setErrorMsg(data.message); 
            
         } catch (error) {
-            setErrorMsg("Something went wrong");
+            if (error instanceof Error) {
+                setErrorMsg(error.message);
+            }  else if (typeof error === 'string') {
+                setErrorMsg(error);
+            } else {
+                setErrorMsg('An unknown error occurred');
+            }
+            
         }
     }
 

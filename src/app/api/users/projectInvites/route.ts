@@ -8,12 +8,12 @@ export async function GET(req : Request) {
     try {
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ error: "You must be authorize"}, { status: 400 });
+            return Response.json({ message: "You must be authorize"}, { status: 400 });
         }
 
         const id : string | null = await getUserId(email);
         if (id == null) {
-            return Response.json({ error: "You must be authorize"}, { status: 400 });
+            return Response.json({ message: "You must be authorize"}, { status: 400 });
         }
 
         const projectInvites : ProjectInvite[] = await prisma.projectInvite.findMany({
@@ -26,6 +26,6 @@ export async function GET(req : Request) {
 
     } catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server}, { status: 400 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 400 });
     }
 }

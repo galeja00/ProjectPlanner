@@ -217,7 +217,7 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
                 return;
             }
             const data = await res.json();
-            throw new Error(data.error);
+            throw new Error(data.message);
         
         }
         catch (error) {
@@ -267,11 +267,12 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
                 })
             })
             if (res.ok) {
+                toggleCreating();
                 fetchGroups();
                 return;
             }
             const data = await res.json();
-            throw new Error(data.error); 
+            throw new Error(data.messgae); 
         }
         catch (error) {
             console.error(error);
@@ -466,7 +467,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
             
             if (!res.ok) {
                 const data = await res.json(); 
-                throw new Error(data.error);
+                throw new Error(data.message);
             } 
 
             fetchGroups();
@@ -509,7 +510,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
                 return;
             }
             const data = await res.json();
-            throw new Error(data.error);
+            throw new Error(data.message);
         }
         catch (error) {
             console.error(error);

@@ -16,7 +16,7 @@ export async function GET(req : Request) {
 
         const email = session.user.email;
         if (!email) {
-            return NextResponse.json({ massage: "fail"}, { status: 401 })
+            return NextResponse.json({ massage: "Fail to authotize"}, { status: 401 })
         }
 
         const user = await prisma.user.findFirst({
@@ -47,9 +47,9 @@ export async function GET(req : Request) {
                 }
             }
         });
-        return NextResponse.json({ error: "succes", projects: projects}, { status: 200 })
+        return NextResponse.json({  projects: projects} , { status: 200 })
     } catch {
-        return NextResponse.json({ error: ErrorMessagges.Server}, { status: 500 })
+        return NextResponse.json({  message: ErrorMessagges.Server }, { status: 500 })
     }
     
     

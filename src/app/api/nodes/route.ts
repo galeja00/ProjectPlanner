@@ -12,7 +12,7 @@ export async function GET(req : Request) {
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
 
         const user = await prisma.user.findFirst({
@@ -21,7 +21,7 @@ export async function GET(req : Request) {
             }
         })
         if(!user) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
 
         const nodes : Node[] = await prisma.node.findMany({
@@ -55,7 +55,7 @@ export async function GET(req : Request) {
         return Response.json({ nodes: resNodes }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 })
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 })
     }
     
 } 

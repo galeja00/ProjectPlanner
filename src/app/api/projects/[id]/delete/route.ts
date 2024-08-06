@@ -7,11 +7,11 @@ export async function POST(req : Request, { params } : { params: { id : string }
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         await prisma.project.delete({
@@ -23,6 +23,6 @@ export async function POST(req : Request, { params } : { params: { id : string }
         return Response.json({ status: 200 });
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server }, { status: 500 });
     }
 }

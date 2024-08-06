@@ -12,11 +12,11 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project"}, { status: 400 });
         }
 
         const data = await req.json();
@@ -48,7 +48,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             return Response.json({ task: task }, { status: 200 });
         } else if (params.board == BoardsTypes.Board) {
             if (!(data.name || data.colId)) {
-                return Response.json({ error: "You need specify name and colId in data segment"}, { status: 400 });
+                return Response.json({ message: "You need specify name and colId in data segment"}, { status: 400 });
             }
     
             const tasksCol : TaskColumn | null = await prisma.taskColumn.findFirst({ 

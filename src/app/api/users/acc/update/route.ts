@@ -10,17 +10,17 @@ export async function POST(req : Request) {
     try {   
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message:"Fail to authorize"}, { status: 401 });
         }
         const user = await prisma.user.findFirst({ where: { email : email }});
         if (!user) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const data = await req.json(); 
         const reqUser = data.user;
 
         if (!reqUser) {
-            return Response.json({ error: "Bad request" }, {status: 400 });
+            return Response.json({ message:"Bad request" }, {status: 400 });
         }
         
         await prisma.user.update({
@@ -36,6 +36,6 @@ export async function POST(req : Request) {
         return Response.json({ message: "Succesfully updated user data" }, { status: 200 })
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

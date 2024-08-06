@@ -12,11 +12,11 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: ErrorMessagges.MemberProject }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.MemberProject }, { status: 400 });
         }
 
         const { taskId } : { taskId : string } = await req.json();
@@ -26,7 +26,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             }
         })
         if (!prevRemove) {
-            return Response.json({ error: "This task don't exist"}, { status: 400 });
+            return Response.json({ message: "This task don't exist"}, { status: 400 });
         } 
 
         if (prevRemove.taskColumnId && prevRemove.colIndex) {
@@ -71,12 +71,12 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             })
             return Response.json({ tasks: finalTasks }, { status : 200 });
         } else {
-            return Response.json({ error: ErrorMessagges.BadRequest }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.BadRequest }, { status: 400 });
         }
         
     } 
     catch (error) {
         console.log(error);
-        return Response.json({ error: ErrorMessagges.Server }, { status: 400 });
+        return Response.json({ message: ErrorMessagges.Server }, { status: 400 });
     }
 }

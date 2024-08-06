@@ -9,7 +9,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const user = await prisma.user.findFirst({
             where: {
@@ -17,7 +17,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
             }
         })
         if(!user) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
 
         const delNode = await prisma.node.delete({
@@ -27,13 +27,13 @@ export async function POST(req : Request, { params } : { params: { id: string } 
             }
         })
         if (!delNode) {
-            return Response.json({ error: "Fail to delete node"}, { status: 400 });
+            return Response.json({ message: "Fail to delete node"}, { status: 400 });
         }
 
         return Response.json({ message: `Succefully deleted node` }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: "Somthing wen't wrong on server"}, { status: 500 })
+        return Response.json({ message: "Somthing wen't wrong on server"}, { status: 500 })
     }
     
 } 

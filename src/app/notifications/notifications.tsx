@@ -50,7 +50,7 @@ function NotifiactionsList() {
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             setNotifs(data.notif);
         }
@@ -102,7 +102,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             updateNotif();
         }

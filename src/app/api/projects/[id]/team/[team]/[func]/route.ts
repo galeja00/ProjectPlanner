@@ -16,11 +16,11 @@ export async function POST(req : Request, { params } : { params: { id: string, t
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project"}, { status: 400 });
         }
         const data = await req.json();
 
@@ -54,7 +54,7 @@ export async function POST(req : Request, { params } : { params: { id: string, t
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }
 
@@ -62,11 +62,11 @@ export async function GET(req : Request, { params } : { params: { id: string, te
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
+            return Response.json({ message: "You are not member of this project"}, { status: 400 });
         }
 
         const team : Team | null = await prisma.team.findFirst({
@@ -76,12 +76,12 @@ export async function GET(req : Request, { params } : { params: { id: string, te
         })
 
         if (!team) {
-            return Response.json({ error: "This team dont exist" }, {status : 400});
+            return Response.json({ message: "This team dont exist" }, {status : 400});
         }
 
         return Response.json({ team : team }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 } 

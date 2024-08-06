@@ -8,11 +8,11 @@ export async function GET(req : Request, { params } : { params : { id : string }
     try {
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 400 });
         }
         const id : string | null = await getUserId(email);
         if (id == null) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 400 });
         }
         
         let count : number = 0;
@@ -28,6 +28,6 @@ export async function GET(req : Request, { params } : { params : { id : string }
         return Response.json({ count: count }, { status: 200 });
     }
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

@@ -8,7 +8,7 @@ export async function GET(req : Request, { params } : { params: { id: string } }
     try {
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
         
         const user = await prisma.user.findFirst({
@@ -17,7 +17,7 @@ export async function GET(req : Request, { params } : { params: { id: string } }
             },
         })
         if (!user) {
-            return Response.json({ error: "Can not find this user in DB"}, { status: 404 });
+            return Response.json({ message: "Can not find this user in DB"}, { status: 404 });
         }
 
         const project = await prisma.project.findFirst({
@@ -29,18 +29,13 @@ export async function GET(req : Request, { params } : { params: { id: string } }
 
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: "You are not member of this project"}, { status: 400 });
-        }
-
-
-        if (!member) {
-            return Response.json({ error: "You are not project member of this project"}, { status: 403 });
+            return Response.json({ message: "You are not project member of this project"}, { status: 403 });
         }
 
         return Response.json({ message: "succes", project: project}, { status: 200 });
     } 
     catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
     
 }

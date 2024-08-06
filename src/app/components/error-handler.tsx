@@ -32,6 +32,7 @@ export function useError() {
 
 // extract from error message or change to default value
 function extractErrorMessage(error: unknown): string {
+
     if (error instanceof Error) {
         return error.message;
     } else if (typeof error === 'string') {
@@ -45,6 +46,7 @@ export function ErrorBoundary({ children }: { children: React.ReactNode}) {
     const [error, setError] = useState<ErrorInfo | null>(null);
 
     function submitError(error : unknown, calbackFunc : () => void) {
+        console.log(error.message);
         setError({ msg: extractErrorMessage(error), repeatFunc: calbackFunc });
     }
 

@@ -20,11 +20,11 @@ export async function POST(req : Request) {
     try {
         const session = await getServerSession(options);
         if (!(session && session.user)) {
-            return Response.json({ error: "You cant get this data if you arent authorize"}, { status: 401 });
+            return Response.json({ message: "You cant get this data if you arent authorize"}, { status: 401 });
         }
         const email = session.user.email; 
         if (!email) {
-            return Response.json({ error: "Fail to authorize"}, { status: 401 });
+            return Response.json({ message: "Fail to authorize"}, { status: 401 });
         }
 
         const data = await req.json();
@@ -71,6 +71,6 @@ export async function POST(req : Request) {
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server}, { status: 400 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 400 });
     }
 }

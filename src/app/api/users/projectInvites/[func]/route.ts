@@ -13,12 +13,12 @@ export async function POST(req : Request, { params } : { params : { func : strin
         // check if user is signet in
         const email : string | null = await authorize(req);
         if (email == null) {
-            return Response.json({ error: "You must be authorize"}, { status: 400 });
+            return Response.json({ message: "You must be authorize"}, { status: 400 });
         }
 
         const id : string | null = await getUserId(email);
         if (id == null) {
-            return Response.json({ error: "Cant accept invite, this invite is not for you"}, { status: 400 });
+            return Response.json({ message: "Cant accept invite, this invite is not for you"}, { status: 400 });
         }
 
         const data = await req.json();

@@ -482,7 +482,7 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
 
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             setTeams(data.teams);
         }
@@ -547,7 +547,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
 
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             //console.log(data.data);
             setMembers(data.data);
