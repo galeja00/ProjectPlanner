@@ -10,7 +10,7 @@ import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { InitialLoader } from "@/app/components/other-client";
 import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
-import { ButtonWithImg, ButtonWithText } from "@/app/components/buttons";
+import { ArrayButtons, Button, ButtonType, ButtonWithImg, ButtonWithText, Lighteness } from "@/app/components/buttons";
 
 // here is components for TimeTable (basic Grant diagram)
 
@@ -82,6 +82,7 @@ enum ConnectType {
 // for easy acces for components to use of basic function in timetable
 interface TimeTableContextTypes {
     createGroup: (name: string) => void;
+    removeGroup: (groupId: string) => void;
     updateGroups: (ranges : GroupRange[]) => void;
     projectStart: Date;
     currentDate: Date;
@@ -161,6 +162,29 @@ export default function TimeTable({ id } : { id : string }) {
         } 
     }
 
+    async function removeGroup(groupId : string) {
+        try {
+            const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}/group/remove`, {
+                method: "POST",
+                body: JSON.stringify({
+                    id: groupId
+                })
+            })
+
+            if (res.ok) {
+                const newGroups = groups.filter(group => group.id !== groupId);
+                setGroups([...newGroups]);
+                return;
+            }
+            const data = await res.json();
+            throw new Error(data.message);
+        }
+        catch (error) {
+            console.error(error); 
+            submitError(error, () => removeGroup(groupId)); 
+        }
+    }
+
     // update for grooup Dates (range - < startAt, deadlineAt >)
     async function submitGroupDates(group : TimeTableGroup)  {
         try {
@@ -184,7 +208,7 @@ export default function TimeTable({ id } : { id : string }) {
         } 
     
     }
-    // function for update groubs from Groubs Ranges
+    // function for update groubs from Groups Ranges
     // GroupRanges convert to Timatable object and find diference -> update
     // only update <startAt,deadlineAt> not names and other date
     function updateGroups(groupsRanges : GroupRange[]) {
@@ -237,7 +261,7 @@ export default function TimeTable({ id } : { id : string }) {
 
     return (
         <>
-            <TimeTableContext.Provider value={{ createGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
+            <TimeTableContext.Provider value={{ createGroup, removeGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
                 <section className="overflow-x-hidden h-full max-h-full ">
                     <Head text='Time Table'/>
                     <div className="mb-2">
@@ -354,11 +378,25 @@ function Groups() {
         <div className="border-b border-neutral-600">
             {
                 groups.map((group, row) => (
-                    <div key={group.id} className={`h-10 w-full pl-4 py-2 ${row % 2 == 0 ? `bg-neutral-200` : `bg-neutral-100`}`}>
-                        {group.name}
-                    </div>
+                    <Group key={group.id} group={group} row={row}/>
                 ))
             }
+        </div>
+    )
+}
+
+function Group({ group, row } : { group : TimeTableGroup, row : number }) {
+    const { removeGroup } = useContext(TimeTableContext)!;
+
+    const lightness = row % 2 == 0 ? Lighteness.Bright : Lighteness.Dark
+    const buttons : Button[] = [
+        { onClick: () => removeGroup(group.id), type: ButtonType.MidDestructive, img: "/x.svg", size: 6, lightness: lightness, title: "Remove Group" }
+    ] 
+
+    return (
+        <div key={group.id} className={`h-10 w-full pl-4 py-2 pr-2 flex justify-between ${row % 2 == 0 ? `bg-neutral-200` : `bg-neutral-100`}`}>
+            {group.name}
+            <ArrayButtons buttons={buttons} gap={2}/>
         </div>
     )
 }
@@ -376,7 +414,7 @@ function getRow(pos : Position, rows : Element[] ) : Row | null {
 
 // get day from coordinates on board
 function getDay(pos : Position, cols : Element[] ) : Day | null {
-    //optimalizace vyhledáví v poly elementů pomocí binárního vyhledávání
+   // Optimization of searching in an array of elements using binary search on ranges
     let start = 0;
     let end = cols.length - 1;
     while (start <= end) {
@@ -412,6 +450,7 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
             return;
         }
     }
+
     // handler to find where user clicket on board
     function handleClick(event: MouseEvent) {
         event.preventDefault();
@@ -463,14 +502,14 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
     return (
         <RangesContext.Provider value={{ changeUserMode, updateRanges, openRangeMenu, userMode, ranges: groupsRanges }}>
             <div className="">
-                <div className="border-b relative  w-max h-max border-neutral-600 "
+                <div className="border-b relative w-max h-max border-neutral-600 "
                 onClick={handleClick}
                 ref={days}
-                >
-                    {groupsRanges.map((groupRange, row) => (
+            >
+                    { groupsRanges.map((groupRange, row) => (
                         <GroupRow key={row} row={row} size={count} current={getDiffInDays(projectStart, currentDate)} />
                     ))}
-                {days && <WorkRanges days={days} groupsRange={groupsRanges} />}
+                { days && <WorkRanges days={days} groupsRange={groupsRanges} />}
                 </div>
             </div>
             { rangeInfo && <RangeMenu rangeInfo={rangeInfo} closeMenu={() => setRangeInfo(null)} removeRange={() => removeRange(rangeInfo)}/>}
@@ -622,6 +661,7 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
         }
     }
   
+    // convert postion of rectangle to range
     function handleDrop() {
       if (isGrabed) {
         const row = rows[index];
@@ -666,6 +706,7 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
     const startbox = boxs[range.start].getBoundingClientRect();
     const endbox = boxs[range.end].getBoundingClientRect();
   
+    // calculate position of range
     let currentLeft = position && startPos ? position.x - startPos.x + (startbox.left - row.left) : startbox.left - row.left;
     /*let zb = currentLeft % startbox.width;
     currentLeft = zb < startbox.width / 2 ? currentLeft - zb : currentLeft + startbox.width - zb;*/

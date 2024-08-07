@@ -11,17 +11,17 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         
         const email = await authorize(req);
         if (!email) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 401 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 401 });
         }
         const member = await getMember(email, params.id);
         if (!member) {
-            return Response.json({ error: ErrorMessagges.Authorize }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.Authorize }, { status: 400 });
         }
 
         const data = await req.json();
 
         if (!data.id || !((!data.startAt && !data.endAt) || (data.startAt && data.endAt))) {
-            return Response.json({ error: ErrorMessagges.BadRequest }, { status: 400 });
+            return Response.json({ message: ErrorMessagges.BadRequest }, { status: 400 });
         }
 
 
@@ -41,6 +41,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         return Response.json({ message: "Succesfully updated" }, { status: 200 });
 
     } catch (error) {
-        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server }, { status: 500 });
     }
 }
