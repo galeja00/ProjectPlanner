@@ -167,7 +167,7 @@ function MemberRow({ memberInfo, handleRemove } : { memberInfo : MemberInfo, han
             <td className='col-span-2'>{memberInfo.tasksLoad}</td>
             <td className='flex gap-1 justify-end col-span-1'>
                 <button onClick={handleRemove} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">
-                        <img src="/x.svg" title="Remove User" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40"></img>
+                        <img src="/trash.svg" title="Remove User" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40 p-2"></img>
                 </button>
             </td>
         </tr>
