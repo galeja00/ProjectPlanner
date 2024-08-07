@@ -1,8 +1,6 @@
 import { prisma } from "@/db";
-import { Backlog, Board, Kanban, ProjectMember, Task, TaskColumn, TasksGroup, User } from "@prisma/client";
 import { authorize } from "@/app/api/static";
 import { getMember } from "../../../static";
-import { BoardsTypes } from "../../board";
 import { group } from "console";
 import { ErrorMessagges } from "@/error-messages";
 

@@ -31,7 +31,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
             }
         })
 
-
         if (!board) {
             return Response.json({ message: "This board dosn't exist"}, { status: 400 })
         }

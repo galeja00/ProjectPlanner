@@ -72,7 +72,7 @@ export async function GET(req : Request, { params } : { params: { id: string, bo
         
     } 
     catch (error) {
-        console.log(error);
+        console.error(error);
         return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }

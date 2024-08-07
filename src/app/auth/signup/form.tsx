@@ -93,7 +93,7 @@ export default function RegisterForm() {
     }
 
     return (
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8 pb-8 border-b border-neutral-900 '>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-8 pb-8 border-b border-neutral-900'>
             <FormItem item="Email" name="email" type="email" correct={correctEmail}/>
             <div className='flex flex-row gap-4'>
                 <FormItem item="Name" name="name" type="text" correct={correctName}/>
