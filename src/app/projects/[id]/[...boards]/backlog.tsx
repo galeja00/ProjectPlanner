@@ -663,7 +663,7 @@ function HowTo({ onClose } : { onClose : () => void}) {
                 </div>
                 <dl className="grid grid-cols-5 p-4 gap-4 w-[80rem]">
                     <dt className="col-span-1 h-28 relative">
-                        <Image src="/how/backlog/groupsbl.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                        <Image src="/how/backlog/groupsbl.png" layout="fill" objectFit="contain" alt="Group"/>
                     </dt>
                     <dd className="col-span-4">
                         <h3 className="font-bold">Groups</h3>
@@ -674,10 +674,10 @@ function HowTo({ onClose } : { onClose : () => void}) {
                         </p>
                     </dd>
                     <dt className="col-span-1 h-28 relative">
-                        <Image src="/how/backlog/groupfuncs.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                        <Image src="/how/backlog/groupfuncs.png" layout="fill" objectFit="contain" alt="Group functions"/>
                     </dt>
                     <dd className="col-span-4">
-                        <h3 className="font-bold">Functions with Group</h3>
+                        <h3 className="font-bold">Group functions</h3>
                         <p>
                             You can perform various functions with a group. 
                             These functions are available in the groups button menu in the following order: move down (if possible), move up (if possible), 

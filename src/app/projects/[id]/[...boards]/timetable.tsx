@@ -804,7 +804,7 @@ function HowTo({ onClose } : { onClose : () => void}) {
                         <Image src="/how/timetable/weeks.png" layout="fill" objectFit="contain" alt="Timeline Division"/>
                     </dt>
                     <dd className="col-span-4">
-                        <h3 className="font-bold">Timeline Division</h3>
+                        <h3 className="font-bold">Timeline division</h3>
                         <p>
                             A timeline element that displays one week and its days. The week number is counted from the beginning of the project. 
                             Below the week number, the start and end of the week are indicated.
