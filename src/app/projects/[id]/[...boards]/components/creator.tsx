@@ -1,9 +1,9 @@
 "use client"
 
-import { CreateButton } from '@/app/components/buttons';
+import { ButtonSideText, Lighteness } from '@/app/components/buttons';
 import { useReducer, useState, KeyboardEvent,  ChangeEvent } from 'react'
 
-export function Creator({ what, handleCreate } : {what : string, handleCreate : (name : string) => void}) {
+export function Creator({ what, handleCreate, lightness, big } : {what : string, handleCreate : (name : string) => void, lightness : Lighteness, big? : boolean }) {
     const [ isCreating, toggleCreating ] = useReducer(isCreating => !isCreating, false);
     const [ name, setName ] = useState<string>("");
 
@@ -29,24 +29,26 @@ export function Creator({ what, handleCreate } : {what : string, handleCreate : 
         setName(""); 
     }
 
+    const bgColor = lightness == Lighteness.Bright ? "bg-neutral-100" : "bg-neutral-200";
+    const buttonColor = lightness == Lighteness.Bright ? "bg-neutral-200" : "bg-neutral-100";
     
     return (
         <div className='h-fit'>
             { isCreating ? 
-                <div className='bg-neutral-200 p-2 rounded  w-fit space-x-4 flex flex-row'>
-                    <input type="text" className="input-primary h-8 w-48" onChange={handleChange} onKeyDown={handleKeyDown}/>
+                <div className={`${bgColor} rounded p-2  w-fit space-x-4 flex flex-row`}>
+                    <input type="text" className={`input-primary px-1 h-6 w-48 ${buttonColor}`} onChange={handleChange} onKeyDown={handleKeyDown}/>
                     <div className='space-x-2 h-full flex items-center'>
-                        <button onClick={() => create(name)} className='bg-neutral-100 w-max rounded hover:outline hover:outline-1 hover:outline-green-600'>
-                            <img src="/check.svg" className='w-8 h-8 hover:bg-green-600 rounded hover:bg-opacity-40 p-1 '/>
+                        <button onClick={() => create(name)} className={`${buttonColor} w-max rounded hover:outline hover:outline-1 hover:outline-green-600`}>
+                            <img src="/check.svg" className='w-6 h-6 hover:bg-green-600 rounded hover:bg-opacity-40'/>
                         </button>
-                        <button onClick={toggleCreating} className='bg-neutral-100 w-max rounded hover:outline hover:outline-1 hover:outline-red-600'>
-                            <img src="/x.svg" className='w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40 p-1'/>
+                        <button onClick={toggleCreating} className={`${buttonColor} w-max rounded hover:outline hover:outline-1 hover:outline-red-600`}>
+                            <img src="/x.svg" className='w-6 h-6 hover:bg-red-600 rounded hover:bg-opacity-40'/>
                         </button>
                     </div>
                     
                 </div>
                 :
-                <CreateButton text={what} onClick={toggleCreating}/>
+                <ButtonSideText text={what} image={"/plus.svg"} onClick={toggleCreating} lightness={lightness} big={big}/>
             }
         </div>
     )
@@ -77,14 +79,14 @@ export function CreatorOfTask({ createTask, endCreate } : { createTask: (text : 
     }
 
     return (
-        <li className="rounded bg-neutral-100 p-2 flex gap-2 ">
-            <input type="text" className="bg-neutral-100 outline-none border-b w-full" id="name" onKeyDown={handleKeyDown} onChange={handleChange}></input>
+        <li className="rounded bg-neutral-100 p-2 flex gap-2">
+            <input type="text" className="bg-neutral-100 outline-none border-b border-neutral-600 w-full" id="name" onKeyDown={handleKeyDown} onChange={handleChange}></input>
             <div className='space-x-2 h-full flex items-center'>
                 <button onClick={() => create()} className='bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-green-600'>
-                    <img src="/check.svg" className='w-8 h-8 hover:bg-green-200 rounded hover:bg-opacity-40 p-1 '/>
+                    <img src="/check.svg" className='w-6 h-6 hover:bg-green-200 rounded hover:bg-opacity-40'/>
                 </button>
                 <button onClick={endCreate} className='bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600'>
-                    <img src="/x.svg" className='w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40 p-1'/>
+                    <img src="/x.svg" className='w-6 h-6 hover:bg-red-600 rounded hover:bg-opacity-40'/>
                 </button>
             </div>
         </li>

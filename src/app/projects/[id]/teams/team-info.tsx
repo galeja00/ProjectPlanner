@@ -58,9 +58,14 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
 
             if (res.ok) {
                 setInfTeam(team);  
+                return;
             }
+
+            const data = await res.json();
+            throw new Error(data.error);
         }
         catch (error) {
+            console.error(error);
             submitError(error, () => updateTeam(team));
         }
     }
@@ -183,7 +188,7 @@ function Members({ team, projectId}  : { team : TeamInfo, projectId : string}) {
             }
 
             const data = await res.json();
-            throw Error(data.error);
+            throw Error(data.message);
         }
         catch (error) {
             console.error(error);

@@ -11,7 +11,7 @@ import Image from "next/image"
 import { TeamDialog } from "./team-info"
 import { InitialLoader } from "@/app/components/other-client"
 import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler"
-import { ButtonWithImg } from "@/app/components/buttons"
+import { ButtonSideText, ButtonWithImg, Lighteness } from "@/app/components/buttons"
 import { getImage, ImageTypes } from "@/images"
 
 // type for teams and with mebers are in teams
@@ -132,9 +132,9 @@ export default function Teams({ projectId } : { projectId : string}) {
             { isAdding && <AddDialog projectId={projectId} handleCloseDialog={toggleAdding} updateTeams={fetchTeams} /> }
             { delTeam && <DeleteDialog message="Do you really want to delete this Team?" onClose={() => setDelTeam(null)} onConfirm={() => deleteTeam(delTeam)}/>}
             <Head text="Teams" />
-            <section className='flex gap-4 mb-4 w-fit h-fit items-end'>
-                <ButtonWithImg image="/person-add.svg" alt="team" title="Create Team" onClick={toggleAdding}/>
-            </section>
+            <div className='mb-4'>
+                <ButtonSideText text={"Create new Team"} onClick={toggleAdding} image='/person-add.svg' lightness={Lighteness.Dark} padding={1} big/>
+            </div>
             <section>
                 {
                     initialLoading ? 

@@ -166,8 +166,8 @@ export default function Board({ id } : { id : string }) {
         <>
             <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns, submitError }}>
                 <div className='relative'>
-                    <Head text='Board'/>
-                    <div className='mb-2'>
+                    <div className='flex gap-4'>
+                        <Head text='Board'/>
                         <ButtonWithImg onClick={()=>toggleIsHowTo()} alt="Info" image="/info.svg" title="How to use Board"/>
                     </div>
                     <section className="flex gap-2 w-full">
@@ -183,7 +183,7 @@ export default function Board({ id } : { id : string }) {
                                 
                             ))
                         }
-                        <Creator what={"Create new Column"} handleCreate={createColumn}/>
+                        <Creator what={"Create new Column"} handleCreate={createColumn} lightness={Lighteness.Dark} big/>
                     </section>
                     { delCol && <DeleteDialog message='Do you really want to delete this Column?' onClose={() => setDelCol(null)} onConfirm={() => deleteColumn(delCol)}/>}
                 </div>
@@ -405,7 +405,7 @@ function TasksColumn(
                         }
                         { creating && <CreatorOfTask key={"create"} createTask={createTask} endCreate={toggle}/> }
                     </ul>
-                    <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={() => handleCreateTaskForm()}/>
+                    <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={() => handleCreateTaskForm()} lightness={Lighteness.Bright}/>
                 </div>
             </section>
         </>

@@ -332,7 +332,7 @@ function Description({ task, updateTask } : { task : Task, updateTask : (task : 
     desc = editDesc;
     return (
         <article className='m-4 space-y-4'>
-            <ButtonSideText text={"Edit Description"} image={"/pencil.svg"} onClick={toggleEdit}/>
+            <ButtonSideText text={"Edit Description"} image={"/pencil.svg"} onClick={toggleEdit} lightness={Lighteness.Bright}/>
             {
                 isEditing ? 
                     <div className="space-y-2">
@@ -415,7 +415,7 @@ function Notes({ task } : { task : Task }) {
     if (isCreating) {
         return (
             <div className="m-4 space-y-4">
-                <ButtonSideText text={"Create new Note"} image={"/plus.svg"} onClick={toggleCreating}/>
+                <ButtonSideText text={"Create new Note"} image={"/plus.svg"} onClick={toggleCreating} lightness={Lighteness.Bright}/>
                 <NoteCreator onCreate={onCreate} head={false} taskId={task.id}/>
             </div>
         )
@@ -423,7 +423,7 @@ function Notes({ task } : { task : Task }) {
 
     return (
         <div className="m-4 space-y-4">
-            <ButtonSideText text={"Create new Note"} image={"/plus.svg"} onClick={toggleCreating}/>
+            <ButtonSideText text={"Create new Note"} image={"/plus.svg"} onClick={toggleCreating} lightness={Lighteness.Bright}/>
             <ul className=" grid auto-cols-fr gap-2">
                 {
                     notes.map((note) => (

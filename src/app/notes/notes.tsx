@@ -1,7 +1,7 @@
 "use client"
 import { ChangeEvent, FormEvent, useEffect, useReducer, useState } from "react";
 import { Dialog, DialogClose } from "../components/dialog";
-import { ArrayButtons, Button, ButtonType, CreateButton, Lighteness } from "../components/buttons";
+import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from "../components/buttons";
 import { FormItem, SubmitButton } from "../components/form";
 import { NodeInfo } from "../api/nodes/static";
 import { useError } from "../components/error-handler";
@@ -89,7 +89,9 @@ export default function Notes() {
             <section>
             { isCreator && <NoteDialog onClose={toggleCreator} onCreate={onCreate}/>}
             { delNote && <DeleteDialog message="Do you really want to delete this Note?" onClose={() => setDelNote(null)} onConfirm={() => deleteNote(delNote)}/>}
-                <CreateButton text="Create new Note" onClick={toggleCreator} />
+                <div className="mb-4">
+                    <ButtonSideText text="Create new Note" image={"plus.svg"} onClick={toggleCreator} lightness={Lighteness.Dark} big/>
+                </div>
                 <ul className="grid grid-cols-2 gap-2">
                     {
                         notes.map((note) => (

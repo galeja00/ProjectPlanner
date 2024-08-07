@@ -195,8 +195,8 @@ export default function Backlog({ id } : { id : string }) {
         <>
             <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups: fetchGroupsProv , openTaskInfo, submitError, projectId: id, collumns: collumns, groups: groups }}>
                 <div className="max-w-screen-lg w-full mx-auto">
-                    <Head text="Backlog"/>
-                    <div className='mb-2'>
+                    <div className='flex gap-4'>
+                        <Head text="Backlog"/>
                         <ButtonWithImg onClick={()=>toggleHowTo()} alt="Info" image="/info.svg" title="How to use Backlog"/>
                     </div>
                     <ListOfGroups groups={groups} />
@@ -246,7 +246,7 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
 
     return (
         <section className="w-full space-y-2" > 
-            <Creator what="Create New Group" handleCreate={createGroup}/>
+            <Creator what="Create New Group" handleCreate={createGroup} lightness={Lighteness.Dark} big/>
             <ul className="space-y-4 w-full" ref={groupsRef}>
                 {
                     groups.map((group) => (
@@ -389,7 +389,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
                     }
                     { isCreating && <CreatorOfTask createTask={createTask} endCreate={toggleCreating} />}
                 </ul>
-                { displayd == "block" && <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={toggleCreating}/>}
+                { displayd == "block" && <ButtonSideText text={"Create new Task"} image='/plus.svg' onClick={toggleCreating} lightness={Lighteness.Bright}/>}
             </li> 
             { isDel && <DeleteDialog message={`Do you really want to delete this Group?`} onClose={toggleDel} onConfirm={() => deleteGroup(group)}/>}
         </>

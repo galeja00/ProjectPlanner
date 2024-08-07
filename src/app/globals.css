@@ -6,8 +6,11 @@
   .btn-primary {
     @apply px-4 py-1 border rounded border-violet-600 text-violet-600 hover:bg-violet-600 hover:bg-opacity-40 hover:border-violet-600 hover:text-violet-600 ease-in-out;
   }
+  .btn-primary2 {
+    @apply px-4  border rounded border-violet-600 text-violet-600 hover:bg-violet-600 hover:bg-opacity-40 hover:border-violet-600 hover:text-violet-600 ease-in-out;
+  }
   .btn-destructive {
-    @apply px-4 py-1 border rounded border-red-500 text-red-500 hover:bg-red-500 hover:border-red-600 hover:bg-opacity-40 hover:text-red-600 ease-in-out;
+    @apply px-4 py-1 border rounded border-red-600 text-red-600 hover:bg-red-600 hover:border-red-600 hover:bg-opacity-40 hover:text-red-600 ease-in-out;
   }
   .input-primary {
     @apply rounded px-4 py-2 focus:outline focus:outline-2 focus:outline-violet-500 bg-neutral-100 text-neutral-950

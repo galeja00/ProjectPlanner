@@ -7,6 +7,7 @@ import { InitialLoader } from '@/app/components/other-client'
 import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler'
 import { getImage, ImageTypes } from '@/images'
 import { DeleteDialog } from '@/app/components/other'
+import { ButtonSideText, Lighteness } from '@/app/components/buttons'
 
 
 // type for a member 
@@ -43,7 +44,7 @@ export default function Members({ id } : { id : string}) {
             
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
 
             const membersInfo : MemberInfo[] = data.data;
@@ -98,13 +99,10 @@ export default function Members({ id } : { id : string}) {
     return (
         <main className="py-14 px-14 relative w-full">
             <div className='max-w-screen-lg w-full mx-auto'>
-
-            
                 <Head text="Members"/>
-                <section className='flex gap-4 mb-4 w-full h-fit items-end'>
-
-                    <AddMemberButton handleClick={handleAddButton}/>
-                </section>
+                <div className='mb-4'>
+                    <ButtonSideText text={"Invite new member"} onClick={handleAddButton} image='/person-add.svg' lightness={Lighteness.Dark} padding={1} big/>
+                </div>
                 <section>
                 {
                     initialLoading ? 
@@ -115,7 +113,7 @@ export default function Members({ id } : { id : string}) {
                 </section>
                 { isAddDialog && <AddDialog onClose={handleAddButton} id={id} />}
             </div>
-            { delMember && <DeleteDialog message="Do you really won't to delete this Member" onClose={() => setDelMember(null)} onConfirm={() => removeMember(delMember)}/>}
+            { delMember && <DeleteDialog message="Do you really want to delete this member?" onClose={() => setDelMember(null)} onConfirm={() => removeMember(delMember)}/>}
         </main>
     )
 }
@@ -202,13 +200,14 @@ function AddDialog({ onClose, id } : { onClose : () => void, id : string }) {
                 method: "POST",
                 body: JSON.stringify({
                     type: type,
+                    projectId: id,
                     value: value
                 })
             })
 
             const data = await res.json();
             if (!res.ok) {
-                throw new Error();
+                throw new Error(data.message);
             }
 
             setResults(data.users);
@@ -255,7 +254,7 @@ function AddForm(
                 }
             </div>
             <div className='py-2 px-4 bg-neutral-100 rounded-tr rounded-br rounded-bl w-full'>
-                <input className="bg-neutral-100 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-200 w-full" type="text" onChange={handleInputChange}></input>
+                <input className="bg-neutral-100 focus:outline focus:outline-2 focus:outline-none border-b border-neutral-600 w-full" type="text" onChange={handleInputChange}></input>
             </div>
         </div>
     )
@@ -302,7 +301,7 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
 
     return (
         <li key={user.id} className='bg-neutral-100 rounded p-2 flex w-full'>
-            <Image src={image} alt="picture" width={20} height={20} className='w-8 h-8 object-cover rounded-full bg-neutral-400 mr-5 text-color cursor-pointer'></Image>
+            <Image src={image} alt="picture" width={40} height={40} className='w-8 h-8 object-cover rounded-full bg-neutral-400 mr-5 text-color cursor-pointer'></Image>
             <div className='w-full'>{user.name} {user.surname}</div>
             <div className='flex w-full flex-row-reverse'>
                 <button className='btn-primary' onClick={inviteUser}>Send</button>

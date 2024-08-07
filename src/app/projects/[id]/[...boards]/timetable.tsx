@@ -10,7 +10,7 @@ import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { InitialLoader } from "@/app/components/other-client";
 import { useError } from "@/app/components/error-handler";
-import { ArrayButtons, Button, ButtonType, ButtonWithImg, ButtonWithText, Lighteness } from "@/app/components/buttons";
+import { ArrayButtons, Button, ButtonSideText, ButtonType, ButtonWithImg, ButtonWithText, Lighteness } from "@/app/components/buttons";
 import Image from 'next/image' 
 
 // here is components for TimeTable (basic Grant diagram)
@@ -264,10 +264,12 @@ export default function TimeTable({ id } : { id : string }) {
         <>
             <TimeTableContext.Provider value={{ createGroup, removeGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
                 <section className="overflow-x-hidden h-full max-h-full ">
-                    <Head text='Time Table'/>
-                    <div className="mb-2 flex gap-2">
-                        <ButtonWithImg onClick={()=>handleAdd()} alt="Add" image="/plus.svg" title="Add Existing Group"/>
+                    <div className="flex gap-4">
+                        <Head text='Time Table'/>
                         <ButtonWithImg onClick={()=>toggleHowTo()} alt="Info" image="/info.svg" title="How to use Time Table"/>
+                    </div>
+                    <div className="mb-2">
+                        <ButtonSideText onClick={()=>handleAdd()} text="Add existing Group" image="/plus.svg" lightness={Lighteness.Dark} big/>
                     </div>
                     <Table/>
                 </section>
@@ -321,7 +323,7 @@ function Table() {
                     <div className="h-16 border-b border-neutral-600 w-full"></div>
                         <Groups/>
                     <div className="pl-2 pt-4">
-                        <Creator what="Create new group" handleCreate={createGroup}/>
+                        <Creator what="Create new Group" handleCreate={createGroup} lightness={Lighteness.Bright}/>
                     </div>
                 </section>
                 <section className="overflow-x-auto w-4/5 h-max rounded"> 
