@@ -39,7 +39,7 @@ export async function GET(req : Request, { params } : { params: { id: string, ta
             case TaskFunctions.info:
                 const taskInfo : TaskInfo | null = await findInfo(params.taskId);
                 if (!taskInfo) {
-                    return Response.json({ message:  "This task dosen`t exist"}, { status: 400 });
+                    return Response.json({ message: "This task dosen`t exist"}, { status: 400 });
                 }
                 return Response.json({ taskInfo: taskInfo }, {status: 200});
             case TaskFunctions.solver:
@@ -50,7 +50,7 @@ export async function GET(req : Request, { params } : { params: { id: string, ta
                 return Response.json({ solvers: solvers }, { status: 200});
         }
     } catch (error) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }
 

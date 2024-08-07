@@ -28,7 +28,7 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         });
 
         if (!task) {
-            return Response.json({error: "This task doesn't exist"}, {status : 400});
+            return Response.json({message: "This task doesn't exist"}, {status : 400});
         }
         
         let index : number;

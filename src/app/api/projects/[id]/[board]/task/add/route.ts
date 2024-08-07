@@ -102,10 +102,10 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     
             return Response.json({ task: task }, { status: 200 });
         }
-        return Response.json({ error: ErrorMessagges.BadRequest}, { status: 400 }); 
+        return Response.json({ message: ErrorMessagges.BadRequest}, { status: 400 }); 
     }
     catch (error) {
         console.log(error);
-        return Response.json({ error : ErrorMessagges.Server }, { status: 500});
+        return Response.json({ message: ErrorMessagges.Server }, { status: 500});
     }
 }

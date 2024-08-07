@@ -62,7 +62,7 @@ export function TeamDialog({ team, projectId, closeSettings, updateTeams } : { t
             }
 
             const data = await res.json();
-            throw new Error(data.error);
+            throw new Error(data.message);
         }
         catch (error) {
             console.error(error);
@@ -218,7 +218,7 @@ function Members({ team, projectId}  : { team : TeamInfo, projectId : string}) {
             }
 
             const data = await res.json();
-            throw new Error(data.error);
+            throw new Error(data.message);
         }
         catch (error) {
             console.error(error);

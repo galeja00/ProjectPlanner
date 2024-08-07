@@ -35,6 +35,6 @@ export async function POST(req : Request, { params } : { params: { id: string, b
     }
     catch (error) {
         console.error(error);
-        return Response.json({ error: ErrorMessagges.Server }, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server }, { status: 500 });
     }
 }

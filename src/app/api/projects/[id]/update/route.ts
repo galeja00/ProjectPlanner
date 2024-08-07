@@ -36,7 +36,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
         return Response.json({ project: updateProj }, { status: 200 });
     } 
     catch (error) {
-        return Response.json({ status: 500 });
+        return Response.json({ message: "Somthing went wrong on server" }, { status: 500 });
     }
     
 }

@@ -43,7 +43,7 @@ function Profile() {
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             setUser(data.user);
         }
@@ -85,7 +85,7 @@ function Profile() {
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
         
             setUser(data.user);

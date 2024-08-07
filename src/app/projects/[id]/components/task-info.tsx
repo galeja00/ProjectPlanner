@@ -150,7 +150,7 @@ export function TaskInfo({ id, projectId, handleClose, submitTask } : { id : str
 
             const data = await res.json(); 
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
 
             setTeam(data.team);
@@ -368,7 +368,7 @@ function Notes({ task } : { task : Task }) {
 
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             console.log(data);
             setNotes(data.nodes);
@@ -387,7 +387,7 @@ function Notes({ task } : { task : Task }) {
             
             if (!res.ok) {
                 const data = await res.json(); 
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             const newNotes : NodeInfo[] = [];
             for (let note of notes) {

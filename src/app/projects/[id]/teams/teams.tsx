@@ -249,8 +249,8 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
             })
             const data = await res.json(); 
             if (!res.ok) {
-                setMsg(data.error);
-                console.error(data.error);
+                setMsg(data.message);
+                console.error(data.message);
                 return
             }
             fetchMembers();

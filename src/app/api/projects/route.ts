@@ -95,7 +95,7 @@ export async function POST(req : Request) {
         const session = await getServerSession(options);
 
         if (!(session && session.user)) {
-            return NextResponse.json({ error: "You cant create project when you arent authorize"}, { status: 400 })  
+            return NextResponse.json({ message: "You cant create project when you arent authorize"}, { status: 400 })  
         }
 
         const email = session.user.email ?? "";
@@ -104,7 +104,7 @@ export async function POST(req : Request) {
         const { name } = await req.json();
 
         if (!user) {
-            return NextResponse.json({ error: "error"}, { status: 400 });
+            return NextResponse.json({ message: "Fail to authorize"}, { status: 400 });
         }
         const project : Project = await prisma.project.create({ data: {
             name: name,
@@ -113,7 +113,7 @@ export async function POST(req : Request) {
 
 
         if (!project) {
-            return NextResponse.json({ error: "error"}, { status: 400 });
+            return NextResponse.json({ message: "Server error"}, { status: 400 });
         }
 
         await prisma.kanban.create( {
@@ -164,13 +164,13 @@ export async function POST(req : Request) {
 
     
         if (!projMem) {
-            return NextResponse.json({ error: "Server siede error"}, { status: 400 });
+            return NextResponse.json({ message: "Server error"}, { status: 400 });
         }
 
         return NextResponse.json({ message: "Project succesfully created" }, { status: 200 });
 
     } catch (error) {
         console.log(error);
-        return NextResponse.json({ error: "Comunication on server faild try again later"}, { status: 500 })
+        return NextResponse.json({ message: "Comunication on server faild try again later"}, { status: 500 })
     }
 }
