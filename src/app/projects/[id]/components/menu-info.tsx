@@ -42,7 +42,7 @@ export function ProjectInfo( { id } : { id : string }) {
             <Image src={icon} alt="Project Icon" width={50} height={50} className="bg-neutral-100 rounded w-10 h-fit block mt-auto mb-auto border-2" style={{ borderColor: info?.color}}></Image>
             <div className=''>
                 <h2>{info?.name ? info.name : ""}</h2>
-                <p className=" text-sm text-neutral-400">{info?.category ? info.category : "undefined"}</p>
+                <p className="text-sm text-neutral-600">{info?.category ? info.category : "undefined"}</p>
             </div>
         </div>
     )

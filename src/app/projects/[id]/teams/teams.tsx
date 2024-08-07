@@ -354,7 +354,7 @@ function ProjectMember({ member, active, onClick } : { member : MemberInfo, acti
         onClick();
     }
     return (
-        <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 ${ac && "outline outline-1 outline-green-500"} cursor-pointer`}>
+        <li key={member.memberId} onClick={handleClick} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 ${ac && "outline outline-2 outline-green-500"} cursor-pointer`}>
             <Image src={img} alt="picture" height={15} width={15} className="rounded-full w-5 h-5 object-cover"></Image>
             <p>{member.name} {member.surname}</p>
             { member.teamName && <TeamBadge name={member.teamName} color={member.teamColor}/>}

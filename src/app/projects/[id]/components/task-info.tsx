@@ -504,7 +504,7 @@ function TeamSelector({ task, team } : { task : Task, team : TeamInfo | null }) 
 
     useEffect(() => {
         fetchTeams(true);
-    }, [team])
+    }, [])
 
     return (
         <>
@@ -576,7 +576,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
 
     useEffect(() => {
         fetchMembers(true);
-    }, [solvers]);
+    }, []);
 
     const selectItems: SelectionItem[] = members
         .filter(member => isAll || (team && member.teamId === team.id))
@@ -604,9 +604,7 @@ function UserSelector({ task, team, solvers } : { task : Task, team : TeamInfo |
                 { intialLoading ?
                     <InitialLoader/>
                     :
-                    
-                        <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
-                    
+                    <Selector items={selectItems} team={true} handleSelect={handleSelect}/>
                 }
             </ul>
         </>

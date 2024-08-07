@@ -25,6 +25,10 @@ export async function POST(request : Request) {
             return NextResponse.json({ message: "Your password is too short, it needs to be at least 8 characters long"}, { status: 400 });
         }
 
+        if (name.length == 0 || surname.length == 0) {
+            return NextResponse.json({ message: "You need to fill up your name and surname"}, { status: 400 });
+        }
+
         if (password !== repeatpassword) {
             return NextResponse.json({ massage: "Your passwords arent same"}, { status: 400 });
         }
