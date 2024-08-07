@@ -656,7 +656,7 @@ function MoreMenu({ items }: { items: MoreMenuItem[] }) {
         
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
-      } ;
+        };
     }, [isMenu]);
   
     return (
@@ -694,43 +694,48 @@ function HowTo({ onClose } : { onClose : () => void}) {
                 </div>
                 <dl className="grid grid-cols-5 p-4 gap-4 w-[80rem]">
                     <dt className="col-span-1 h-28 relative">
-                        <Image src="/how/board/column.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                        <Image src="/how/board/column.png" layout="fill" objectFit="contain" alt="Column"/>
                     </dt>
                     <dd className="col-span-4">
                         <h3 className="font-bold">Column</h3>
                         <p>
-                            Column určuje v jakém stádiu jsou obsáhnuté úkoly. V základu jsou vytvořeny tři základní sloupce "To Do", "In Work" a "Done". Přidat další sloupec jde pomocí tlačítka "Create new Column".
-                            S každým sloupcem je možné provádět funkce zmenšení, odstranění a přídání úkolu pomocí talčítka "Create new Task". 
+                        A column indicates the stage of the tasks it contains. 
+                        By default, three basic columns are created: To Do, In Work, and Done. Additional columns can be added using the Create new Column button. 
+                        Each column allows functions such as shrinking, deleting, and adding tasks using the Create new Task button.
                         </p>
                     </dd>
                     <dt className="col-span-1 h-28 relative">
-                        <Image src="/how/board/task.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                        <Image src="/how/board/task.png" layout="fill" objectFit="contain" alt="Task"/>
                     </dt>
                     <dd className="col-span-4">
                         <h3 className="font-bold">Task</h3>
                         <p>
                             Task is an element of each column. It contains basic information about the task. This information includes the task name, 
                             which can be edited, and the priority, if specified, displayed at the bottom left. 
-                            The assignee section shows the team assigned to the task and an image of one of the assignees. To learn more about the assignees, simply click on the assignee's image. 
+                            The assignee section shows the team assigned to the task and an image of one of the assignees. 
+                            To learn more about the assignees, simply click on the assignees image. 
                         </p>
                     </dd>
                     <dt className="col-span-1 h-28 relative">
-                        <Image src="/how/board/moremenu.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                        <Image src="/how/board/moremenu.png" layout="fill" objectFit="contain" alt="Task more menu"/>
                     </dt>
                     <dd className="col-span-4">
                         <h3 className="font-bold">Task more menu</h3>
                         <p>
                             You can open a popup menu with additional options for managing a task using the button in the top right corner of the task. 
-                            The menu contains functions such as "remove" which removes the task from the board but keeps it in the project, "delete" which completely deletes the task, and "info," which opens a dialog with detailed information about the task.
+                            The menu contains functions such as remove which removes the task from the board but keeps it in the project, 
+                            delete which completely deletes the task, and info which opens a dialog with detailed information about the task.
                         </p>
                     </dd>
                     <dt className="col-span-1 h-28 relative">
-                        <Image src="/how/board/taskmoveb.png" layout="fill" objectFit="contain" alt="Groups"/>
+                        <Image src="/how/board/taskmoveb.png" layout="fill" objectFit="contain" alt="Task move"/>
                     </dt>
                     <dd className="col-span-4">
                         <h3 className="font-bold">Task move</h3>
                         <p>
-                        Tasks can be moved between columns using Drag & Drop. When moving a task, it is important to pay attention to the position where the task is dropped, as it determines the order of the tasks in that column. Tasks can also be rearranged within the same column to change their position.
+                            Tasks can be moved between columns using Drag & Drop. 
+                            When moving a task, it is important to pay attention to the position where the task is dropped, 
+                            as it determines the order of the tasks in that column. Tasks can also be rearranged within the same column to change their position.
                         </p>                
                     </dd>
                 </dl>

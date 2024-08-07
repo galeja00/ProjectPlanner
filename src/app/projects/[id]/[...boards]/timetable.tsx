@@ -796,7 +796,8 @@ function HowTo({ onClose } : { onClose : () => void}) {
                     <dd className="col-span-4">
                         <h3 className="font-bold">Groups</h3>
                         <p>
-                            Display of the current groups on the Timetable, along with a button to create a new group, which is automatically added to the Backlog board as well. Each group can be removed using the close button next to each group; removed groups are only removed from the Timetable.
+                            Display of the current groups on the Timetable, along with a button to create a new group, which is automatically added to the Backlog board as well. 
+                            Each group can be removed using the close button next to each group; removed groups are only removed from the Timetable.
                         </p>                
                     </dd>
                     <dt className="col-span-1 h-28 relative">
@@ -805,7 +806,8 @@ function HowTo({ onClose } : { onClose : () => void}) {
                     <dd className="col-span-4">
                         <h3 className="font-bold">Timeline Division</h3>
                         <p>
-                            A timeline element that displays one week and its days. The week number is counted from the beginning of the project. Below the week number, the start and end of the week are indicated.
+                            A timeline element that displays one week and its days. The week number is counted from the beginning of the project. 
+                            Below the week number, the start and end of the week are indicated.
                         </p>
                     </dd>
                     <dt className="col-span-1 h-28 relative">
@@ -823,9 +825,10 @@ function HowTo({ onClose } : { onClose : () => void}) {
                     </dt>
                     <dd className="col-span-4">
                     <h3 className="font-bold">Interval Dialog</h3>
-                    <p>
-                        The dialog opens after right-clicking on the given interval. A dialog will open where you can change the length of the interval using the start day and end day inputs or delete the interval with the delete button.
-                    </p>
+                        <p>
+                            The dialog opens after right-clicking on the given interval. 
+                            A dialog will open where you can change the length of the interval using the start day and end day inputs or delete the interval with the delete button.
+                        </p>
                     </dd>
                 </dl>
             </div>

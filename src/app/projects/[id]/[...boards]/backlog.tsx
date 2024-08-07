@@ -668,8 +668,9 @@ function HowTo({ onClose } : { onClose : () => void}) {
                     <dd className="col-span-4">
                         <h3 className="font-bold">Groups</h3>
                         <p>
-                            A group is a collection of tasks or a large task that can be divided into smaller tasks. A group can be created using the "Create new Group" button, and tasks can then be added to it using the "Create new Task" button.
-                            There is also a group called "unassigned," which contains tasks that have not been assigned to any group.
+                            A group is a collection of tasks or a large task that can be divided into smaller tasks. 
+                            A group can be created using the Create new Group button, and tasks can then be added to it using the Create new Task button.
+                            There is also a group called unassigned, which contains tasks that have not been assigned to any group.
                         </p>
                     </dd>
                     <dt className="col-span-1 h-28 relative">
@@ -679,8 +680,9 @@ function HowTo({ onClose } : { onClose : () => void}) {
                         <h3 className="font-bold">Functions with Group</h3>
                         <p>
                             You can perform various functions with a group. 
-                            These functions are available in the group’s button menu in the following order: move down (if possible), move up (if possible), shrink, delete, and create new tasks.
-                            The only special group, "unassigned," cannot be moved or deleted.
+                            These functions are available in the groups button menu in the following order: move down (if possible), move up (if possible), 
+                            shrink, delete, and create new tasks.
+                            The only special group, unassigned, cannot be moved or deleted.
                         </p>
                     </dd>
                     <dt className="col-span-1 h-28 relative">
@@ -689,8 +691,11 @@ function HowTo({ onClose } : { onClose : () => void}) {
                     <dd className="col-span-4">
                         <h3 className="font-bold">Tasks</h3>
                         <p>
-                            Tasks are smaller, indivisible parts of a group. Each task displays basic information in the following order: column on the board, priority, assigned team, and task assignee. The column on the board can be changed by clicking on the relevant field and selecting a new option.
-                            Following the information, there are function buttons for the task. The functions are listed in the following order: delete the task, remove the task (move it to "unassigned"), and open task details.
+                            Tasks are smaller, indivisible parts of a group. 
+                            Each task displays basic information in the following order: column on the board, priority, assigned team, and task assignee. 
+                            The column on the board can be changed by clicking on the relevant field and selecting a new option.
+                            Following the information, there are function buttons for the task. 
+                            The functions are listed in the following order: delete the task, remove the task (move it to unassigned), and open task details.
                         </p>                
                     </dd>
                     <dt className="col-span-1 h-28 relative">
@@ -699,7 +704,8 @@ function HowTo({ onClose } : { onClose : () => void}) {
                     <dd className="col-span-4">
                         <h3 className="font-bold">Task move</h3>
                         <p>
-                        Tasks can be moved between groups using Drag & Drop. However, note that the order of tasks within a group is not preserved, so it does not matter where you drop the task within the selected group.
+                            Tasks can be moved between groups using Drag & Drop. 
+                            However, note that the order of tasks within a group is not preserved, so it does not matter where you drop the task within the selected group.
                         </p>                
                     </dd>
                 </dl>
