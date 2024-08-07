@@ -9,7 +9,7 @@ export default function ProjectMenu({ id } : { id : string }) {
         <div className="flex flex-col bg-neutral-200 min-h-[calc(100vh-3rem)] w-48 min-w-[12rem] p-4 gap-8 border-r border-neutral-600 overflow-hidden align-middle">
             <ProjectInfo id={id}/>
             <section>
-                <h3 className="text-sm text-neutral-400 mb-2">Planning</h3>
+                <h3 className="text-sm text-neutral-600 mb-2">Planning</h3>
                 <ul className="flex flex-col gap-2">
                     <BoardLink name="board" id={id} text="Board"/>
                     <BoardLink name="timetable" id={id} text="Time Table"/>
@@ -17,11 +17,10 @@ export default function ProjectMenu({ id } : { id : string }) {
                 </ul>
             </section>
             <section>
-                <h3 className="text-sm text-neutral-400 mb-2">More</h3>
+                <h3 className="text-sm text-neutral-600 mb-2">More</h3>
                 <ul className="flex flex-col gap-2">
                     <SideMenuLink id={id} name="Members" to="members" img="/members.svg"/>
                     <SideMenuLink id={id} name="Teams" to="teams" img="/members.svg"/>
-                    {/*<SideMenuLink id={id} name="Issues" to="issues" img="/code.svg"/>*/}
                     <SideMenuLink id={id} name="Settings" to="settings" img="/settings.svg"/>
                 </ul>
             </section>  

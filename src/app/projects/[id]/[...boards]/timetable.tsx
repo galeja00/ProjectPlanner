@@ -9,8 +9,9 @@ import { AddGroupToTimeTable } from "./components/groups";
 import { TasksGroup } from "@prisma/client";
 import { BoardsTypes } from "@/app/api/projects/[id]/[board]/board";
 import { InitialLoader } from "@/app/components/other-client";
-import { ErrorBoundary, ErrorState, useError } from "@/app/components/error-handler";
+import { useError } from "@/app/components/error-handler";
 import { ArrayButtons, Button, ButtonType, ButtonWithImg, ButtonWithText, Lighteness } from "@/app/components/buttons";
+import Image from 'next/image' 
 
 // here is components for TimeTable (basic Grant diagram)
 
@@ -110,6 +111,7 @@ export default function TimeTable({ id } : { id : string }) {
     const [ projectStart, setProjectStart ] = useState<Date | null>(null);
     const [ currentDate, setCurrentDate ] = useState<Date>(new Date()); 
     const [ isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false);
+    const [ isHowTo, toggleHowTo ] = useReducer(isHowTo => !isHowTo, false);
     const { submitError } = useError();
 
     // get all basic data from REST-API like groups and start of project
@@ -121,7 +123,6 @@ export default function TimeTable({ id } : { id : string }) {
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.message);
-                return;
             }
             setProjectStart(new Date(data.start.toString()));
             setGroups([...data.groups]);
@@ -264,16 +265,20 @@ export default function TimeTable({ id } : { id : string }) {
             <TimeTableContext.Provider value={{ createGroup, removeGroup, updateGroups, currentDate,  groups, mode, projectStart }}>
                 <section className="overflow-x-hidden h-full max-h-full ">
                     <Head text='Time Table'/>
-                    <div className="mb-2">
+                    <div className="mb-2 flex gap-2">
                         <ButtonWithImg onClick={()=>handleAdd()} alt="Add" image="/plus.svg" title="Add Existing Group"/>
+                        <ButtonWithImg onClick={()=>toggleHowTo()} alt="Info" image="/info.svg" title="How to use Time Table"/>
                     </div>
                     <Table/>
                 </section>
                 { isAdding && <AddGroupToTimeTable projectId={id} groups={groups} handleClose={toggleAdding} submitGroups={fetchGroups}/>}
+                { isHowTo && <HowTo onClose={toggleHowTo}/>}
             </TimeTableContext.Provider>
         </>
     )
 }
+
+
 
 // Menu for timemods not implemented in final version
 /*
@@ -768,7 +773,65 @@ function updateGroupDates(group : TimeTableGroup, range : Range, start : Date) :
     return { id: group.id, timeTableId: group.timeTableId, name: group.name, startAt: startAt, deadlineAt: endAt, position: group.position };
 }
 
-
+// komponent display how to use time table
+function HowTo({ onClose } : { onClose : () => void}) {
+    return (
+        <Dialog>
+            <div className='bg-neutral-200 rounded w-fit h-fit overflow-hidden relative'>
+                <div className="p-4">
+                    <DialogClose handleClose={onClose}></DialogClose>
+                    <Head text="How to use Time Table"></Head>
+                </div>
+                <dl className="grid grid-cols-5 p-4 gap-4 w-[80rem]">
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/timetable/currentdate.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Curren day</h3>
+                        <p>An orange vertical line represents the current day.</p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/timetable/groups.png" layout="fill" objectFit="contain" alt="Groups"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Groups</h3>
+                        <p>
+                            Display of the current groups on the Timetable, along with a button to create a new group, which is automatically added to the Backlog board as well. Each group can be removed using the close button next to each group; removed groups are only removed from the Timetable.
+                        </p>                
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/timetable/weeks.png" layout="fill" objectFit="contain" alt="Timeline Division"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Timeline Division</h3>
+                        <p>
+                            A timeline element that displays one week and its days. The week number is counted from the beginning of the project. Below the week number, the start and end of the week are indicated.
+                        </p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/timetable/intervals.png" layout="fill" objectFit="contain" alt="Intervals"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Intervals</h3>
+                        <p>
+                            If at least one group is added, an interval can be created by two clicks on the timeline. The first click marks the start of the interval. The second click marks the end of the interval. 
+                            Be careful with the second click: if it occurs before the first click on the timeline or in a different row, the interval creation will be canceled. Subsequently, the interval can be moved by grabbing and dragging it in both directions.
+                        </p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/timetable/dialoginterval.png" layout="fill" objectFit="contain" alt="Interval Dialog"/>
+                    </dt>
+                    <dd className="col-span-4">
+                    <h3 className="font-bold">Interval Dialog</h3>
+                    <p>
+                        The dialog opens after right-clicking on the given interval. A dialog will open where you can change the length of the interval using the start day and end day inputs or delete the interval with the delete button.
+                    </p>
+                    </dd>
+                </dl>
+            </div>
+        </Dialog>
+    )
+}
 
 // converting number in Range to actual Date
 function convertRangeToDates(range : Range, start : Date) : DateRange {

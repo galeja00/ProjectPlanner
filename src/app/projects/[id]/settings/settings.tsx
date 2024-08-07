@@ -174,7 +174,7 @@ export default function Settings({ id } : { id : string}) {
                         <section className="bg-neutral-200 p-4 rounded">
                             <ul className="space-y-4">
                                 <SettingsItem propertyKey="category" type={ItemType.Text} text="Category" value={project.category ?? ""} updateVal={updateVal} />
-                                <SettingsItem propertyKey="createdAt" type={ItemType.Date} text="Created At" value={formatDate(date)} updateVal={updateVal} />
+                                <SettingsItem propertyKey="createdAt" type={ItemType.Date} text="Start at" value={formatDate(date)} updateVal={updateVal} />
                                 <SettingsItem propertyKey="done" type={ItemType.Select} text="State" value={state} updateVal={updateVal} options={[ Status.InWork, Status.Done ]} />
                                 <SettingsItem propertyKey="color" type={ItemType.Color} text="Color" value={project.color} updateVal={updateVal} />
                             </ul>

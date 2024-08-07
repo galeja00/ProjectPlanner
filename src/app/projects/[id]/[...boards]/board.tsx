@@ -9,8 +9,9 @@ import { Creator, CreatorOfTask } from './components/creator'
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board'
 import { InitialLoader } from '@/app/components/other-client'
 import {  useError } from '@/app/components/error-handler'
-import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from '@/app/components/buttons'
+import { ArrayButtons, Button, ButtonSideText, ButtonType, ButtonWithImg, Lighteness } from '@/app/components/buttons'
 import { DeleteDialog } from '@/app/components/other'
+import { Dialog, DialogClose } from '@/app/components/dialog'
 
 
 // defalt type for Object for work with column and tasks
@@ -38,6 +39,7 @@ const TasksColumnsContext = createContext<ProviderColumns>({
 export default function Board({ id } : { id : string }) {
     const [ tasksColumns, setTaskColumns ] = useState<BoardTasksColumn[]>([]); // state of or columns on board
     const [initialLoading, setInitialLoading] = useState<boolean>(true); // initial loading state
+    const [ isHowTo, toggleIsHowTo ] = useReducer(isHowTo => !isHowTo, false);
     const [ delCol, setDelCol ] = useState<string | null>(null); 
     const { submitError } = useError();
 
@@ -165,6 +167,9 @@ export default function Board({ id } : { id : string }) {
             <TasksColumnsContext.Provider value={{ tasksColumns, setTaskColumns, submitError }}>
                 <div className='relative'>
                     <Head text='Board'/>
+                    <div className='mb-2'>
+                        <ButtonWithImg onClick={()=>toggleIsHowTo()} alt="Info" image="/info.svg" title="How to use Board"/>
+                    </div>
                     <section className="flex gap-2 w-full">
                         {
                             tasksColumns.map((col, index) => (
@@ -182,6 +187,7 @@ export default function Board({ id } : { id : string }) {
                     </section>
                     { delCol && <DeleteDialog message='Do you really want to delete this Column?' onClose={() => setDelCol(null)} onConfirm={() => deleteColumn(delCol)}/>}
                 </div>
+                { isHowTo && <HowTo onClose={toggleIsHowTo}/>}
             </TasksColumnsContext.Provider>
         </>
     )
@@ -370,8 +376,8 @@ function TasksColumn(
 
     return (
         <>
-                <section 
-                className={`rounded h-fit ${isDragetOver ? "bg-neutral-700" : "bg-neutral-200"}`} 
+            <section 
+                className={`rounded h-fit ${isDragetOver ? "bg-neutral-400"  : "bg-neutral-200"}`} 
                 onDrop={handleOnDrop} 
                 onDragOver={handleDragOver} 
                 onDragExit={handleOnLeave} 
@@ -678,6 +684,60 @@ function MoreMenuItem({ item } : { item : MoreMenuItem}) {
     )
 }
 
+function HowTo({ onClose } : { onClose : () => void}) {
+    return (
+        <Dialog>
+            <div className='bg-neutral-200 rounded w-fit h-fit overflow-hidden relative'>
+                <div className="p-4">
+                    <DialogClose handleClose={onClose}></DialogClose>
+                    <Head text="How to use Backlog"></Head>
+                </div>
+                <dl className="grid grid-cols-5 p-4 gap-4 w-[80rem]">
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/board/column.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Column</h3>
+                        <p>
+                            Column určuje v jakém stádiu jsou obsáhnuté úkoly. V základu jsou vytvořeny tři základní sloupce "To Do", "In Work" a "Done". Přidat další sloupec jde pomocí tlačítka "Create new Column".
+                            S každým sloupcem je možné provádět funkce zmenšení, odstranění a přídání úkolu pomocí talčítka "Create new Task". 
+                        </p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/board/task.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Task</h3>
+                        <p>
+                            Task is an element of each column. It contains basic information about the task. This information includes the task name, 
+                            which can be edited, and the priority, if specified, displayed at the bottom left. 
+                            The assignee section shows the team assigned to the task and an image of one of the assignees. To learn more about the assignees, simply click on the assignee's image. 
+                        </p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/board/moremenu.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Task more menu</h3>
+                        <p>
+                            You can open a popup menu with additional options for managing a task using the button in the top right corner of the task. 
+                            The menu contains functions such as "remove" which removes the task from the board but keeps it in the project, "delete" which completely deletes the task, and "info," which opens a dialog with detailed information about the task.
+                        </p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/board/taskmoveb.png" layout="fill" objectFit="contain" alt="Groups"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Task move</h3>
+                        <p>
+                        Tasks can be moved between columns using Drag & Drop. When moving a task, it is important to pay attention to the position where the task is dropped, as it determines the order of the tasks in that column. Tasks can also be rearranged within the same column to change their position.
+                        </p>                
+                    </dd>
+                </dl>
+            </div>
+        </Dialog>
+    )
+}
 
 
 /*
@@ -719,6 +779,7 @@ function sortTaskByColIndex(task1 : Task, task2 : Task) : number {
     if (!task2.colIndex) return -1; // task2 má null colIndex, takže ho umístíme za task2
     return task2.colIndex - task1.colIndex;
 }
+
 
 function submitError(error: unknown, arg1: () => Promise<void>) {
     throw new Error('Function not implemented.')

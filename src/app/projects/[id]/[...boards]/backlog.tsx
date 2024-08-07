@@ -8,13 +8,14 @@ import Image from 'next/image'
 import { TaskInfo } from "../components/task-info";
 import { PriorityText } from "./components/priority";
 import { Creator, CreatorOfTask } from './components/creator';
-import { ArrayButtons, Button, ButtonSideText, ButtonType, Lighteness } from '@/app/components/buttons';
+import { ArrayButtons, Button, ButtonSideText, ButtonType, ButtonWithImg, Lighteness } from '@/app/components/buttons';
 import { unassigned } from '@/config';
 import { BoardsTypes } from '@/app/api/projects/[id]/[board]/board';
 import { Name } from '../components/other-client';
 import { InitialLoader } from '@/app/components/other-client';
 import { ErrorBoundary, ErrorState, useError } from '@/app/components/error-handler';
 import { DeleteDialog } from '@/app/components/other';
+import { Dialog, DialogClose } from '@/app/components/dialog';
 
 
 // for Context to easy use of functions and values
@@ -37,6 +38,7 @@ export default function Backlog({ id } : { id : string }) {
     const [ groups, setGroups] = useState<GroupOfTasks[]>([]); // state for every group display on backlog
     const [ collumns, setColumns] = useState<TaskColumn[]>([]); // all possible collumns for tasks
     const [ isInfo, toggleInfo ] = useReducer(isInfo => !isInfo, true);
+    const [ isHowTo, toggleHowTo ] = useReducer(isHowTo => !isHowTo, false);
     const [ task, setTask ] = useState<Task | null>(null); // state inf isInfo = True will display atask info about task
     const [ initialLoading, setInitialLoading ] = useState<boolean>(false); 
     const { submitError } = useError(); // state if in fecth or other async comunication with server failed
@@ -52,7 +54,7 @@ export default function Backlog({ id } : { id : string }) {
             })
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             const newGroups : GroupOfTasks[] = data.backlog
             newGroups.sort((a, b) => sortGroups(a, b));
@@ -91,7 +93,7 @@ export default function Backlog({ id } : { id : string }) {
                 setGroups([...newGroups]);
                 return;
             }
-            throw new Error(data.error);
+            throw new Error(data.message);
         }
         catch (error) {
             console.error(error);
@@ -111,7 +113,7 @@ export default function Backlog({ id } : { id : string }) {
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
             fetchGroups(false);
         }   
@@ -166,7 +168,7 @@ export default function Backlog({ id } : { id : string }) {
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error);
+                throw new Error(data.message);
             }
 
             fetchGroups(false);
@@ -194,8 +196,12 @@ export default function Backlog({ id } : { id : string }) {
             <FunctionsContext.Provider value={{ createGroup, updateGroup, deleteGroup, fetchGroups: fetchGroupsProv , openTaskInfo, submitError, projectId: id, collumns: collumns, groups: groups }}>
                 <div className="max-w-screen-lg w-full mx-auto">
                     <Head text="Backlog"/>
+                    <div className='mb-2'>
+                        <ButtonWithImg onClick={()=>toggleHowTo()} alt="Info" image="/info.svg" title="How to use Backlog"/>
+                    </div>
                     <ListOfGroups groups={groups} />
                     {isInfo && task && <TaskInfo id={task.id} projectId={task.projectId} handleClose={toggleInfo} submitTask={updateTask}/>}
+                    {isHowTo && <HowTo onClose={toggleHowTo}/>}
                 </div>
             </FunctionsContext.Provider>
         </>
@@ -357,7 +363,7 @@ function GroupList({ group, moveTask, moveGroup } : { group : GroupOfTasks, move
         if (pos < groups.length - 2) {
             buttons[0] = { onClick: () => moveGroup(group.id, pos + 1), img: "/arrow-down.svg", type: ButtonType.Normal, size: 6, padding: 1, lightness: Lighteness.Bright, title: "Move Down" };
         }
-        buttons[3] = { onClick: () => toggleDel(), img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "Delete Group" };
+        buttons[3] = { onClick: () => toggleDel(), img: "/trash.svg", padding: 1, type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "Delete Group" };
     }
     
 
@@ -644,4 +650,60 @@ function sortGroups(a : GroupOfTasks, b : GroupOfTasks) : number {
     if (b.position === null) return -1;
     
     return a.position - b.position;
+}
+
+// komponent display how to use time table
+function HowTo({ onClose } : { onClose : () => void}) {
+    return (
+        <Dialog>
+            <div className='bg-neutral-200 rounded w-fit h-fit overflow-hidden relative'>
+                <div className="p-4">
+                    <DialogClose handleClose={onClose}></DialogClose>
+                    <Head text="How to use Backlog"></Head>
+                </div>
+                <dl className="grid grid-cols-5 p-4 gap-4 w-[80rem]">
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/backlog/groupsbl.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Groups</h3>
+                        <p>
+                            A group is a collection of tasks or a large task that can be divided into smaller tasks. A group can be created using the "Create new Group" button, and tasks can then be added to it using the "Create new Task" button.
+                            There is also a group called "unassigned," which contains tasks that have not been assigned to any group.
+                        </p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/backlog/groupfuncs.png" layout="fill" objectFit="contain" alt="Current Day"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Functions with Group</h3>
+                        <p>
+                            You can perform various functions with a group. 
+                            These functions are available in the group’s button menu in the following order: move down (if possible), move up (if possible), shrink, delete, and create new tasks.
+                            The only special group, "unassigned," cannot be moved or deleted.
+                        </p>
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/backlog/tasks.png" layout="fill" objectFit="contain" alt="Groups"/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Tasks</h3>
+                        <p>
+                            Tasks are smaller, indivisible parts of a group. Each task displays basic information in the following order: column on the board, priority, assigned team, and task assignee. The column on the board can be changed by clicking on the relevant field and selecting a new option.
+                            Following the information, there are function buttons for the task. The functions are listed in the following order: delete the task, remove the task (move it to "unassigned"), and open task details.
+                        </p>                
+                    </dd>
+                    <dt className="col-span-1 h-28 relative">
+                        <Image src="/how/backlog/taskmove.png" layout="fill" objectFit="contain" alt="Groups" className=''/>
+                    </dt>
+                    <dd className="col-span-4">
+                        <h3 className="font-bold">Task move</h3>
+                        <p>
+                        Tasks can be moved between groups using Drag & Drop. However, note that the order of tasks within a group is not preserved, so it does not matter where you drop the task within the selected group.
+                        </p>                
+                    </dd>
+                </dl>
+            </div>
+        </Dialog>
+    )
 }
