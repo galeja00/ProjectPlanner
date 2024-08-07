@@ -97,15 +97,15 @@ function ButtonComp({ button } : { button : Button }) {
         case (ButtonType.Destructive):
             hoverColor = "red-600";
             break;
-        case (ButtonType.MidDestructive):
-            // TOD: fix bug with color (orange-600)
-            hoverColor = "orange-600";
-            break;
         case (ButtonType.Creative):
             hoverColor = "green-600";
             break;
+        case (ButtonType.MidDestructive):
+            hoverColor = "orange-600";
+            break;
         default:
             hoverColor = "violet-600";
+            break;
     }
     return (
         <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor} hover:bg-${hoverColor} w-fit h-fit  hover:bg-opacity-40`} onClick={button.onClick}>
