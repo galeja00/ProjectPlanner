@@ -368,7 +368,7 @@ function TasksColumn(
 
     const buttons : Button[] = [
         { onClick: toggleSmall, img: "/dash-normal.svg", type: ButtonType.MidDestructive, size: 6, lightness: Lighteness.Bright, title: "Hide Tasks" },
-        { onClick: handleDelete, img: "/x.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "DeleteColumns" }
+        { onClick: handleDelete, img: "/trash.svg", type: ButtonType.Destructive, size: 6, lightness: Lighteness.Bright, title: "DeleteColumns", padding: 1}
     ]
     
     const displayed = isSmall ? "block" : "none";
