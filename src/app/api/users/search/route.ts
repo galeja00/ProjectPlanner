@@ -30,6 +30,8 @@ export async function POST(req : Request) {
         const data = await req.json();
 
         const search : string = data.value;
+        
+
         let users : UserInfo[]  = [];
         // chack type of search
         if (SearchTypes.Name == data.type) {
@@ -66,7 +68,22 @@ export async function POST(req : Request) {
                 }
             })
         }
+
+        if (data.projectId) {
+            const members = await prisma.projectMember.findMany({
+                where: {
+                    projectId: data.projectId
+                }
+            })
+            users = users.filter((user) => {
+                for (let member of members) {
+                    if (member.userId === user.id) return false;
+                }
+                return true;
+            })
+        }
         
+
         return Response.json({ users: users }, { status: 200 });
     }
     catch (error) {

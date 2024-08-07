@@ -30,24 +30,24 @@ export async function POST(request : Request) {
         }
 
         if (password !== repeatpassword) {
-            return NextResponse.json({ massage: "Your passwords arent same"}, { status: 400 });
+            return NextResponse.json({ message: "Your passwords arent same"}, { status: 400 });
         }
 
         const lowEmail = email.toLowerCase();
         const CountSameEmails = await prisma.user.count({ where: { email: lowEmail }});
         if (CountSameEmails > 0) {
-            return NextResponse.json({ massage: "This email is allready used"}, { status: 400 });
+            return NextResponse.json({ message: "This email is allready used"}, { status: 400 });
         }
 
         const hashedPassword = await hash(password, 10);
         const response = await prisma.user.create({data: { email: lowEmail, name: name, surname: surname, password: hashedPassword }});
         if (response) {
-            return NextResponse.json({ massage: "Succesfully registred"}, { status: 200 })
+            return NextResponse.json({ message: "Succesfully registred"}, { status: 200 })
         } else {
-           return NextResponse.json({ massage: "Our server have some problems, try again later"}, { status: 400 });
+           return NextResponse.json({ message: "Our server have some problems, try again later"}, { status: 400 });
         }
     }
     catch (e) {
-        return Response.json({ error: ErrorMessagges.Server}, { status: 500 });
+        return Response.json({ message: ErrorMessagges.Server}, { status: 500 });
     }
 }
