@@ -6,15 +6,15 @@ export function PriorityImg({ priority } : { priority : Ranking }) {
     switch (priority) {
         case Ranking.low:
             priorityImg = "/dash.svg";
-            priorityClasses = "bg-green-500 border-green-500";
+            priorityClasses = "bg-green-600 border-green-600";
             break;
         case Ranking.medium:
             priorityImg = "/chevron-up.svg"; 
-            priorityClasses = "bg-yellow-500 border-yellow-500";
+            priorityClasses = "bg-yellow-600 border-yellow-600";
             break
         case Ranking.high:
             priorityImg = "/chevron-double-up.svg";
-            priorityClasses= "bg-red-500 border-red-600";
+            priorityClasses= "bg-red-600 border-red-600";
             break;
     }
     return (
@@ -28,13 +28,13 @@ export function PriorityText({ priority } : { priority : Ranking }) {
     let priorityClasses : string = "";
     switch (priority) {
         case Ranking.low:
-            priorityClasses = "text-green-500 bg-green-500 border-green-500";
+            priorityClasses = "text-green-600 bg-green-600 border-green-600";
             break;
         case Ranking.medium:
-            priorityClasses = "text-yellow-500 bg-yellow-500 border-yellow-500";
+            priorityClasses = "text-yellow-600 bg-yellow-600 border-yellow-600";
             break
         case Ranking.high:
-            priorityClasses= "text-red-500 bg-red-500 border-red-600";
+            priorityClasses= "text-red-600 bg-red-600 border-red-600";
             break;
     }
     return (

@@ -95,20 +95,20 @@ function ButtonComp({ button } : { button : Button }) {
     let hoverColor;
     switch (button.type) {
         case (ButtonType.Destructive):
-            hoverColor = "red-600";
+            hoverColor = "hover:outline-red-600 hover:bg-red-600";
             break;
         case (ButtonType.Creative):
-            hoverColor = "green-600";
+            hoverColor = "hover:outline-green-600 hover:bg-green-600";
             break;
         case (ButtonType.MidDestructive):
-            hoverColor = "orange-600";
+            hoverColor = "hover:outline-yellow-600 hover:bg-yellow-600";
             break;
         default:
-            hoverColor = "violet-600";
+            hoverColor = "hover:outline-violet-600 hover:bg-violet-600";
             break;
     }
     return (
-        <button  className={`rounded ${bgColor} hover:outline hover:outline-1 hover:outline-${hoverColor} hover:bg-${hoverColor} w-fit h-fit  hover:bg-opacity-40`} onClick={button.onClick}>
+        <button  className={`rounded ${bgColor} hover:outline hover:outline-1 ${hoverColor}  w-fit h-fit  hover:bg-opacity-40`} onClick={button.onClick}>
             <img src={button.img} title={button.title} className={`w-${button.size} h-${button.size} p-${button.padding ?? "0"}`}></img>
         </button>
     )
