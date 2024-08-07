@@ -44,7 +44,7 @@ type MemberInfo = {
     image: string | null,
 }
 
-// deafult componenet inhouse other smaller parts of teams information and states for moving parts
+// Default component contains other smaller parts for team's information and states for moving parts
 export default function Teams({ projectId } : { projectId : string}) {
     const [teams, setTeams] = useState<TeamInfo[]>([]);// data about all teams
     const [isAdding, toggleAdding ] = useReducer(isAdding => !isAdding, false); // indicate if is user creating/adding a team to project
@@ -189,7 +189,6 @@ function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInf
                     <img src="/settings.svg" title="Edit Team" className="w-8 h-8 p-2 rounde hover:bg-violet-600 hover:bg-opacity-40"></img>
                 </button>
             </td>
-            
         </tr>
     )
 }
@@ -234,12 +233,14 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
         const formData = new FormData(e.currentTarget);
         const name = formData.get("name");
         const color = formData.get("color");
+        if (!name || name.toString().length == 0) {
+            setMsg("You need to fill in the name of the team");
+            setCorrect(false);
+            return;
+        }
         try {
             const res = await fetch(`/api/projects/${projectId}/team/create`, {
                 method: "POST",
-                headers: {
-                    'Content-Type': 'application/json', 
-                },
                 body: JSON.stringify({
                     name: name,
                     color: color,
@@ -254,10 +255,16 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
             }
             fetchMembers();
             updateTeams();
-            setMsg(data.msg);
         }
         catch (error) {
             console.error(error);
+            if (error instanceof Error) {
+                setMsg(error.message);
+            } else if (typeof error === 'string') {
+                setMsg(error);
+            } else {
+                return 'An unknown error occurred' ;
+            }
         }
     }
 
@@ -298,7 +305,7 @@ function AddDialog({ projectId, handleCloseDialog, updateTeams } : { projectId :
                             <div className="w-full flex flex-row-reverse">
                                 <button className="btn-primary">Create</button>
                             </div>
-                            <p>{msg}</p>
+                            <p className="text-red-600">{msg}</p>
                         </form>
                     </div>
                     <SelectMembers members={members} selected={selected} updateSelected={updateSelected}/>

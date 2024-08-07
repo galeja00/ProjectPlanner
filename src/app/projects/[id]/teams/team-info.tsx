@@ -296,7 +296,7 @@ function MembersColumn({ type, members, handleMove } : { type : ColumnType, memb
             onDragExit={handleOnLeave}
             >
             <h3>{type} Members</h3>
-            <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[26rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-violet-600" : "bg-neutral-100"}`}>
+            <ul className={`rounded p-1 flex flex-col gap-1 flex-1 h-[26rem] w-[20rem] overflow-y-auto ${isDraged ? "bg-neutral-400" : "bg-neutral-100"}`}>
                 {
                     members.map((member) => {
                         return ( 

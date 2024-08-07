@@ -28,6 +28,10 @@ export async function POST(req : Request, { params } : { params: { id: string } 
         }
         const data = await req.json(); 
         
+        if (!data.name || data.name.length === 0) {
+            return Response.json({ message: "You need to fill in the name of the team" }, { status: 400 });
+        }
+
         const team : Team = await prisma.team.create({
             data: {
                 name: data.name,
