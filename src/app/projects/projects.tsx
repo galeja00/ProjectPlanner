@@ -131,7 +131,7 @@ function ProjectItem({ proj, index, vis } : { proj : Project, index : number, vi
                         <dd>{proj.category ? proj.category : "undefined"}</dd>
                     </div>
                     <div className='flex gap-4'>
-                        <dt>Create At: </dt>
+                        <dt>Start at: </dt>
                         <dd>{formatDate(new Date(proj.createdAt))}</dd>
                     </div>
                 </dl>

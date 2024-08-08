@@ -1,7 +1,7 @@
 "use client"
 import { TimeTableGroup } from "@/app/api/projects/[id]/[board]/route";
 import { Head } from "../components/other";
-import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, TouchEvent, useRef, RefObject, ChangeEvent } from "react";
+import { createContext, useContext, useEffect, useReducer, useState, MouseEvent, TouchEvent, useRef, RefObject, ChangeEvent, useMemo } from "react";
 import { Creator } from "./components/creator";
 import { Dialog, DialogClose } from "@/app/components/dialog";
 import { formatDate, formatDate2, fromDayToMills, getDiffInDays } from "@/date";
@@ -133,7 +133,7 @@ export default function TimeTable({ id } : { id : string }) {
         } 
     }
 
-    // thrue REST API create new group
+    // fetch to endpoint and create new group on timetable
     async function createGroup(name : string) {
         if (name.length == 0) {
             submitError("Your input for name of Group is empty", () => createGroup(name));
@@ -163,6 +163,7 @@ export default function TimeTable({ id } : { id : string }) {
         } 
     }
 
+    // fetch to endpoint and remove group from timetable
     async function removeGroup(groupId : string) {
         try {
             const res = await fetch(`/api/projects/${id}/${BoardsTypes.TimeTable}/group/remove`, {
@@ -298,18 +299,26 @@ function TimeMode({ mode, changeMode } : { mode : Mode, changeMode : (mode : Mod
 function Table() {
     const { createGroup, updateGroups, currentDate, groups, projectStart } = useContext(TimeTableContext)!;
     const [ groupsRanges, setGroupsRanges ] = useState<GroupRange[]>(convertGroupsToRanges(groups, projectStart));
-    const [ count , setCount ] = useState<number>(80); // count - number of weeks displayed on timetable
+    
 
     function updateRanges(ranges : GroupRange[]) {
         updateGroups(ranges);
         setGroupsRanges([...ranges]);
     }
     
-    // chack if timetable is big enough if not will double count
-    useEffect(() => {
+    const count = useMemo(() => {  // count - number of weeks displayed on timetable
         const currentDay = getDiffInDays(projectStart, currentDate);
-        if (currentDay * 2 > count) setCount(count * 2);
-    }, [currentDate])
+        let newCount = currentDay * 2 > 80 ? 80 * 2 : 80;
+
+        // handle if range is too big
+        for (const r of groupsRanges) {
+            if (r?.range.end / 7 > newCount) {
+                newCount = Math.round(r.range.end / 7 * 2);
+            }
+        }
+
+        return newCount;
+    }, [currentDate, groupsRanges]);
     
     // convert group to GroupRange on every update on group or in init phase
     useEffect(() => {
@@ -526,8 +535,12 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
 
 // displaying all divs for easy find where ranges are or where user start or end creating range
 function GroupRow({ row, size, current } : { row  : number, size : number, current : number }) {
-    const count =  size * 7;
-    const arr : boolean[] = new Array(count).fill(false);
+    const [count, setCount] = useState<number>(size * 7); 
+    const arr: boolean[] = new Array(count).fill(false);
+
+    useEffect(() => {
+        setCount(size * 7);
+    }, [size]);
     return (
         <div key={row} className={`flex ${row % 2 == 0 ? `bg-neutral-200` : `bg-neutral-100`} `} data-row-id={row}>
             {arr.map((value, col) => (
@@ -630,7 +643,7 @@ function WorkRanges({days, groupsRange} : { days : RefObject<HTMLDivElement>, gr
 
 function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, groupRange: GroupRange, index: number, rows: Element[] }) {
     const [isGrabed, toggleGrab] = useReducer(isGraped => !isGraped, false);
-    const [range, setRange] = useState<Range>(groupRange.range);
+    //const [range, setRange] = useState<Range>(groupRange.range);
     const [startPos, setStartPos] = useState<Position | null>(null);
     const [position, setPosition] = useState<Position | null>(null); 
     const { changeUserMode, updateRanges, openRangeMenu, ranges } = useContext(RangesContext)!;
@@ -676,28 +689,24 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
         const difference = position!.x - startPos!.x;
         const shift = Math.round(difference / widthDay);
   
-        setRange(prevRange => {
-          const newRange = { ...prevRange };
-  
-          if (newRange.start + shift < 0) {
+        const newRange = { ...ranges[index].range };
+        if (newRange.start + shift < 0) {
             newRange.end -= newRange.start;
             newRange.start = 0;
-          } else {
+        } else {
             newRange.start += shift;
             newRange.end += shift;
-          }
-  
-          return newRange;
-        });
-  
-        ranges[index].range = range;
-        updateRanges(ranges);
+        }
+        ranges[index].range = newRange;
+        console.log(ranges);
+        updateRanges([...ranges]);
         toggleGrab();
         setStartPos(null);
         setPosition(null); 
         changeUserMode(UserMode.Creating);
       }
     }
+    
   
     function handleMenu(event: MouseEvent) {
         event.preventDefault();
@@ -708,15 +717,19 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
         return null;
     }
   
+    const range = ranges[index].range 
     const boxs: Element[] = Array.from(rows[index].children);
+    if (boxs.length < range.end) {
+        return (
+            <></>
+        )
+    }
+    
     const row = rows[index].getBoundingClientRect();
     const startbox = boxs[range.start].getBoundingClientRect();
     const endbox = boxs[range.end].getBoundingClientRect();
-  
     // calculate position of range
     let currentLeft = position && startPos ? position.x - startPos.x + (startbox.left - row.left) : startbox.left - row.left;
-    /*let zb = currentLeft % startbox.width;
-    currentLeft = zb < startbox.width / 2 ? currentLeft - zb : currentLeft + startbox.width - zb;*/
     currentLeft = Math.max(currentLeft, 0); 
 
     return (
@@ -731,17 +744,15 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
             onTouchMove={handleTouchMove}
             onTouchEnd={handleDrop}
             style={{
-            height: startbox.height / (3 / 2),
-            left: currentLeft,
-            top: startbox.top - parent.top + startbox.height / 6,
-            width: endbox.right - startbox.left
+                height: startbox.height / (3 / 2),
+                left: currentLeft,
+                top: startbox.top - parent.top + startbox.height / 6,
+                width: endbox.right - startbox.left
             }}
         >
         </div>
     );
 }
-
-
 
 // convertor Group -> GroupRange
 function convertGroupToRange(group : TimeTableGroup, start : Date) : GroupRange | null {
@@ -775,7 +786,7 @@ function updateGroupDates(group : TimeTableGroup, range : Range, start : Date) :
     return { id: group.id, timeTableId: group.timeTableId, name: group.name, startAt: startAt, deadlineAt: endAt, position: group.position };
 }
 
-// komponent display how to use time table
+// display how to use time table
 function HowTo({ onClose } : { onClose : () => void}) {
     return (
         <Dialog>
