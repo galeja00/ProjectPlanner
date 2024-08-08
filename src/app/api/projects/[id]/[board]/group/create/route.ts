@@ -23,12 +23,29 @@ export async function POST(req : Request, { params } : { params: { id: string, b
         if (data.name.length == 0) {
             return Response.json({ message: "Name of Group can't be empty" }, { status: 400});
         }
+
+        
         
         const kanban : Kanban | null = await prisma.kanban.findFirst({
             where: {
                 projectId: params.id
             }
         })
+
+        if (!kanban?.backlogId) {
+            return Response.json({ message: ErrorMessagges.BadRequest }, { status: 400 });
+        }
+
+        const count = await prisma.tasksGroup.count({
+            where: {
+                name: data.name,
+                backlogId: kanban.backlogId
+            }
+        })
+
+        if (count > 0) {
+            return Response.json({ message: "You can't create two groups with the same name"}, { status: 400 });
+        }
 
         if (!kanban || !kanban.backlogId) {
             return Response.json({ message: ErrorMessagges.BadRequest }, { status: 400 });
@@ -51,6 +68,8 @@ export async function POST(req : Request, { params } : { params: { id: string, b
                 }
             })
         }
+
+
         
         const group : TasksGroup = await prisma.tasksGroup.create({
             data: {
