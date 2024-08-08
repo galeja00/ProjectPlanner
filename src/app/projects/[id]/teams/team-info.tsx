@@ -34,6 +34,7 @@ type MemberInfo = {
     surname: string,
     teamId: string | null,
     teamName: string | null,
+    teamColor: string | null,
     image: string | null,
 }
 
@@ -321,9 +322,9 @@ function ProjectMember({ member, handleOnDrag } : { member : MemberInfo, handleO
     }
     return (
         <li key={member.memberId} draggable onDragStart={handleOnDrag} className={`box-content flex gap-4 bg-neutral-200 rounded items-center p-1 cursor-pointer`}>
-            <Image src={img} alt="Picture" height={15} width={15} className="rounded-full w-5 h-5"></Image>
+            <Image src={img} alt="Picture" height={20} width={20} className="rounded-full object-fill w-5 h-5"></Image>
             <p>{member.name} {member.surname}</p>
-            { member.teamName && <TeamBadge name={member.teamName} color={""}/>}
+            { member.teamName && <TeamBadge name={member.teamName} color={member.teamColor}/>}
         </li>
     )
 }

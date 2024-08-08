@@ -301,7 +301,7 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
 
     return (
         <li key={user.id} className='bg-neutral-100 rounded p-2 flex w-full'>
-            <Image src={image} alt="picture" width={40} height={40} className='w-8 h-8 object-cover rounded-full bg-neutral-400 mr-5 text-color cursor-pointer'></Image>
+            <Image src={image} alt="picture" width={40} height={40} className='w-8 h-8 object-cover rounded-full bg-neutral-400 mr-5 text-color'></Image>
             <div className='w-full'>{user.name} {user.surname}</div>
             <div className='flex w-full flex-row-reverse'>
                 <button className='btn-primary' onClick={inviteUser}>Send</button>

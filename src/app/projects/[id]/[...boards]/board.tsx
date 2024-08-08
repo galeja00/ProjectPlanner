@@ -564,7 +564,7 @@ function Solver({ handleSolversMenu, solvers} : { handleSolversMenu : () => void
     
     return (
         <button className='w-fit h-fit rounded-full hover:bg-neutral-200 p-1' title={solver ? `${solver.name} ${solver.surname}` : "add solver"} onClick={handleSolversMenu}>
-            <Image src={img} alt="picture" width={10} height={10} className='w-6 h-6 rounded-full bg-neutral-400 cursor-pointer object-cover'></Image>
+            <Image src={img} alt="picture" width={20} height={20} className='w-6 h-6 rounded-full bg-neutral-400 cursor-pointer object-cover'></Image>
         </button>    
     )
 }

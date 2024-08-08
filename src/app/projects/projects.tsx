@@ -95,8 +95,8 @@ function ProjectList({ name, list } : { name : string, list : Project[] }) {
                 <h2 className='text-xl  font-bold'>{name}</h2>
                 {list.length > (top - bottom) + 1 ?
                         <div className='flex gap-4'>
-                            <button onClick={() => changeIndex(-1)}><Image src="/arrow-small-left.svg" alt="to left" width={40} height={40} className='hover:stroke-violet-500 bg-neutral-200 rounded'></Image></button>
-                            <button onClick={() => changeIndex(1)}><Image src="/arrow-small-right.svg" alt="to right" width={40} height={40} className='hover:stroke-violet-500 bg-neutral-200 rounded'></Image></button>
+                            <button onClick={() => changeIndex(-1)} className=''><Image src="/arrow-small-left.svg" alt="to left" width={40} height={40} className='w-8 h-8 bg-neutral-200 rounded hover:bg-violet-600 hover:bg-opacity-40 hover:border hover:border-violet-600'></Image></button>
+                            <button onClick={() => changeIndex(1)} className=''><Image src="/arrow-small-right.svg" alt="to right" width={40} height={40} className='w-8 h-8 bg-neutral-200 rounded hover:bg-violet-600 hover:bg-opacity-40 hover:border hover:border-violet-600'></Image></button>
                         </div>
                     :
                         <></>

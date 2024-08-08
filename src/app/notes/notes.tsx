@@ -99,6 +99,7 @@ export default function Notes() {
                         ))
                     }
                 </ul>
+                { notes.length == 0 && <div>Currently, you have zero notes.</div>}
             </section>
         </>
         
