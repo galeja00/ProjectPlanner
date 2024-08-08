@@ -109,6 +109,7 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
             updateNotif();
         }
         catch (error) {
+            console.log(error);
             console.error(error);
             submitError(error, () =>  handleSubmitRes(type));
         }

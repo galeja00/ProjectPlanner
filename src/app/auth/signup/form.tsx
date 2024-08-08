@@ -44,9 +44,9 @@ export default function RegisterForm() {
                 return;
             }
 
-            if (name.toString.toString().length || surname.toString().length == 0) {
+            if (name.toString().length == 0 || surname.toString().length == 0) {
                 setCorrectName(false);
-                setCorrectName(false);
+                setCorrectSurName(false);
                 setMsg({ message: "You need to insert a name and surname.", type: false});
                 return;
             }

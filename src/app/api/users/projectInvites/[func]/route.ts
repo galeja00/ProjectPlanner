@@ -32,12 +32,12 @@ export async function POST(req : Request, { params } : { params : { func : strin
 
         // check if invite is in DB
         if(invite == null) {
-            return Response.json({ error: "This Invite dosn't exist"}, { status: 400 });
+            return Response.json({ message: "This Invite dosn't exist"}, { status: 400 });
         }
         console.log("inviteUserID: " + invite.invitedUserId);
         //
         if(id != invite.invitedUserId) {
-            return Response.json({ error: "Invite is not for you"}, { status: 400 });
+            return Response.json({ message: "Invite is not for you"}, { status: 400 });
         }
         // do api function for invite
         switch (params.func) {
