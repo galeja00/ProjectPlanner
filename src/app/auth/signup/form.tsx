@@ -30,7 +30,7 @@ export default function RegisterForm() {
         try {
             // validet if user fild all inputs
             if (!(email && name && surname && password && repeatpassword )) {
-                setMsg({ message: "You need to fill all inputs.", type: false});
+                setMsg({ message: "You need to fill in all inputs.", type: false});
                 setCorrectPsw(false);
                 setCorrectEmail(false);
                 setCorrectName(false);
@@ -40,14 +40,14 @@ export default function RegisterForm() {
             // validete if email is looking like real one
             if (!EmailValidator.validate(email.toString())) {
                 setCorrectEmail(false);
-                setMsg({ message: "You need to insert valid email.", type: false});
+                setMsg({ message: "You need to insert a valid email.", type: false});
                 return;
             }
 
             if (name.toString.toString().length || surname.toString().length == 0) {
                 setCorrectName(false);
                 setCorrectName(false);
-                setMsg({ message: "You need to insert name and surname.", type: false});
+                setMsg({ message: "You need to insert a name and surname.", type: false});
                 return;
             }
 
@@ -79,7 +79,7 @@ export default function RegisterForm() {
                         router.push("/auth/signin");
                     }
                 } catch (error) {
-                    setMsg({ message: "Error in communication with server, try again.", type: false });
+                    setMsg({ message: "Error in communication with server.", type: false });
                 }
             } else {
                 setCorrectPsw(false);
