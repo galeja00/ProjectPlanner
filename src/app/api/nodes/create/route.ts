@@ -31,7 +31,7 @@ export async function POST(req : Request) {
         })
         
 
-        return Response.json({ message: "Succefully created node", id: node.id }, { status: 200 });
+        return Response.json({ message: "Succefully created note", id: node.id }, { status: 200 });
     }
     catch (error) {
         return Response.json({ message: ErrorMessagges.Server}, { status: 500 })

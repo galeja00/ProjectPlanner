@@ -27,10 +27,10 @@ export async function POST(req : Request, { params } : { params: { id: string } 
             }
         })
         if (!delNode) {
-            return Response.json({ message: "Fail to delete node"}, { status: 400 });
+            return Response.json({ message: "Fail to delete note"}, { status: 400 });
         }
 
-        return Response.json({ message: `Succefully deleted node` }, { status: 200 });
+        return Response.json({ message: `Succefully deleted note` }, { status: 200 });
     }
     catch (error) {
         return Response.json({ message: "Somthing wen't wrong on server"}, { status: 500 })
