@@ -6,3 +6,23 @@ In this web application, users can create an unlimited number of projects. Each 
 ### How to Run?
 
 
+#### 1. Install Node.js Runtime Environment
+- **Version:** 20.9.0
+- **Installation Guide:** Follow the instructions [here](https://nodejs.org/en/download/package-manager) to download and install Node.js.
+
+#### 2. Install PostgreSQL Database
+- **Version:** 16
+- **Installation Guide:** Follow the instructions [here](https://www.postgresql.org/download/) to download and install PostgreSQL.
+
+#### 3. Move the Source Code
+- Move the source code, including the root directory named `project-planner`, to the location where the application will run.
+
+#### 4. Create a Database for the Application
+- Create a database for the application with a name of your choice.
+
+#### 5. Install Necessary Packages
+- Open a terminal and navigate to the root directory of the application.
+- Run the following command to install all necessary packages:
+  ```bash
+  npm install
+  ```
