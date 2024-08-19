@@ -1,9 +1,6 @@
-Project is in heavy development, right now its not now working properly with lot of missing thinks a bugs.
-Readme will be added after it will be possible to use.
+## Project Planner
+This is my bachelor's thesis project. The aim of the thesis is to identify a flexible model of the software process and implement it alongside other useful tools to facilitate collaboration among project members in solving problems and tasks. To address this challenge, I created a web application using Next.js and PostgreSQL for the database.
 
-README.md will be updatet in futer weeks
-    - how to run app
-    - tutorial for using
+### How to Run?
 
-Thanks.
 
