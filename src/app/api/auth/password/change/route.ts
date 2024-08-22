@@ -22,13 +22,10 @@ export async function POST(req : Request) {
             return Response.json({ message: "You need to submit both passwords"}, { status: 400 }); 
         }
 
-    
         if (data.password.length < 8) {
             return Response.json({ message: "Your new password is too short; it needs to be at least 8 characters." }, { status: 400 });
         }
 
-        console.log(data.password);
-        console.log(data.repeatPassword);
         if(data.password !== data.repeatPassword) {
             return Response.json({ message: "Passwords arent same"}, { status: 400}); 
         }
