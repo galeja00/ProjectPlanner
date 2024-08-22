@@ -19,7 +19,6 @@ export async function POST(req : Request, { params } : { params: { id: string } 
         }
 
         const { project } : { project : Project } = await req.json(); 
-        console.log(project);
 
         const updateProj : Project = await prisma.project.update({
             where: {

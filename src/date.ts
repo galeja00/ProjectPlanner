@@ -22,7 +22,7 @@ export function isEarlierDate(compDate : Date, date : Date) : boolean {
 }
 
 // compare two dates and try to find out if date is later then compDate
-export function isLaterDate(compDate : Date, date : Date) {
+export function isLaterDate(compDate : Date, date : Date) : boolean {
     const compArr : number[] = convertDateToArray(compDate);
     const dateArr : number[] = convertDateToArray(date);
     for (let i = 3; i >= 0; i--) {
@@ -59,7 +59,7 @@ export function formatDate(date : Date) : string {
 }
 
 // format date to = YYYY-MM-DD
-export function formatDate2(date : Date) {
+export function formatDate2(date : Date) : string{
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
