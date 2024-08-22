@@ -19,6 +19,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
         }
 
         const { project } : { project : Project } = await req.json(); 
+        console.log(project);
 
         const updateProj : Project = await prisma.project.update({
             where: {
@@ -27,7 +28,7 @@ export async function POST(req : Request, { params } : { params: { id: string } 
             data: {
                 name: project.name,
                 color: project.color,
-                createdAt: project.createdAt,
+                createdAt: new Date(project.createdAt),
                 done: project.done,
                 category: project.category
             }
