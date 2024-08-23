@@ -68,13 +68,16 @@ export function formatDate2(date : Date) : string{
 
 // format date from millisecunds past number to string
 export function formatAgo(time: number): string {
-    const units = ['sec', 'min', 'h', 'd'];
+    const units = ['sec', 'min', 'h', 'd', 'w', 'm', 'y'];
+    const conversions = [60, 60, 24, 7, 4.35, 12]; // convert rates to sec, min, hours, days, weeks, months, years
     let unitIndex = 0;
 
-    while (time >= 60 && unitIndex < units.length - 1) {
-        time /= 60;
+    while (time >= conversions[unitIndex] && unitIndex < units.length - 1) {
+        time /= conversions[unitIndex];
         unitIndex++;
     }
+
     time = Math.round(time);
+    console.log(time);
     return `${time} ${units[unitIndex]}`;
 }
