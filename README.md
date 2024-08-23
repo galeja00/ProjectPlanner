@@ -43,7 +43,7 @@ postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA
 - Add the following lines to configure authorization and image storage paths:
 ```plaintext
 NEXTAUTH_SECRET="HASH"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://ADDRESS OF APP:3000"
 IMAGE_DIRECTORY_PATH="PATH TO APPLICATION/project-planner/public/uploads/"
 ```
 - For more information on `NEXTAUTH_SECRET` and `NEXTAUTH_URL`, visit [NextAuth.js Configuration Options](https://next-auth.js.org/configuration/options).
