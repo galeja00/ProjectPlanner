@@ -16,6 +16,7 @@ export default function LoginForm() {
 
     if (status == "authenticated") {
         router.push('/');
+        return;
     }
     
 

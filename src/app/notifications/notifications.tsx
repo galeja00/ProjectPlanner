@@ -17,7 +17,7 @@ type Notification = {
     name : string,
     icon : string | null,
     type : string,
-    agoInHours : number,
+    agoInSeconds : number,
     displayd : boolean
 }
 
@@ -76,7 +76,7 @@ function NotifiactionsList() {
 
     return (
         <>
-            <ul className="rounded p-1 min-h-[40rem]">
+            <ul className="rounded p-1 min-h-[40rem] space-y-2">
                 {
                     notifs.map((notif) => (
                         <NotificationsItem key={notif.id} notif={notif} updateNotif={() => fetchNotifications(false)}/>
@@ -109,7 +109,6 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
             updateNotif();
         }
         catch (error) {
-            console.log(error);
             console.error(error);
             submitError(error, () =>  handleSubmitRes(type));
         }
@@ -126,13 +125,15 @@ function NotificationsItem({notif, updateNotif} : {notif : Notification, updateN
     }
 
     // formats ago to readeble data for user
-    let ago : number = notif.agoInHours;
+    let ago : number = notif.agoInSeconds;
+    console.log(ago);
     let agoText : string = formatAgo(ago);
+    console.log(agoText);
     let image : string = getImage(notif.icon, ImageTypes.Project);
 
     return (
         <>
-            { isDecline && <DeleteDialog message="" onClose={toggleIsDecline} onConfirm={() => handleSubmitRes("decline")}/>}
+            { isDecline && <DeleteDialog message="Do you really want to decline this invitation?" onClose={toggleIsDecline} onConfirm={() => handleSubmitRes("decline")}/>}
             <li className='bg-neutral-200 rounded p-2 w-full flex gap-4 relative'>
                 <Image src={image} alt={''} width={80} height={80} className="bg-neutral-100 rounded w-20 h-fit block mt-auto mb-auto"></Image>
                 <div className="flex flex-col gap-1 w-max h-fit justify-between">

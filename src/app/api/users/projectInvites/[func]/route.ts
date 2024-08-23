@@ -34,20 +34,20 @@ export async function POST(req : Request, { params } : { params : { func : strin
         if(invite == null) {
             return Response.json({ message: "This Invite dosn't exist"}, { status: 400 });
         }
-        console.log("inviteUserID: " + invite.invitedUserId);
+
         //
         if(id != invite.invitedUserId) {
-            return Response.json({ message: "Invite is not for you"}, { status: 400 });
+            return Response.json({ message: "This Invite is not for you"}, { status: 400 });
         }
         // do api function for invite
         switch (params.func) {
             case func.accept:
                 acceptInv(invite.invitedUserId, invite.projectId);
                 deleteInv(invite.id);
-                return Response.json({ mess: "Accepte was succesfull"}, {status: 200});
+                return Response.json({ message: "Accepte was succesfull"}, {status: 200});
             case func.decline:
                 deleteInv(invite.id);
-                return Response.json({ mess: "Decline was succesfull"}, {status: 200});
+                return Response.json({ message: "Decline was succesfull"}, {status: 200});
             default:
                 return Response.json({ error: "This function don't exist" }, { status: 400 });
         }
