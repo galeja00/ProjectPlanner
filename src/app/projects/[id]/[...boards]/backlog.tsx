@@ -406,7 +406,7 @@ type ColumnInfo = {
 
 // task component with is randred in group
 function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : React.DragEvent) => void }) {
-    const [ isSelecetCol, toggleSelectColl ] = useReducer(isSelecetCol => !isSelecetCol, false); // to open pop up to change column on Board from Backlog
+    const [ isSelecetCol, toggleSelectCol ] = useReducer(isSelecetCol => !isSelecetCol, false); // to open pop up to change column on Board from Backlog
     const [ solvers, setSolvers ] = useState<Solver[]>([]);
     const [ team, setTeam ] = useState<Team | null>(null);
     const [ colInfo, setColInfo ] = useState<ColumnInfo | null>(null);
@@ -513,6 +513,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
 
     // handle move of task between columns
     async function handleMoveCol(id : string) {
+        toggleSelectCol();
         try {
             const res = await fetch(`/api/projects/${projectId}/${BoardsTypes.Backlog}/task/move`, {
                 method: "POST",
@@ -559,7 +560,7 @@ function GroupTask({ task, handleOnDrag } : {task : Task, handleOnDrag : (e : Re
             <li className="bg-neutral-100 w-full p-2 rounded grid  grid-cols-9 gap-2" draggable onDragStart={handleOnDrag}>
                 <h3 className="col-span-3">{task.name}</h3>
                 <div className='relative'>
-                    <ColInfo info={colInfo} onClick={toggleSelectColl}/>
+                    <ColInfo info={colInfo} onClick={toggleSelectCol}/>
                     { isSelecetCol && <ColMenu info={colInfo} handleMoveCol={handleMoveCol} />}
                 </div>
                 <div className="col-span-1 flex items-center">{ task.priority && <PriorityText priority={task.priority}/>}</div>
