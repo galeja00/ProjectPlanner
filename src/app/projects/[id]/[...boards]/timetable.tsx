@@ -726,6 +726,15 @@ function WorkRange({ parent, groupRange, index, rows }: { parent: DOMRect, group
     }
     
     const row = rows[index].getBoundingClientRect();
+    console.log(range);
+    if (range.start < 0 || range.end > boxs.length || range.end < 0) {
+        const newRanges = new Array(boxs.length);
+        updateRanges(newRanges);
+        return (
+            <></>
+        )
+    }
+
     const startbox = boxs[range.start].getBoundingClientRect();
     const endbox = boxs[range.end].getBoundingClientRect();
     // calculate position of range
