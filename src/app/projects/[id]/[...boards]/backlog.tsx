@@ -246,7 +246,7 @@ function ListOfGroups({ groups } : { groups : GroupOfTasks[]}) {
 
     return (
         <section className="w-full space-y-2" > 
-            <Creator what="Create New Group" handleCreate={createGroup} lightness={Lighteness.Dark} big/>
+            <Creator what="Create new Group" handleCreate={createGroup} lightness={Lighteness.Dark} big/>
             <ul className="space-y-4 w-full" ref={groupsRef}>
                 {
                     groups.map((group) => (

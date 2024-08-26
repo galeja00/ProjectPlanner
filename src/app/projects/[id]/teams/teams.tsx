@@ -180,7 +180,7 @@ function TeamRow({ teamInfo, handleDelete, openSettings } : { teamInfo : TeamInf
             <td className="col-span-2"><TeamBadge name={teamInfo.name} color={teamInfo.color} /></td>
             <Members members={teamInfo.members}/>
             <td className="col-span-2">{count}</td>
-            <td className="col-span-2">{teamInfo.taskLoad}</td> {/*TODO: fetch info about number of tasks*/} 
+            <td className="col-span-2">{teamInfo.taskLoad}</td> 
             <td className="h-fit flex gap-2 items-center justify-end">
                 <button onClick={handleDelete} className="w-fit h-fit bg-neutral-200 rounded hover:outline hover:outline-1 hover:outline-red-600">
                     <img src="/trash.svg" title="Delete Group" className="w-8 h-8 hover:bg-red-600 rounded hover:bg-opacity-40 p-2"></img>

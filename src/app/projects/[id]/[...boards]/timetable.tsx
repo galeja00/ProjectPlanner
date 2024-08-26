@@ -307,8 +307,9 @@ function Table() {
     }
     
     const count = useMemo(() => {  // count - number of weeks displayed on timetable
+        const deffaultCount = 80;
         const currentDay = getDiffInDays(projectStart, currentDate);
-        let newCount = currentDay * 2 > 80 ? 80 * 2 : 80;
+        let newCount = currentDay * 2 > deffaultCount ? deffaultCount * 2 : deffaultCount;
 
         // handle if range is too big
         for (const r of groupsRanges) {
@@ -410,9 +411,11 @@ function Group({ group, row } : { group : TimeTableGroup, row : number }) {
     ] 
 
     return (
-        <div key={group.id} className={`h-10 w-full pl-4 py-2 pr-2 flex justify-between ${row % 2 == 0 ? `bg-neutral-200` : `bg-neutral-100`}`}>
+        <div key={group.id} className={`relative h-10 w-full pl-4 py-2 pr-2 ${row % 2 == 0 ? `bg-neutral-200` : `bg-neutral-100`}`}>
             {group.name}
-            <ArrayButtons buttons={buttons} gap={2}/>
+            <div className="absolute right-2 top-2">
+                <ArrayButtons buttons={buttons} gap={2}/>
+            </div>
         </div>
     )
 }

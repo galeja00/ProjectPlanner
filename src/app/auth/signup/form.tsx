@@ -101,6 +101,7 @@ export default function RegisterForm() {
             </div>
             <FormItem item="Password" name="password" type="password" correct={correctPsw}/>
             <FormItem item="Repeat Password" name="repeatpassword" type="password" correct={correctPsw}/>
+            <p className='text-sm text-neutral-600'>passwords must be at least 8 characters long</p>
             <SubmitButton text={"Sign up"}/>
             {Msg.message === "" ? <p>  </p> : <p className={`${Msg.type ? "text-green-500" : "text-red-500"} w-fit m-auto`}>{Msg.message}</p>}
         </form>

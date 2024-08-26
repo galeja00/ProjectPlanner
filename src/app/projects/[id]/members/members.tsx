@@ -101,7 +101,7 @@ export default function Members({ id } : { id : string}) {
             <div className='max-w-screen-lg w-full mx-auto'>
                 <Head text="Members"/>
                 <div className='mb-4'>
-                    <ButtonSideText text={"Invite new member"} onClick={handleAddButton} image='/person-add.svg' lightness={Lighteness.Dark} padding={1} big/>
+                    <ButtonSideText text={"Invite new Member"} onClick={handleAddButton} image='/person-add.svg' lightness={Lighteness.Dark} padding={1} big/>
                 </div>
                 <section>
                 {

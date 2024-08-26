@@ -86,7 +86,7 @@ function UserMenu({ userImg } : { userImg : string }) {
             </button>
             { isMenu && 
                 <ul ref={menuRef} className='absolute z-20 flex flex-col p-4 bg-neutral-200 right-0  top-10 border border-neutral-700  gap-1 shadow shadow-neutral-100'>
-                    <li><Link href="/profil" className='hover:text-violet-600 hover:border-b hover:border-violet-600 ease-in-out'>Your profile</Link></li>
+                    <li><Link href="/profil" onClick={() => setMenu(false)} className='hover:text-violet-600 hover:border-b hover:border-violet-600 ease-in-out'>Your profile</Link></li>
                     <li><button onClick={handleSignOut} className='hover:text-red-600 hover:border-b text-red-500 hover:border-red-600 ease-in-out'>Sign Out</button></li>
                 </ul> 
             }
@@ -117,7 +117,7 @@ function NotificationIcon() {
             }
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -125,7 +125,7 @@ function NotificationIcon() {
     useEffect(() => {
         const interval = setInterval(() => {
             fetchInfo(); // Call fo info
-        }, 5000); 
+        }, 50000); 
 
         // Clean Interval
         return () => clearInterval(interval);

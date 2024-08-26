@@ -165,7 +165,7 @@ export default function Settings({ id } : { id : string}) {
                 <div className='max-w-screen-lg w-full mx-auto'>
                     <Head text="Settings" />
                     <div className="space-y-8 ">
-                        <section className="bg-neutral-200 p-4 rounded flex gap-8">
+                        <section className="bg-neutral-200 p-4 rounded flex gap-8 relative">
                             <Image src={icon} onClick={toggleImgDrop} alt="Project Logo" height={150} width={150} className="bg-neutral-50 rounded w-32 h-32 block hover:outline hover:outline-violet-600 cursor-pointer" />
                             <div className="space-y-4">
                                 <Name name={project.name} update={(val: string) => updateVal("name", val)} />
@@ -193,9 +193,11 @@ function Name({ name, update } : { name : string, update : (val : string) => voi
     const [ isEditing, toggle ] = useReducer(isEditing => !isEditing, false);
 
     return (
-        <div className='flex gap-4'>
-            { !isEditing ? <h1 className="text-2xl font-bold">{name}</h1> : <Editor create={update} endCreate={toggle} type={InputTypes.Text}/> }
-            <EditTextButton onClick={toggle}/>
+        <div className='relative w-96'>
+            { !isEditing ? <h1 className="text-2xl max-w-[100%] break-words font-bold">{name}</h1> : <Editor create={update} endCreate={toggle} type={InputTypes.Text}/> }
+            <div className='absolute right-[-2rem] top-1'>
+                <EditTextButton onClick={toggle}/>
+            </div>
         </div>
         
     )
