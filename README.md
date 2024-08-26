@@ -27,8 +27,8 @@ In this web application, users can create an unlimited number of projects. Each 
 npm install
 ```
 
-#### 6. Create the `.env.local` File for Database Connection
-- Create a file named `.env.local` in the root directory of the application.
+#### 6. Create the `.env` File for Database Connection
+- Create a file named `.env` in the root directory of the application.
 - Add the following line to the file to configure the database connection using the CONNECT URL:
 ```plaintext
 DATABASE_URL="CONNECT URL"
@@ -44,6 +44,9 @@ postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA
 ```plaintext
 NEXTAUTH_SECRET="HASH"
 IMAGE_DIRECTORY_PATH="PATH TO APPLICATION/project-planner/public/uploads/"
+EMAIL_SERVICE="SERVICE"
+EMAIL_USER="MAIL"
+EMAIL_PASS="PASS"
 ```
 - For more information on `NEXTAUTH_SECRET` and `NEXTAUTH_URL`, visit [NextAuth.js Configuration Options](https://next-auth.js.org/configuration/options).
 - To generate the `HASH` for `NEXTAUTH_SECRET`:
@@ -53,6 +56,7 @@ IMAGE_DIRECTORY_PATH="PATH TO APPLICATION/project-planner/public/uploads/"
     openssl rand -base64 32
     ```
   - Replace the word `HASH` with the generated key.
+- For Email `SERVICE`, use `gmail` or `seznam`.
 
 #### 8. Apply Migrations to the Database
 - Open a terminal in the root directory of the project or navigate to it.
