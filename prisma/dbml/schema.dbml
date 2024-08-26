@@ -13,6 +13,7 @@ Table User {
   projects ProjectMember [not null]
   projectInvites ProjectInvite [not null]
   nodes Node [not null]
+  passwordResets PasswordReset [not null]
 }
 
 Table Node {
@@ -50,6 +51,7 @@ Table ProjectMember {
   teamId String
   team Team
   creator Boolean [not null, default: false]
+  admin Boolean [not null, default: false]
   tasks TaskSolver [not null]
 
   indexes {
@@ -179,6 +181,19 @@ Table Team {
   project Project [not null]
   members ProjectMember [not null]
   tasks Task [not null]
+
+  indexes {
+    (projectId, name) [unique]
+  }
+}
+
+Table PasswordReset {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  userId String [not null]
+  user User [not null]
+  token String [not null]
+  expiresAt DateTime [not null]
 }
 
 Enum Ranking {
@@ -228,3 +243,5 @@ Ref: TasksGroup.backlogId > Backlog.id [delete: Cascade]
 Ref: TasksGroup.timeTableId > TimeTable.id
 
 Ref: Team.projectId > Project.id [delete: Cascade]
+
+Ref: PasswordReset.userId > User.id [delete: Cascade]

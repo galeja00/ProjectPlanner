@@ -27,6 +27,7 @@ model User {
   projectInvites   ProjectInvite[]
 //  issues    Issue[]
   nodes     Node[]
+  passwordResets PasswordReset[]
 }
 
 model Node {
@@ -69,6 +70,7 @@ model ProjectMember {
   teamId    String?
   team      Team?     @relation(fields: [teamId], references: [id])
   creator   Boolean   @default(false) 
+  admin     Boolean   @default(false)
   tasks     TaskSolver[]
 
   @@unique([userId, projectId], name: "Unique_User_Project")
@@ -209,6 +211,16 @@ model Team {
   members   ProjectMember[]
   tasks     Task[]
 //  tags      Tag[]
+  @@unique([projectId, name], name: "Unique_Team_Project")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String
+  expiresAt DateTime
 }
 
 
