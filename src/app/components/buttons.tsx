@@ -34,8 +34,12 @@ export function ButtonWithImg({onClick, alt, image, title} : { onClick: () => vo
 }
 
 export function ButtonWithText({ text, type, handle} : { text : string, type : string, handle : () => void }) {
+    let btn = `btn-primary`;
+    if (type == "destructive")  {
+        btn = "btn-destructive";
+    }
     return (
-        <button className={`btn-${type} h-fit flex flex-col`} onClick={handle}>{text}</button>
+        <button className={`${btn} h-fit flex flex-col`} onClick={handle}>{text}</button>
     )
 }
 
