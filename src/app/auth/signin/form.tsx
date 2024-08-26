@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import EmailValidator from 'email-validator';
 import { useRouter } from 'next/navigation';
 import { FormItem, SubmitButton } from '@/app/components/form';
+import Link from 'next/link';
 
 // for user to login to account
 export default function LoginForm() {
@@ -72,6 +73,7 @@ export default function LoginForm() {
             <FormItem item="Password" type="password" name="password" correct={correctEmail}></FormItem>
             <SubmitButton text={"Sign in"}/>
             {faildMsg === "" ? <p>  </p> : <p className='text-red-500 w-fit m-auto'>{faildMsg}</p>}
+            <Link href="/auth/forgot" className="link pt-8 w-fit m-auto">Forgot Password</Link>
         </form>
     )
 }
