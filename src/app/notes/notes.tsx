@@ -183,24 +183,42 @@ function SelectorTask() {
 
 // display info about note
 export function NoteComponent({ note, deleteNote, colorMode = 200 } : { note : NodeInfo, deleteNote : (id : string) => void, colorMode? : number }) {
+    const [ editing, setEditing ] = useState<boolean>(false);
     const ago: number = note.createdAgo;
     const agoText: string = formatAgo(ago);
 
-    const buttons : Button[] = [{ onClick: () => deleteNote(note.id), img: "/x.svg", title: "Delete Note", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}];
-    return ( 
-        <li key={note.id} className={`bg-neutral-${colorMode} rounded min-h-[8rem]`}>
-            <div className="flex justify-between border-b border-neutral-900 p-4 items-center">
-                <h3>{note.name}</h3>
-                <div className="flex gap-4">
-                    <div className="text-neutral-600">
-                        {agoText}
+    const buttons : Button[] = [
+        //{ onClick: () => setEditing(true), img: "/pencil.svg", title: "Edit Note", size: 8, padding: 1, type: ButtonType.Normal, lightness: Lighteness.Bright},
+        { onClick: () => deleteNote(note.id), img: "/x.svg", title: "Delete Note", size: 8, type: ButtonType.Destructive, lightness: Lighteness.Bright}
+    ];
+    return (
+        <>
+            <li key={note.id} className={`bg-neutral-${colorMode} rounded min-h-[8rem]`}>
+                <div className="flex justify-between border-b border-neutral-900 p-4 items-center">
+                    <h3>{note.name}</h3>
+                    <div className="flex gap-4">
+                        <div className="text-neutral-600">
+                            {agoText}
+                        </div>
+                        <ArrayButtons buttons={buttons} gap={1}/>
                     </div>
-                    <ArrayButtons buttons={buttons} gap={1}/>
+                    
                 </div>
-                
+                <p className="p-4" style={{ whiteSpace: 'pre-line' }}>{note.text}</p>
+            </li>
+            { editing && <NoteEditor note={note} onClose={() => setEditing(false)}/>}
+        </>
+        
+    )
+}
+
+export function NoteEditor({ note, onClose } : { note : NodeInfo, onClose : () => void }) {
+    return (
+        <Dialog>
+            <div className="bg-neutral-200 rounded p-4 h-fit relative w-1/3">
+                <DialogClose handleClose={onClose}/>
             </div>
-            <p className="p-4" style={{ whiteSpace: 'pre-line' }}>{note.text}</p>
-        </li>
+        </Dialog>
     )
 }
 
