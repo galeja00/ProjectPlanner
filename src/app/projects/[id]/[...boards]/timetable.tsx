@@ -516,6 +516,7 @@ function GroupsRanges({ groupsRanges, updateRanges, count } : { groupsRanges: Gr
             }
         }
         updateRanges(newGroupsRanges);
+        setRangeInfo(null);
     }
 
     return (
@@ -593,6 +594,7 @@ function RangeMenu({rangeInfo, closeMenu, removeRange} : {rangeInfo : RangeInfo,
         setLen(rangeInfo.groupRange.range.end - rangeInfo.groupRange.range.start);
         updateRanges([...ranges]);
     }
+
 
     const dates : DateRange =  convertRangeToDates(rangeInfo.groupRange.range, projectStart);
     return (

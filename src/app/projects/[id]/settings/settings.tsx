@@ -251,13 +251,3 @@ function SettingsItem({propertyKey, type, text, value, options, updateVal} : Set
         </li>
     );
 }
-
-
-
-function ButtonDel({ onClick } : { onClick : () => void }) {
-    return (
-        <button className="btn-destructive" onClick={onClick}>Delete</button>
-    )
-}
-
-
