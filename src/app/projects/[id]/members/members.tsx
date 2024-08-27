@@ -1,6 +1,6 @@
 "use client"
 import Image from 'next/image'
-import { useEffect, useReducer, useRef, useState, KeyboardEvent, ChangeEvent } from "react"
+import { useEffect, useReducer, useRef, useState, KeyboardEvent, ChangeEvent, use } from "react"
 import { Head, TeamBadge } from '../components/other'
 import { Dialog, DialogClose } from '@/app/components/dialog'
 import { InitialLoader } from '@/app/components/other-client'
@@ -193,7 +193,8 @@ function AddDialog({ onClose, id } : { onClose : () => void, id : string }) {
     const [ type, setType ] = useState<TypeOfSearh>(TypeOfSearh.Id); // state of sreach type
     const typesOfSearh = [ TypeOfSearh.Id, TypeOfSearh.Name ]; 
     const { submitError } = useError();
-    // search users by snyc cominication with enpoint
+    const [ msg, setMsg ] = useState<string>("");
+    // search users by async cominication with enpoint
     async function searchUser(value : string) {
         try {
             const res = await fetch("/api/users/search", {
@@ -211,6 +212,7 @@ function AddDialog({ onClose, id } : { onClose : () => void, id : string }) {
             }
 
             setResults(data.users);
+            
 
         } catch (error) {
             console.error(error);
@@ -223,12 +225,24 @@ function AddDialog({ onClose, id } : { onClose : () => void, id : string }) {
         setType(type);
     }
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setMsg(""); // Clean msg
+        }, 5000); 
+
+        // Clean Interval
+        return () => clearInterval(interval);
+    }, [msg]);
+
     return (
         <Dialog>
             <search className='p-4 relative h-2/3 w-1/3 bg-neutral-200 rounded flex flex-col gap-4 '>
                 <DialogClose handleClose={onClose}/>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser} handleChange={handleChange}/>
-                <ListUsers users={results} id={id}/>
+                <ListUsers users={results} id={id} setMsg={setMsg}/>
+                <div className='relative text-green-600  px-2 border m-auto'>
+                    {msg}
+                </div>
             </search>
         </Dialog>
     )
@@ -261,12 +275,12 @@ function AddForm(
 }
 
 // display all finded users
-function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
+function ListUsers({ users, id, setMsg } : { users : UserInfo[], id : string, setMsg : (msg : string) => void }) {
     return (
         <ul className='space-y-2 overflow-y-auto'>
             {
                 users.map((user) => (
-                    <UsersItem key={user.id} user={user} id={id}/>
+                    <UsersItem key={user.id} user={user} id={id} setMsg={setMsg}/>
                 ))
             }
         </ul>
@@ -274,7 +288,7 @@ function ListUsers({ users, id } : { users : UserInfo[], id : string }) {
 }
 
 // info about user and function to invite him
-function UsersItem({ user, id } : { user : UserInfo, id : string }) {
+function UsersItem({ user, id, setMsg } : { user : UserInfo, id : string, setMsg : (msg : string) => void }) {
     const { submitError } = useError();
     // contact endpoint by fetching to invite user and create notification for him
     async function inviteUser() {
@@ -290,6 +304,8 @@ function UsersItem({ user, id } : { user : UserInfo, id : string }) {
             if (!res.ok) {
                 throw new Error(data.message);
             }
+
+            setMsg("Invite sent");
         } 
         catch (error) {
             console.error(error);
