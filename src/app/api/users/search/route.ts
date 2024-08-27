@@ -75,12 +75,16 @@ export async function POST(req : Request) {
                     projectId: data.projectId
                 }
             })
-            users = users.filter((user) => {
-                for (let member of members) {
-                    if (member.userId === user.id) return false;
+
+            const invites = await prisma.projectInvite.findMany({
+                where: {
+                    projectId: data.projectId
                 }
-                return true;
             })
+            const memberIds = new Set(members.map(member => member.userId));
+            const inviteIds = new Set(invites.map(invite => invite.invitedUserId));
+
+            users = users.filter(user => !memberIds.has(user.id) && !inviteIds.has(user.id));
         }
         
 

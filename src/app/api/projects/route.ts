@@ -47,7 +47,11 @@ export async function GET(req : Request) {
                 }
             }
         });
-        return NextResponse.json({  projects: projects} , { status: 200 })
+
+        const sortProjects = projects.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+        return NextResponse.json({  projects: sortProjects} , { status: 200 });
+
     } catch {
         return NextResponse.json({  message: ErrorMessagges.Server }, { status: 500 })
     }

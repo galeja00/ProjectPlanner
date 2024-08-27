@@ -17,7 +17,7 @@ export async function POST(req : Request, { params } : { params: { id : string }
         }
 
         const data = await req.json();
-        
+        console.log(params.id);
         const isMember : ProjectMember | null = await prisma.projectMember.findFirst({
             where: {
                 userId: data.userId,
@@ -25,10 +25,19 @@ export async function POST(req : Request, { params } : { params: { id : string }
             }
         })
 
-        
         if (isMember) {
             return Response.json({ message: "User is allready member" }, { status: 400 });
         }
+        const isInvite : ProjectInvite | null = await prisma.projectInvite.findFirst({
+            where: {
+                invitedUserId: data.userId,
+                projectId: params.id
+            }
+        })
+        if (isInvite) {
+            return Response.json({ message: "User is allready invited" }, { status: 400 });
+        }
+        
         const invite : ProjectInvite | null = await prisma.projectInvite.create({
             data: {
                 projectId: params.id,
