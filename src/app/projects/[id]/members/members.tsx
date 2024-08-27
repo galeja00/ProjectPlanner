@@ -240,9 +240,11 @@ function AddDialog({ onClose, id } : { onClose : () => void, id : string }) {
                 <DialogClose handleClose={onClose}/>
                 <AddForm actualType={type} types={typesOfSearh} search={searchUser} handleChange={handleChange}/>
                 <ListUsers users={results} id={id} setMsg={setMsg}/>
-                <div className='relative text-green-600  px-2 border m-auto'>
-                    {msg}
-                </div>
+                { msg != "" && 
+                    <div className='absolute text-green-600 bg-green-600 bg-opacity-40  border border-green-600 bottom-0 left-0 w-full p-2 rounded'>
+                        {msg}
+                    </div>
+                }
             </search>
         </Dialog>
     )
