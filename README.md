@@ -57,6 +57,7 @@ EMAIL_PASS="PASS"
     ```
   - Replace the word `HASH` with the generated key.
 - For Email `SERVICE`, use `gmail` or `seznam`.
+- email service will be upgradet (in Work)
 
 #### 8. Apply Migrations to the Database
 - Open a terminal in the root directory of the project or navigate to it.
