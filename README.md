@@ -78,3 +78,7 @@ EMAIL_PASS="PASS"
     npm start
     ```
 
+
+## Problems
+
+If somthing not working properly, conntact me or add issue
